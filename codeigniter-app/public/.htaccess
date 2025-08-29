@@ -1,0 +1,21 @@
+# Disable server signature start
+ServerSignature Off
+
+# Disable directory browsing
+Options All -Indexes
+
+# Disable server signature end
+
+RewriteEngine On
+
+# Handle Angular and Vue.js requests
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
+
+<IfModule authz_core_module>
+    Require all denied
+</IfModule>
+<IfModule !authz_core_module>
+    Deny from all
+</IfModule>

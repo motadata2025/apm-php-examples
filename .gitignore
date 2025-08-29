@@ -1,0 +1,73 @@
+# APM PHP Examples - Git Ignore File
+
+# Generated configuration files
+*/config/app.env
+*/config/*.conf
+*/config/*.ini
+
+# Log files
+*/logs/*.log
+*/logs/*.txt
+*/storage/logs/*.log
+
+# Vendor directories
+*/vendor/
+node_modules/
+
+# Environment files
+*/.env
+*/.env.local
+*/.env.production
+
+# Composer
+composer.phar
+*/composer.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Build artifacts
+*/build/
+*/dist/
+
+# Laravel specific
+*/bootstrap/cache/*.php
+*/storage/app/*
+*/storage/framework/cache/*
+*/storage/framework/sessions/*
+*/storage/framework/views/*
+*/storage/framework/testing/*
+!*/storage/app/.gitkeep
+!*/storage/framework/.gitkeep
+!*/storage/framework/cache/.gitkeep
+!*/storage/framework/sessions/.gitkeep
+!*/storage/framework/views/.gitkeep
+
+# Application specific
+*/public/storage
+*/public/hot
+
+# Testing
+*/coverage/
+*/.phpunit.result.cache
+
+# Deployment specific
+*/start-local.sh

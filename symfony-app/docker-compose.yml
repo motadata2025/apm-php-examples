@@ -1,0 +1,55 @@
+version: '3.8'
+
+# Symfony Application - Docker Compose
+# Supports multi-PHP version deployment
+
+services:
+  symfony-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+    container_name: apm-symfony-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8002}:8002"
+    volumes:
+      - .:/var/www/html
+      - ./var/log:/var/www/html/var/log
+    environment:
+      - APP_ENV=${APP_ENV:-prod}
+      - PHP_VERSION=${PHP_VERSION:-8.4}
+      - DATABASE_URL=mysql://root:rootpassword@mysql:3306/apm_examples
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mysql
+      - postgres
+      - redis
+    networks:
+      - apm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Import shared services
+  mysql:
+    extends:
+      file: ../docker-compose.services.yml
+      service: mysql
+
+  postgres:
+    extends:
+      file: ../docker-compose.services.yml
+      service: postgres
+
+  redis:
+    extends:
+      file: ../docker-compose.services.yml
+      service: redis
+
+networks:
+  apm-network:
+    external: true

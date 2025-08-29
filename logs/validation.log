@@ -1,0 +1,16 @@
+=== APM PHP Examples - Deployment Validation ===
+Timestamp: Thu 28 Aug 2025 03:25:56 PM IST
+
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP 8.4 validation passed
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension PDO is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension pdo_mysql is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension pdo_pgsql is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension mbstring is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension gd is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension zip is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension redis is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension intl is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension curl is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension json is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: PHP extension openssl is available
+[SUCCESS] Thu 28 Aug 2025 03:25:56 PM IST: Deployment validation passed

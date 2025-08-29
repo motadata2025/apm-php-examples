@@ -1,0 +1,143 @@
+[Thu Aug 28 12:49:01 2025] PHP 8.4.11 Development Server (http://10.20.41.77:8080) started
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:40448 Accepted
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:40448 [200]: GET /
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:40448 Closing
+[Thu Aug 28 12:51:28 2025] 10.20.41.77:39018 Accepted
+[Thu Aug 28 12:51:28 2025] 10.20.41.77:39018 [200]: GET /
+[Thu Aug 28 12:51:28 2025] 10.20.41.77:39018 Closing
+[Thu Aug 28 12:51:28 2025] 10.20.41.77:39032 Accepted
+[Thu Aug 28 12:51:28 2025] 10.20.41.77:39032 [200]: GET /favicon.ico
+[Thu Aug 28 12:51:28 2025] 10.20.41.77:39032 Closing
+[Thu Aug 28 12:51:56 2025] 10.20.41.77:59990 Accepted
+[Thu Aug 28 12:51:56 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\DatabaseConnection" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 16
+[Thu Aug 28 12:51:56 2025] 10.20.41.77:59990 [500]: POST / - Uncaught Error: Class "Shared\Utils\DatabaseConnection" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 16
+[Thu Aug 28 12:51:56 2025] 10.20.41.77:59990 Closing
+[Thu Aug 28 12:52:01 2025] 10.20.41.77:50102 Accepted
+[Thu Aug 28 12:52:01 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\UserModel" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 21
+[Thu Aug 28 12:52:01 2025] 10.20.41.77:50102 [500]: POST / - Uncaught Error: Class "Shared\Utils\UserModel" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 21
+[Thu Aug 28 12:52:01 2025] 10.20.41.77:50102 Closing
+[Thu Aug 28 12:52:03 2025] 10.20.41.77:50104 Accepted
+[Thu Aug 28 12:52:03 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\UserModel" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 21
+[Thu Aug 28 12:52:03 2025] 10.20.41.77:50104 [500]: POST / - Uncaught Error: Class "Shared\Utils\UserModel" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 21
+[Thu Aug 28 12:52:03 2025] 10.20.41.77:50104 Closing
+[Thu Aug 28 12:52:07 2025] 10.20.41.77:50112 Accepted
+[Thu Aug 28 12:52:07 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\UserModel" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 21
+[Thu Aug 28 12:52:07 2025] 10.20.41.77:50112 [500]: POST / - Uncaught Error: Class "Shared\Utils\UserModel" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:21
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 21
+[Thu Aug 28 12:52:07 2025] 10.20.41.77:50112 Closing
+[Thu Aug 28 12:52:09 2025] 10.20.41.77:50122 Accepted
+[Thu Aug 28 12:52:09 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\DatabaseConnection" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 16
+[Thu Aug 28 12:52:09 2025] 10.20.41.77:50122 [500]: POST / - Uncaught Error: Class "Shared\Utils\DatabaseConnection" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:16
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 16
+[Thu Aug 28 12:52:09 2025] 10.20.41.77:50122 Closing
+[Thu Aug 28 12:52:11 2025] 10.20.41.77:50134 Accepted
+[Thu Aug 28 12:52:11 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\ApiClient" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:27
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 27
+[Thu Aug 28 12:52:11 2025] 10.20.41.77:50134 [500]: POST / - Uncaught Error: Class "Shared\Utils\ApiClient" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:27
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 27
+[Thu Aug 28 12:52:11 2025] 10.20.41.77:50134 Closing
+[Thu Aug 28 12:52:13 2025] 10.20.41.77:41494 Accepted
+[Thu Aug 28 12:52:13 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 33
+[Thu Aug 28 12:52:13 2025] 10.20.41.77:41494 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 33
+[Thu Aug 28 12:52:13 2025] 10.20.41.77:41494 Closing
+[Thu Aug 28 12:52:15 2025] 10.20.41.77:41506 Accepted
+[Thu Aug 28 12:52:15 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:39
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 39
+[Thu Aug 28 12:52:15 2025] 10.20.41.77:41506 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:39
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 39
+[Thu Aug 28 12:52:15 2025] 10.20.41.77:41506 Closing
+[Thu Aug 28 12:52:16 2025] 10.20.41.77:41518 Accepted
+[Thu Aug 28 12:52:16 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:39
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 39
+[Thu Aug 28 12:52:16 2025] 10.20.41.77:41518 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:39
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 39
+[Thu Aug 28 12:52:16 2025] 10.20.41.77:41518 Closing
+[Thu Aug 28 12:52:17 2025] 10.20.41.77:41526 Accepted
+[Thu Aug 28 12:52:17 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:46
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 46
+[Thu Aug 28 12:52:17 2025] 10.20.41.77:41526 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:46
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 46
+[Thu Aug 28 12:52:17 2025] 10.20.41.77:41526 Closing
+[Thu Aug 28 12:52:22 2025] 10.20.41.77:55588 Accepted
+[Thu Aug 28 12:52:22 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:52
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 52
+[Thu Aug 28 12:52:22 2025] 10.20.41.77:55588 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:52
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 52
+[Thu Aug 28 12:52:22 2025] 10.20.41.77:55588 Closing
+[Thu Aug 28 12:52:23 2025] 10.20.41.77:55600 Accepted
+[Thu Aug 28 12:52:23 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:46
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 46
+[Thu Aug 28 12:52:23 2025] 10.20.41.77:55600 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:46
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 46
+[Thu Aug 28 12:52:23 2025] 10.20.41.77:55600 Closing
+[Thu Aug 28 12:52:28 2025] 10.20.41.77:55610 Accepted
+[Thu Aug 28 12:52:28 2025] PHP Fatal error:  Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 33
+[Thu Aug 28 12:52:28 2025] 10.20.41.77:55610 [500]: POST / - Uncaught Error: Class "Shared\Utils\QueueManager" not found in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php:33
+Stack trace:
+#0 {main}
+  thrown in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 33
+[Thu Aug 28 12:52:28 2025] 10.20.41.77:55610 Closing
+[Thu Aug 28 12:52:36 2025] 10.20.41.77:39406 Accepted
+[Thu Aug 28 12:52:36 2025] 10.20.41.77:39406 [200]: GET /
+[Thu Aug 28 12:52:36 2025] 10.20.41.77:39406 Closing

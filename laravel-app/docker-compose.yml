@@ -1,0 +1,61 @@
+version: '3.8'
+
+# Laravel Application - Docker Compose
+# Supports multi-PHP version deployment
+
+services:
+  laravel-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+    container_name: apm-laravel-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8001}:8001"
+    volumes:
+      - .:/var/www/html
+      - ./storage/logs:/var/www/html/storage/logs
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - PHP_VERSION=${PHP_VERSION:-8.4}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=apm_examples
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - postgres
+      - redis
+    networks:
+      - apm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Import shared services
+  mysql:
+    extends:
+      file: ../docker-compose.services.yml
+      service: mysql
+
+  postgres:
+    extends:
+      file: ../docker-compose.services.yml
+      service: postgres
+
+  redis:
+    extends:
+      file: ../docker-compose.services.yml
+      service: redis
+
+networks:
+  apm-network:
+    external: true

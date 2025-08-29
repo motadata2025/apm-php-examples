@@ -1,0 +1,60 @@
+version: '3.8'
+
+# CodeIgniter Application - Docker Compose
+# Supports multi-PHP version deployment
+
+services:
+  codeigniter-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+    container_name: apm-codeigniter-app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8004}:8004"
+    volumes:
+      - .:/var/www/html
+      - ./writable/logs:/var/www/html/writable/logs
+    environment:
+      - CI_ENVIRONMENT=${CI_ENVIRONMENT:-production}
+      - PHP_VERSION=${PHP_VERSION:-8.4}
+      - database.default.hostname=mysql
+      - database.default.database=apm_examples
+      - database.default.username=root
+      - database.default.password=rootpassword
+      - database.default.port=3306
+      - redis.host=redis
+      - redis.port=6379
+    depends_on:
+      - mysql
+      - postgres
+      - redis
+    networks:
+      - apm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Import shared services
+  mysql:
+    extends:
+      file: ../docker-compose.services.yml
+      service: mysql
+
+  postgres:
+    extends:
+      file: ../docker-compose.services.yml
+      service: postgres
+
+  redis:
+    extends:
+      file: ../docker-compose.services.yml
+      service: redis
+
+networks:
+  apm-network:
+    external: true

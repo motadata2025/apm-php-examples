@@ -1,0 +1,123 @@
+[Thu Aug 28 12:49:05 2025] PHP 8.4.11 Development Server (http://10.20.41.77:8083) started
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:46164 Accepted
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:46164 [200]: GET /
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:46164 Closing
+[Thu Aug 28 12:51:31 2025] 10.20.41.77:41988 Accepted
+[Thu Aug 28 12:51:31 2025] 10.20.41.77:41988 [200]: GET /
+[Thu Aug 28 12:51:31 2025] 10.20.41.77:41988 Closing
+[Thu Aug 28 12:51:31 2025] 10.20.41.77:41998 Accepted
+[Thu Aug 28 12:51:31 2025] 404 Not Found
+Type: Slim\Exception\HttpNotFoundException
+Code: 404
+Message: Not found.
+File: /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/RoutingMiddleware.php
+Line: 76
+Trace: #0 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/RouteRunner.php(62): Slim\Middleware\RoutingMiddleware->performRouting()
+#1 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/twig-view/src/TwigMiddleware.php(117): Slim\Routing\RouteRunner->handle()
+#2 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Views\TwigMiddleware->process()
+#3 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/ErrorMiddleware.php(77): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#4 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\ErrorMiddleware->process()
+#5 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/BodyParsingMiddleware.php(64): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#6 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\BodyParsingMiddleware->process()
+#7 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#8 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(209): Slim\MiddlewareDispatcher->handle()
+#9 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(193): Slim\App->handle()
+#10 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/public/index.php(67): Slim\App->run()
+#11 {main}
+[Thu Aug 28 12:51:31 2025] 10.20.41.77:41998 [404]: GET /favicon.ico
+[Thu Aug 28 12:51:31 2025] 10.20.41.77:41998 Closing
+[Thu Aug 28 12:52:40 2025] 10.20.41.77:40274 Accepted
+[Thu Aug 28 12:52:40 2025] 10.20.41.77:40274 [200]: GET /
+[Thu Aug 28 12:52:40 2025] 10.20.41.77:40274 Closing
+[Thu Aug 28 12:52:49 2025] 10.20.41.77:59604 Accepted
+[Thu Aug 28 12:52:49 2025] 10.20.41.77:59604 [200]: GET /
+[Thu Aug 28 12:52:49 2025] 10.20.41.77:59604 Closing
+[Thu Aug 28 12:52:49 2025] 10.20.41.77:59618 Accepted
+[Thu Aug 28 12:52:49 2025] 404 Not Found
+Type: Slim\Exception\HttpNotFoundException
+Code: 404
+Message: Not found.
+File: /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/RoutingMiddleware.php
+Line: 76
+Trace: #0 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/RouteRunner.php(62): Slim\Middleware\RoutingMiddleware->performRouting()
+#1 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/twig-view/src/TwigMiddleware.php(117): Slim\Routing\RouteRunner->handle()
+#2 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Views\TwigMiddleware->process()
+#3 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/ErrorMiddleware.php(77): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#4 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\ErrorMiddleware->process()
+#5 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/BodyParsingMiddleware.php(64): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#6 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\BodyParsingMiddleware->process()
+#7 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#8 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(209): Slim\MiddlewareDispatcher->handle()
+#9 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(193): Slim\App->handle()
+#10 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/public/index.php(67): Slim\App->run()
+#11 {main}
+[Thu Aug 28 12:52:49 2025] 10.20.41.77:59618 [404]: GET /favicon.ico
+[Thu Aug 28 12:52:49 2025] 10.20.41.77:59618 Closing
+[Thu Aug 28 12:52:52 2025] 10.20.41.77:57672 Accepted
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_NAME" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 59
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_USER" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 61
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_PASS" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 61
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_POSTGRES_HOST" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 72
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_POSTGRES_PORT" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 73
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_POSTGRES_NAME" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 74
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_POSTGRES_USER" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 76
+[Thu Aug 28 12:52:52 2025] PHP Warning:  Undefined array key "DB_POSTGRES_PASS" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 76
+[Thu Aug 28 12:52:52 2025] Slim Application Error
+Type: Error
+Code: 0
+Message: Class "Shared\Utils\DatabaseConnection" not found
+File: /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php
+Line: 85
+Trace: #0 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Handlers/Strategies/RequestResponse.php(39): App\Controllers\ApmController->testDatabases()
+#1 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/Route.php(362): Slim\Handlers\Strategies\RequestResponse->__invoke()
+#2 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Slim\Routing\Route->handle()
+#3 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Slim\MiddlewareDispatcher->handle()
+#4 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/Route.php(321): Slim\MiddlewareDispatcher->handle()
+#5 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/RouteRunner.php(74): Slim\Routing\Route->run()
+#6 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/twig-view/src/TwigMiddleware.php(117): Slim\Routing\RouteRunner->handle()
+#7 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Views\TwigMiddleware->process()
+#8 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/ErrorMiddleware.php(77): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#9 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\ErrorMiddleware->process()
+#10 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/BodyParsingMiddleware.php(64): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#11 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\BodyParsingMiddleware->process()
+#12 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#13 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(209): Slim\MiddlewareDispatcher->handle()
+#14 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(193): Slim\App->handle()
+#15 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/public/index.php(67): Slim\App->run()
+#16 {main}
+[Thu Aug 28 12:52:52 2025] 10.20.41.77:57672 [500]: POST /test-databases
+[Thu Aug 28 12:52:52 2025] 10.20.41.77:57672 Closing
+[Thu Aug 28 12:52:57 2025] 10.20.41.77:57674 Accepted
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_NAME" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 59
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_USER" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 61
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_PASS" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 61
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_POSTGRES_HOST" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 72
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_POSTGRES_PORT" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 73
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_POSTGRES_NAME" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 74
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_POSTGRES_USER" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 76
+[Thu Aug 28 12:52:57 2025] PHP Warning:  Undefined array key "DB_POSTGRES_PASS" in /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php on line 76
+[Thu Aug 28 12:52:57 2025] Slim Application Error
+Type: Error
+Code: 0
+Message: Class "Shared\Utils\DatabaseConnection" not found
+File: /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/src/Controllers/ApmController.php
+Line: 85
+Trace: #0 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Handlers/Strategies/RequestResponse.php(39): App\Controllers\ApmController->testDatabases()
+#1 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/Route.php(362): Slim\Handlers\Strategies\RequestResponse->__invoke()
+#2 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Slim\Routing\Route->handle()
+#3 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Slim\MiddlewareDispatcher->handle()
+#4 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/Route.php(321): Slim\MiddlewareDispatcher->handle()
+#5 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Routing/RouteRunner.php(74): Slim\Routing\Route->run()
+#6 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/twig-view/src/TwigMiddleware.php(117): Slim\Routing\RouteRunner->handle()
+#7 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Views\TwigMiddleware->process()
+#8 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/ErrorMiddleware.php(77): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#9 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\ErrorMiddleware->process()
+#10 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/Middleware/BodyParsingMiddleware.php(64): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#11 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(129): Slim\Middleware\BodyParsingMiddleware->process()
+#12 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/MiddlewareDispatcher.php(73): Psr\Http\Server\RequestHandlerInterface@anonymous->handle()
+#13 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(209): Slim\MiddlewareDispatcher->handle()
+#14 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/vendor/slim/slim/Slim/App.php(193): Slim\App->handle()
+#15 /home/nikunj-katariya/projects/php/apm-php-examples/slim-framework/public/index.php(67): Slim\App->run()
+#16 {main}
+[Thu Aug 28 12:52:57 2025] 10.20.41.77:57674 [500]: POST /test-databases
+[Thu Aug 28 12:52:57 2025] 10.20.41.77:57674 Closing

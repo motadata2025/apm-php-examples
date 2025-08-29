@@ -1,0 +1,110 @@
+# APM PHP Examples - Production-Grade Architecture
+# This Docker Compose file supports both local development and production deployment
+# Use 'make dev' for local development or 'make prod' for production deployment
+
+services:
+  # Database Services
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: apm_examples
+      MYSQL_USER: apm_user
+      MYSQL_PASSWORD: apm_password
+    ports:
+      - "${NETWORK_INTERFACE:-127.0.0.1}:3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./shared/database/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: apm_examples
+      POSTGRES_USER: postgres
+    ports:
+      - "${NETWORK_INTERFACE:-127.0.0.1}:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./shared/database/postgres:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d apm_examples"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass redispassword
+    ports:
+      - "${NETWORK_INTERFACE:-127.0.0.1}:6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./shared/config/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redispassword", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Optional: Adminer for database management
+  adminer:
+    image: adminer:latest
+    ports:
+      - "${NETWORK_INTERFACE:-127.0.0.1}:9090:8080"
+    networks:
+      - apm-network
+    restart: unless-stopped
+    depends_on:
+      - mysql
+      - postgres
+    profiles:
+      - admin
+
+  # Optional: Redis Commander for Redis management
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:redispassword
+    ports:
+      - "${NETWORK_INTERFACE:-127.0.0.1}:8091:8081"
+    networks:
+      - apm-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+    profiles:
+      - admin
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  apm-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

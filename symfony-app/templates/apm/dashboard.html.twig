@@ -1,0 +1,329 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Symfony APM Example{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="header">
+        <h1>🚀 Symfony Application</h1>
+        <p>APM Integration Example - Symfony Framework Implementation</p>
+    </div>
+
+    <div class="info-cards">
+        <div class="info-card">
+            <h3>PHP Version</h3>
+            <p>{{ phpVersion }}</p>
+        </div>
+        <div class="info-card">
+            <h3>Symfony Version</h3>
+            <p>{{ symfonyVersion }}</p>
+        </div>
+        <div class="info-card">
+            <h3>Environment</h3>
+            <p>{{ environment|title }}</p>
+        </div>
+        <div class="info-card">
+            <h3>Framework</h3>
+            <p>Symfony</p>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Database Operations Section -->
+        <div class="section">
+            <h2>🗄️ Database Operations</h2>
+            <div class="button-group">
+                <button class="btn" onclick="testDatabases()">Test Database Connections</button>
+                <button class="btn success" onclick="demoCrud()">Demo CRUD Operations</button>
+            </div>
+            <div class="loader" id="db-loader"></div>
+            <div class="alert" id="db-alert"></div>
+            <div class="result-area" id="db-results">Click a button above to test database operations...</div>
+        </div>
+
+        <!-- External API Section -->
+        <div class="section">
+            <h2>🌐 External API Calls</h2>
+            <div class="button-group">
+                <button class="btn" onclick="fetchApiData()">Fetch External API Data</button>
+            </div>
+            <div class="loader" id="api-loader"></div>
+            <div class="alert" id="api-alert"></div>
+            <div class="result-area" id="api-results">Click the button above to fetch data from external APIs...</div>
+        </div>
+
+        <!-- Queue Operations Section -->
+        <div class="section">
+            <h2>📋 Queue System Operations</h2>
+            <div class="button-group">
+                <button class="btn" onclick="testQueue()">Demo Queue Operations</button>
+                <button class="btn success" onclick="addQueueData()">Add Data to Queue</button>
+                <button class="btn warning" onclick="readQueueData()">Read Data from Queue</button>
+                <button class="btn danger" onclick="clearQueue()">Clear Queue</button>
+            </div>
+
+            <div class="queue-input-section">
+                <textarea class="queue-input" id="queue-data" placeholder='Enter JSON data to add to queue, e.g., {"message": "Hello World", "priority": 1}'></textarea>
+                <div class="queue-presets">
+                    <button class="btn-small" onclick="setQueueData('message')">Sample Message</button>
+                    <button class="btn-small" onclick="setQueueData('task')">Sample Task</button>
+                    <button class="btn-small" onclick="setQueueData('notification')">Sample Notification</button>
+                </div>
+            </div>
+
+            <div class="loader" id="queue-loader"></div>
+            <div class="alert" id="queue-alert"></div>
+            <div class="result-area" id="queue-results">Use the buttons above to interact with the Symfony Messenger queue system...</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // Utility functions
+    function showLoader(section) {
+        document.getElementById(section + '-loader').style.display = 'block';
+        hideAlert(section);
+    }
+
+    function hideLoader(section) {
+        document.getElementById(section + '-loader').style.display = 'none';
+    }
+
+    function showAlert(section, message, type = 'success') {
+        const alert = document.getElementById(section + '-alert');
+        alert.textContent = message;
+        alert.className = 'alert ' + type;
+        alert.style.display = 'block';
+
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 5000);
+    }
+
+    function hideAlert(section) {
+        document.getElementById(section + '-alert').style.display = 'none';
+    }
+
+    function updateResults(section, data) {
+        document.getElementById(section + '-results').textContent = JSON.stringify(data, null, 2);
+    }
+
+    function makeRequest(url, data = {}) {
+        const formData = new FormData();
+
+        for (const key in data) {
+            formData.append(key, data[key]);
+        }
+
+        return fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).then(response => response.json());
+    }
+
+    // Database operations
+    function testDatabases() {
+        showLoader('db');
+        makeRequest('{{ path("apm_test_databases") }}')
+            .then(response => {
+                hideLoader('db');
+                if (response.success) {
+                    updateResults('db', response.data);
+                    showAlert('db', 'Database connections tested successfully!');
+                } else {
+                    showAlert('db', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('db');
+                showAlert('db', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    function demoCrud() {
+        showLoader('db');
+        makeRequest('{{ path("apm_demo_crud") }}')
+            .then(response => {
+                hideLoader('db');
+                if (response.success) {
+                    updateResults('db', response.data);
+                    showAlert('db', 'CRUD operations completed successfully!');
+                } else {
+                    showAlert('db', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('db');
+                showAlert('db', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    // API operations
+    function fetchApiData() {
+        showLoader('api');
+        makeRequest('{{ path("apm_fetch_api_data") }}')
+            .then(response => {
+                hideLoader('api');
+                if (response.success) {
+                    updateResults('api', response.data);
+                    showAlert('api', 'External API data fetched successfully!');
+                } else {
+                    showAlert('api', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('api');
+                showAlert('api', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    // Queue operations
+    function testQueue() {
+        showLoader('queue');
+        makeRequest('{{ path("apm_test_queue") }}')
+            .then(response => {
+                hideLoader('queue');
+                if (response.success) {
+                    updateResults('queue', response.data);
+                    showAlert('queue', 'Queue operations completed successfully!');
+                } else {
+                    showAlert('queue', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('queue');
+                showAlert('queue', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    function addQueueData() {
+        const data = document.getElementById('queue-data').value.trim();
+        if (!data) {
+            showAlert('queue', 'Please enter some data to add to the queue', 'error');
+            return;
+        }
+
+        try {
+            JSON.parse(data); // Validate JSON
+        } catch (e) {
+            showAlert('queue', 'Invalid JSON format', 'error');
+            return;
+        }
+
+        showLoader('queue');
+        makeRequest('{{ path("apm_add_queue_data") }}', { data: data })
+            .then(response => {
+                hideLoader('queue');
+                if (response.success) {
+                    updateResults('queue', { message: response.message, data: JSON.parse(data) });
+                    showAlert('queue', 'Data added to queue successfully!');
+                    document.getElementById('queue-data').value = '';
+                } else {
+                    showAlert('queue', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('queue');
+                showAlert('queue', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    function readQueueData() {
+        showLoader('queue');
+        makeRequest('{{ path("apm_read_queue_data") }}')
+            .then(response => {
+                hideLoader('queue');
+                if (response.success) {
+                    if (response.data && response.data.length > 0) {
+                        // Show all queue items with better formatting
+                        const queueDisplay = {
+                            total_items: response.data.length,
+                            queue_items: response.data,
+                            message: `Found ${response.data.length} items in queue`
+                        };
+                        updateResults('queue', queueDisplay);
+                        showAlert('queue', `Retrieved ${response.data.length} items from queue`);
+                    } else {
+                        updateResults('queue', { message: 'Queue is empty', total_items: 0 });
+                        showAlert('queue', 'Queue is empty', 'warning');
+                    }
+                } else {
+                    showAlert('queue', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('queue');
+                showAlert('queue', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    function clearQueue() {
+        if (!confirm('Are you sure you want to clear the entire queue?')) {
+            return;
+        }
+
+        showLoader('queue');
+        makeRequest('{{ path("apm_clear_queue") }}')
+            .then(response => {
+                hideLoader('queue');
+                if (response.success) {
+                    updateResults('queue', { message: response.message });
+                    showAlert('queue', 'Queue cleared successfully!');
+                } else {
+                    showAlert('queue', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('queue');
+                showAlert('queue', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    // Queue preset functions
+    function setQueueData(type) {
+        const timestamp = new Date().toISOString();
+        let data;
+
+        switch(type) {
+            case 'message':
+                data = {
+                    "message": "Hello from Symfony",
+                    "timestamp": timestamp,
+                    "priority": 1,
+                    "type": "message"
+                };
+                break;
+            case 'task':
+                data = {
+                    "task": "Process user data",
+                    "user_id": Math.floor(Math.random() * 1000),
+                    "timestamp": timestamp,
+                    "priority": 2,
+                    "type": "task"
+                };
+                break;
+            case 'notification':
+                data = {
+                    "notification": "System alert",
+                    "level": "info",
+                    "timestamp": timestamp,
+                    "priority": 3,
+                    "type": "notification"
+                };
+                break;
+        }
+
+        document.getElementById('queue-data').value = JSON.stringify(data, null, 2);
+    }
+
+    // Initialize with sample data
+    document.addEventListener('DOMContentLoaded', function() {
+        setQueueData('message');
+    });
+</script>
+{% endblock %}

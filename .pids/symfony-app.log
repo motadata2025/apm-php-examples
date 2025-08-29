@@ -1,0 +1,17 @@
+[Thu Aug 28 12:49:03 2025] PHP 8.4.11 Development Server (http://10.20.41.77:8082) started
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:36158 Accepted
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:36158 [500]: GET /
+[Thu Aug 28 12:49:34 2025] 2025-08-28T07:19:34+00:00 [critical] Uncaught Exception: Invalid middleware: service "messenger.middleware.doctrine_transaction" not found.
+[Thu Aug 28 12:49:34 2025] 10.20.41.77:36158 Closing
+[Thu Aug 28 12:51:30 2025] 10.20.41.77:42610 Accepted
+[Thu Aug 28 12:51:30 2025] 10.20.41.77:42610 [500]: GET /
+[Thu Aug 28 12:51:30 2025] 2025-08-28T07:21:30+00:00 [critical] Uncaught Exception: Invalid middleware: service "messenger.middleware.doctrine_transaction" not found.
+[Thu Aug 28 12:51:30 2025] 10.20.41.77:42610 Closing
+[Thu Aug 28 12:52:38 2025] 10.20.41.77:37782 Accepted
+[Thu Aug 28 12:52:38 2025] 10.20.41.77:37782 [500]: GET /
+[Thu Aug 28 12:52:38 2025] 2025-08-28T07:22:38+00:00 [critical] Uncaught Exception: Invalid middleware: service "messenger.middleware.doctrine_transaction" not found.
+[Thu Aug 28 12:52:38 2025] 10.20.41.77:37782 Closing
+[Thu Aug 28 12:52:48 2025] 10.20.41.77:47510 Accepted
+[Thu Aug 28 12:52:48 2025] 10.20.41.77:47510 [500]: GET /
+[Thu Aug 28 12:52:48 2025] 2025-08-28T07:22:48+00:00 [critical] Uncaught Exception: Invalid middleware: service "messenger.middleware.doctrine_transaction" not found.
+[Thu Aug 28 12:52:48 2025] 10.20.41.77:47510 Closing

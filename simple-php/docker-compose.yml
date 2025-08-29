@@ -1,0 +1,49 @@
+version: '3.8'
+
+# Simple PHP Application - Docker Compose
+# Supports multi-PHP version deployment
+
+services:
+  simple-php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+    container_name: apm-simple-php
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - .:/var/www/html
+      - ./logs:/var/www/html/logs
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - PHP_VERSION=${PHP_VERSION:-8.4}
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=apm_examples
+      - MYSQL_USERNAME=root
+      - MYSQL_PASSWORD=rootpassword
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DATABASE=apm_examples
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=postgrespassword
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    # depends_on removed - connects to external shared services
+    networks:
+      - apm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Note: This application connects to shared services via external network
+  # Shared services (mysql, postgres, redis) are managed by ../docker-compose.services.yml
+
+networks:
+  apm-network:
+    external: true
