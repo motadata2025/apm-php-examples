@@ -49,6 +49,137 @@ SUPPORTED_SERVERS=("php-cli" "apache-mod-php" "apache-fpm" "nginx-fpm")
 echo -e "${BLUE}🔍 ${APP_NAME} - System Requirements Check${NC}"
 echo "=============================================="
 
+# Function to install missing PHP extensions with user choice
+install_php_extensions() {
+    echo -e "\n${PURPLE}🔧 PHP Extensions Check${NC}"
+
+    # Ask user if they want to install extensions
+    echo -e "${YELLOW}Do you want to check and install missing PHP extensions? (y/n, default: n):${NC}"
+    read -t 15 -p "> " install_extensions || install_extensions="n"
+    install_extensions=$(echo "$install_extensions" | tr -d '[:space:]')
+
+    if [[ ! "$install_extensions" =~ ^[Yy]$ ]]; then
+        echo -e "  ${BLUE}⏭️  Skipping PHP extension installation${NC}"
+        echo -e "  ${YELLOW}💡 You can install extensions manually if needed:${NC}"
+        echo -e "     ${BLUE}sudo apt install php<version>-redis php<version>-mysql php<version>-pgsql${NC}"
+        return 0
+    fi
+
+    # Show available PHP versions
+    echo -e "\n${BLUE}Available PHP versions:${NC}"
+    local available_versions=()
+    for version in "${REQUIRED_PHP_VERSIONS[@]}"; do
+        if command -v "php$version" >/dev/null 2>&1; then
+            echo -e "  ${GREEN}✅ PHP $version${NC}"
+            available_versions+=("$version")
+        else
+            echo -e "  ${YELLOW}⚠️  PHP $version (not installed)${NC}"
+        fi
+    done
+
+    if [ ${#available_versions[@]} -eq 0 ]; then
+        echo -e "  ${RED}❌ No PHP versions found${NC}"
+        return 1
+    fi
+
+    # Ask which versions to install extensions for
+    echo -e "\n${YELLOW}Install extensions for which PHP versions?${NC}"
+    echo -e "${BLUE}Options:${NC}"
+    echo -e "  ${BLUE}1) All available versions (${available_versions[*]})${NC}"
+    echo -e "  ${BLUE}2) Select specific versions${NC}"
+    echo -e "  ${BLUE}3) Skip extension installation${NC}"
+
+    read -t 30 -p "Choose option (1/2/3, default: 3): " version_choice || version_choice="3"
+    version_choice=$(echo "$version_choice" | tr -d '[:space:]')
+
+    local target_versions=()
+    case "$version_choice" in
+        "1")
+            target_versions=("${available_versions[@]}")
+            echo -e "  ${BLUE}Installing for all versions: ${target_versions[*]}${NC}"
+            ;;
+        "2")
+            echo -e "\n${YELLOW}Select PHP versions (space-separated, e.g., 8.3 8.4):${NC}"
+            read -t 30 -p "> " selected_versions || selected_versions=""
+
+            if [ -n "$selected_versions" ]; then
+                for version in $selected_versions; do
+                    if [[ " ${available_versions[*]} " =~ " ${version} " ]]; then
+                        target_versions+=("$version")
+                    else
+                        echo -e "  ${YELLOW}⚠️  PHP $version not available, skipping${NC}"
+                    fi
+                done
+            fi
+
+            if [ ${#target_versions[@]} -eq 0 ]; then
+                echo -e "  ${YELLOW}No valid versions selected, skipping${NC}"
+                return 0
+            fi
+            ;;
+        *)
+            echo -e "  ${BLUE}⏭️  Skipping extension installation${NC}"
+            return 0
+            ;;
+    esac
+
+    # Required extensions for the application
+    local required_extensions=("redis" "mysql" "pgsql" "curl" "zip" "mbstring" "xml" "gd")
+    local missing_extensions=()
+
+    # Check selected PHP versions and install missing extensions
+    for version in "${target_versions[@]}"; do
+        echo -e "\n  ${BLUE}Checking PHP $version extensions...${NC}"
+
+        for ext in "${required_extensions[@]}"; do
+            # Check if extension is loaded
+            if ! php$version -m | grep -q "^$ext$" 2>/dev/null; then
+                local package_name="php$version-$ext"
+
+                # Special case for some extensions
+                case $ext in
+                    "mysql") package_name="php$version-mysql" ;;
+                    "pgsql") package_name="php$version-pgsql" ;;
+                    "redis") package_name="php$version-redis" ;;
+                esac
+
+                echo -e "    ${YELLOW}⚠️  Missing: $ext${NC}"
+                missing_extensions+=("$package_name")
+            else
+                echo -e "    ${GREEN}✅ $ext${NC}"
+            fi
+        done
+    done
+
+    # Install missing extensions
+    if [ ${#missing_extensions[@]} -gt 0 ]; then
+        echo -e "\n  ${BLUE}Installing missing extensions...${NC}"
+        echo -e "  ${YELLOW}Extensions to install: ${missing_extensions[*]}${NC}"
+
+        # Remove duplicates
+        local unique_extensions=($(printf "%s\n" "${missing_extensions[@]}" | sort -u))
+
+        if sudo apt update && sudo apt install -y "${unique_extensions[@]}"; then
+            echo -e "  ${GREEN}✅ PHP extensions installed successfully${NC}"
+
+            # Restart PHP-FPM services if they're running
+            for version in "${target_versions[@]}"; do
+                if systemctl is-active --quiet "php${version}-fpm" 2>/dev/null; then
+                    echo -e "  ${BLUE}Restarting PHP-FPM $version...${NC}"
+                    sudo systemctl restart "php${version}-fpm"
+                fi
+            done
+
+            echo -e "  ${GREEN}✅ PHP-FPM services restarted${NC}"
+        else
+            echo -e "  ${RED}❌ Failed to install some PHP extensions${NC}"
+            echo -e "  ${YELLOW}💡 You may need to install them manually${NC}"
+        fi
+    else
+        echo -e "  ${GREEN}✅ All required PHP extensions are already installed${NC}"
+    fi
+}
+
 # Function to check PHP versions
 check_php_versions() {
     echo -e "\n${PURPLE}📋 Checking PHP Versions...${NC}"
@@ -230,27 +361,37 @@ check_docker() {
 
 # Function to start Docker services
 start_docker_services() {
-    echo -e "\n${PURPLE}🚀 Starting Docker Services...${NC}"
+    echo -e "\n${PURPLE}🚀 Starting Application Docker Containers...${NC}"
 
-    # Use the Docker helper script for proper version detection
-    if [ -f "../scripts/docker-helper.sh" ]; then
-        echo -e "  ${BLUE}Using Docker helper for service management...${NC}"
+    # Check if application has its own docker-compose.yml for isolated containers
+    if [ -f "docker-compose.yml" ]; then
+        echo -e "  ${BLUE}Starting application containers (MySQL, PostgreSQL, Redis)...${NC}"
+        if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+            # Use docker-helper.sh for proper version detection
+            if [ -f "scripts/docker-helper.sh" ]; then
+                ./scripts/docker-helper.sh app-up 2>/dev/null || true
+                echo -e "  ${GREEN}✅ Application containers started${NC}"
 
-        # Check if shared services are needed
-        if [ -f "../docker-compose.services.yml" ]; then
-            echo -e "  ${BLUE}Starting shared services...${NC}"
-            ../scripts/docker-helper.sh services-up
-            echo -e "  ${GREEN}✅ Shared services started${NC}"
+                # Show container status
+                echo -e "  ${BLUE}Container status:${NC}"
+                ./scripts/docker-helper.sh app-status 2>/dev/null || true
+            else
+                # Fallback to direct docker compose commands
+                if command -v "docker" >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+                    docker compose up -d 2>/dev/null || true
+                elif command -v "docker-compose" >/dev/null 2>&1; then
+                    docker-compose up -d 2>/dev/null || true
+                fi
+                echo -e "  ${GREEN}✅ Application containers started${NC}"
+            fi
+        else
+            echo -e "  ${YELLOW}⚠️  Docker not available - application will use localhost services${NC}"
         fi
-
-        # Note: Application runs natively, only shared services needed
-        echo -e "  ${BLUE}Application will run natively with local PHP/Apache${NC}"
-
-        return 0
     else
-        echo -e "  ${YELLOW}⚠️  Docker helper not found - skipping Docker services${NC}"
-        return 0
+        echo -e "  ${YELLOW}⚠️  No docker-compose.yml found - application will use localhost services${NC}"
     fi
+
+    return 0
 }
 
 # Function to show summary
@@ -259,28 +400,10 @@ show_summary() {
     echo "======================="
     
     echo -e "${GREEN}✅ System is ready for ${APP_NAME} deployment${NC}"
-    echo ""
 
-    # Ask about production scaling configuration
-    echo -e "${PURPLE}🚀 Production Scaling Configuration${NC}"
-    echo -e "Would you like to apply production scaling optimizations?"
-    echo -e "  ${BLUE}• Optimizes for 200+ concurrent users${NC}"
-    echo -e "  ${BLUE}• Configures PHP-FPM, Apache, and database settings${NC}"
-    echo -e "  ${BLUE}• Adds monitoring endpoints${NC}"
-    echo ""
-
-    read -t 15 -p "Apply production scaling configuration? (y/n): " apply_scaling || apply_scaling="n"
-
-    if [[ "$apply_scaling" =~ ^[Yy]$ ]]; then
-        echo -e "\n${BLUE}Applying production scaling configuration...${NC}"
-        if [ -f "scripts/production-scaling.sh" ]; then
-            ./scripts/production-scaling.sh
-        else
-            echo -e "  ${RED}❌ Production scaling script not found${NC}"
-        fi
-    else
-        echo -e "  ${YELLOW}⚠️  Production scaling skipped${NC}"
-        echo -e "  ${BLUE}You can apply it later with: ./scripts/production-scaling.sh${NC}"
+    # Apply production scaling silently (no user prompts)
+    if [ -f "scripts/production-scaling.sh" ]; then
+        ./scripts/production-scaling.sh >/dev/null 2>&1 || true
     fi
 
     echo ""
@@ -296,6 +419,7 @@ main() {
     fix_script_permissions
 
     check_php_versions
+    install_php_extensions
     check_web_servers
     
     if check_docker; then

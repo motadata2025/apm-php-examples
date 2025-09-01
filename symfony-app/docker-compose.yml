@@ -1,55 +1,103 @@
+# Simple PHP Application - Supporting Services Only
+# Application runs locally, Docker provides database/cache services
+
 version: '3.8'
 
-# Symfony Application - Docker Compose
-# Supports multi-PHP version deployment
-
 services:
-  symfony-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: ${PHP_VERSION:-8.4}
-    container_name: apm-symfony-app
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8002}:8002"
-    volumes:
-      - .:/var/www/html
-      - ./var/log:/var/www/html/var/log
+
+  # MySQL Database for Simple PHP
+  symfony-app-mysql:
+    image: mysql:8.0
+    container_name: symfony_app_mysql
     environment:
-      - APP_ENV=${APP_ENV:-prod}
-      - PHP_VERSION=${PHP_VERSION:-8.4}
-      - DATABASE_URL=mysql://root:rootpassword@mysql:3306/apm_examples
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - mysql
-      - postgres
-      - redis
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: symfony_app_db
+      MYSQL_USER: symfony_app_user
+      MYSQL_PASSWORD: symfony_app_password
+    ports:
+      - "3308:3306"
+    volumes:
+      - symfony_app_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
+      - symfony-app-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
-  # Import shared services
-  mysql:
-    extends:
-      file: ../docker-compose.services.yml
-      service: mysql
+  # PostgreSQL Database for Simple PHP
+  symfony-app-postgres:
+    image: postgres:15
+    container_name: symfony_app_postgres
+    environment:
+      POSTGRES_DB: symfony_app_db
+      POSTGRES_USER: symfony_app_user
+      POSTGRES_PASSWORD: symfony_app_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - symfony_app_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - symfony-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d symfony_app_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
-  postgres:
-    extends:
-      file: ../docker-compose.services.yml
-      service: postgres
+  # Redis Cache for Simple PHP
+  symfony-app-redis:
+    image: redis:7-alpine
+    container_name: symfony_app_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6381:6379"
+    volumes:
+      - symfony_app_redis_data:/data
+    networks:
+      - symfony-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
-  redis:
-    extends:
-      file: ../docker-compose.services.yml
-      service: redis
+  # Adminer for Simple PHP Database Management
+  symfony-app-adminer:
+    image: adminer:latest
+    container_name: symfony_app_adminer
+    ports:
+      - "8082:8080"
+    networks:
+      - symfony-app-network
+    restart: unless-stopped
+    depends_on:
+      - symfony-app-mysql
+      - symfony-app-postgres
+    profiles:
+      - admin
+
+volumes:
+  symfony_app_mysql_data:
+    driver: local
+  symfony_app_postgres_data:
+    driver: local
+  symfony_app_redis_data:
+    driver: local
 
 networks:
-  apm-network:
-    external: true
+  symfony-app-network:
+    driver: bridge
+    name: symfony_app_network
+    ipam:
+      config:
+        - subnet: 172.32.0.0/16

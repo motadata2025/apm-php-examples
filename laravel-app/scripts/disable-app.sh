@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Disable Application Script
-# APM PHP Examples - Laravel Application
+# APM PHP Examples - Laravel App Application
 
 set -e
 
@@ -18,7 +18,7 @@ CONFIG_DIR="config"
 APP_CONFIG_FILE="$CONFIG_DIR/app.env"
 
 # Application info
-APP_NAME="laravel-app"
+APP_NAME="Laravel"
 VHOST_NAME="laravel-app"
 
 # Function to load configuration
@@ -85,9 +85,32 @@ stop_php_server() {
     fi
 }
 
+# Function to disable Nginx site
+disable_nginx_site() {
+    echo -e "\n${PURPLE}🌐 Disabling Nginx Site${NC}"
+
+    # Disable the site (but keep files and configuration)
+    if sudo rm -f "/etc/nginx/sites-enabled/${VHOST_NAME}" 2>/dev/null; then
+        echo -e "  ${GREEN}✅ Site ${VHOST_NAME} disabled${NC}"
+    else
+        echo -e "  ${YELLOW}⚠️  Site ${VHOST_NAME} was not enabled${NC}"
+    fi
+
+    # Test and reload Nginx
+    if sudo nginx -t 2>/dev/null; then
+        if sudo systemctl reload nginx 2>/dev/null; then
+            echo -e "  ${GREEN}✅ Nginx reloaded${NC}"
+        else
+            echo -e "  ${YELLOW}⚠️  Failed to reload Nginx${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}⚠️  Nginx configuration test failed${NC}"
+    fi
+}
+
 # Main execution
 main() {
-    echo -e "${BLUE}⏸️  Disabling Laravel Application${NC}"
+    echo -e "${BLUE}⏸️  Disabling Laravel App Application${NC}"
     echo -e "====================================="
     
     if load_configuration; then
@@ -96,7 +119,7 @@ main() {
                 disable_apache_site
                 ;;
             "nginx-fpm")
-                echo -e "${YELLOW}⚠️  Nginx deployment disable not implemented yet${NC}"
+                disable_nginx_site
                 ;;
             "php-cli"|*)
                 stop_php_server

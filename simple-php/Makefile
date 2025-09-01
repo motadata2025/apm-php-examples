@@ -1,84 +1,286 @@
-# Simple PHP Application - Simplified Makefile
-# APM PHP Examples - Independent Application
+# Simple PHP Application - Standardized Makefile
+# APM PHP Examples - Final Standardization Implementation
 
-.PHONY: help setup compile start disable enable stop down
+.PHONY: help setup compile start status php-status network-status disable enable stop down 
 
-# Configuration
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
 APP_NAME = simple-php
 DEFAULT_PORT = 8000
 PHP_VERSION ?= 8.4
-NETWORK_INTERFACE ?= 127.0.0.1
+NETWORK_INTERFACE ?= 0.0.0.0
 
-# Colors for output
+# =============================================================================
+# COLORS FOR OUTPUT
+# =============================================================================
 RED=\033[0;31m
 GREEN=\033[0;32m
 YELLOW=\033[1;33m
 BLUE=\033[0;34m
+PURPLE=\033[0;35m
+CYAN=\033[0;36m
 NC=\033[0m # No Color
 
+# =============================================================================
+# DEFAULT TARGET
+# =============================================================================
+.DEFAULT_GOAL := help
+
+# =============================================================================
+# CORE COMMANDS (STANDARDIZED ACROSS ALL APPLICATIONS)
+# =============================================================================
+
 help: ## Show available commands
-	@echo "$(BLUE)Simple PHP Application - APM Testing$(NC)"
-	@echo "======================================"
+	@echo "$(BLUE)Simple PHP Application - APM Testing (Standardized)$(NC)"
+	@echo "================================================================"
 	@echo ""
-	@echo "Available commands:"
-	@echo "  $(YELLOW)make setup$(NC)      - Check system requirements and setup"
-	@echo "  $(YELLOW)make compile$(NC)    - Compile application for deployment"
-	@echo "  $(YELLOW)make start$(NC)      - Start the application"
-	@echo "  $(YELLOW)make status$(NC)        - Show application status"
-	@echo "  $(YELLOW)make php-status$(NC)    - Show PHP version status and compatibility"
-	@echo "  $(YELLOW)make network-status$(NC) - Show network status and IP changes"
-	@echo "  $(YELLOW)make disable$(NC)    - Disable the application"
-	@echo "  $(YELLOW)make enable$(NC)     - Enable the application"
-	@echo "  $(YELLOW)make stop$(NC)       - Stop and cleanup application"
-	@echo "  $(YELLOW)make down$(NC)       - Complete cleanup (remove all files and config)"
+	@echo "$(PURPLE)🔧 Core Operations:$(NC)"
+	@echo "  $(YELLOW)make setup$(NC)         - Check system requirements and setup Docker services"
+	@echo "  $(YELLOW)make compile$(NC)       - Interactive configuration wizard (PHP, deployment, network)"
+	@echo "  $(YELLOW)make start$(NC)         - Deploy and start the application"
+	@echo "  $(YELLOW)make status$(NC)        - Comprehensive application status with resource monitoring"
+	@echo "  $(YELLOW)make stop$(NC)          - Stop application and cleanup resources"
+	@echo "  $(YELLOW)make down$(NC)          - Complete cleanup (remove containers, configs, logs)"
+	@echo ""
+	@echo "$(PURPLE)🔍 Diagnostics:$(NC)"
+	@echo "  $(YELLOW)make php-status$(NC)    - PHP version diagnostics and compatibility"
+	@echo "  $(YELLOW)make network-status$(NC) - Network configuration and IP change detection"
+	@echo ""
+	@echo "$(PURPLE)⚡ Service Management:$(NC)"
+	@echo "  $(YELLOW)make disable$(NC)       - Disable web server virtual host (keep containers)"
+	@echo "  $(YELLOW)make enable$(NC)        - Enable web server virtual host"
+
+	@echo ""
+	@echo "$(PURPLE)💡 Standardized Features:$(NC)"
+	@echo "  • Cross-platform compatibility (Ubuntu, RHEL, Arch, etc.)"
+	@echo "  • Robust error handling with detailed diagnostics"
+	@echo "  • Port conflict detection and automatic resolution"
+	@echo "  • Real-time resource monitoring and health checks"
+	@echo "  • Configuration profiles (development/production)"
+	@echo "  • Automatic firewall configuration for public access"
 	@echo ""
 
-setup: ## Check system requirements and setup
-	@echo "$(BLUE)🔍 Checking system requirements...$(NC)"
-	@./scripts/check-system.sh
+setup: ## Check system requirements and setup Docker services
+	@echo "$(BLUE)🔍 Checking system requirements for Simple PHP...$(NC)"
+	@if [ ! -f scripts/common-functions.sh ]; then \
+		echo "$(RED)❌ [setup] failed: Common functions not found$(NC)"; \
+		echo "$(YELLOW)💡 Ensure standardized scripts are present in scripts/ directory$(NC)"; \
+		exit 1; \
+	fi
+	@chmod +x scripts/*.sh 2>/dev/null || true
+	@if ./scripts/check-system.sh; then \
+		echo "$(GREEN)✅ [setup] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Run 'docker ps' to see running containers$(NC)"; \
+		echo "$(BLUE)💡 Next step: Run 'make compile' to configure the application$(NC)"; \
+	else \
+		echo "$(RED)❌ [setup] failed: System requirements not met$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/check-system.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'VERBOSE=1 make setup' for detailed output$(NC)"; \
+		exit 1; \
+	fi
 
-compile: ## Compile application for deployment
-	@echo "$(BLUE)🔨 Compiling Simple PHP application...$(NC)"
-	@./scripts/compile-app.sh
+compile: ## Interactive configuration wizard (PHP version, deployment type, network)
+	@echo "$(BLUE)🧙 Starting Configuration Wizard for Simple PHP...$(NC)"
+	@if [ ! -f scripts/compile-app.sh ]; then \
+		echo "$(RED)❌ [compile] failed: Compilation script not found$(NC)"; \
+		echo "$(YELLOW)💡 Ensure scripts/compile-app.sh exists$(NC)"; \
+		exit 1; \
+	fi
+	@chmod +x scripts/compile-app.sh 2>/dev/null || true
+	@if ./scripts/compile-app.sh; then \
+		echo "$(GREEN)✅ [compile] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Check config/app.env for settings$(NC)"; \
+		echo "$(BLUE)💡 Next step: Run 'make start' to deploy the application$(NC)"; \
+		if [ "${CLEAR_CACHE}" = "1" ]; then \
+			echo "$(BLUE)🧹 Clearing application cache...$(NC)"; \
+			rm -rf cache/* var/cache/* storage/framework/cache/* 2>/dev/null || true; \
+		fi; \
+	else \
+		echo "$(RED)❌ [compile] failed: Configuration incomplete$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/compile-app.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'VERBOSE=1 make compile' for detailed output$(NC)"; \
+		exit 1; \
+	fi
 
-start: ## Start the application
+start: ## Deploy and start the application
 	@echo "$(BLUE)🚀 Starting Simple PHP application...$(NC)"
-	@./scripts/start-app.sh
+	@if [ ! -f config/app.env ]; then \
+		echo "$(RED)❌ [start] failed: Configuration not found$(NC)"; \
+		echo "$(YELLOW)💡 Run 'make compile' first to configure the application$(NC)"; \
+		exit 1; \
+	fi
+	@if ./scripts/start-app.sh; then \
+		echo "$(GREEN)✅ [start] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Visit http://localhost:$(DEFAULT_PORT) to test$(NC)"; \
+		echo "$(BLUE)💡 Management: Use 'make status' to monitor the application$(NC)"; \
+	else \
+		echo "$(RED)❌ [start] failed: Application startup failed$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/start-app.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'make status' to diagnose issues$(NC)"; \
+		exit 1; \
+	fi
 
-disable: ## Disable the application
-	@echo "$(YELLOW)⏸️  Disabling Simple PHP application...$(NC)"
-	@./scripts/disable-app.sh
-
-enable: ## Enable the application
-	@echo "$(GREEN)▶️  Enabling Simple PHP application...$(NC)"
-	@./scripts/enable-app.sh
-
-stop: ## Stop the application
-	@echo "$(YELLOW)🛑 Stopping Simple PHP application...$(NC)"
-	@./scripts/stop-app.sh
-
-# Development helpers
-test: ## Run tests
-	@echo "$(BLUE)🧪 Running tests...$(NC)"
-	@php vendor/bin/phpunit
-
-install: ## Install dependencies
-	@echo "$(BLUE)📦 Installing dependencies...$(NC)"
-	@composer install --optimize-autoloader
-
-status: ## Show application status
+status: ## Comprehensive application status with resource monitoring
 	@echo "$(BLUE)📊 Simple PHP Application Status$(NC)"
-	@echo "================================="
-	@./scripts/status.sh
+	@echo "================================================"
+	@if [ -f config/app.env ]; then \
+		echo "$(PURPLE)Configuration Status:$(NC)"; \
+		. config/app.env && echo "  App: $$APP_NAME (Port: $$APP_PORT)"; \
+		. config/app.env && echo "  PHP: $$PHP_VERSION ($$DEPLOYMENT_TYPE)"; \
+		. config/app.env && echo "  Environment: $$APP_ENV (Debug: $$APP_DEBUG)"; \
+		. config/app.env && echo "  Network: $$NETWORK_INTERFACE"; \
+	else \
+		echo "$(YELLOW)⚠️  Configuration: Not found (run 'make compile')$(NC)"; \
+	fi
+	@echo ""
+	@echo "$(PURPLE)Docker Container Status:$(NC)"
+	@if command -v docker >/dev/null 2>&1; then \
+		COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+		if $$COMPOSE_CMD ps 2>/dev/null | grep -q "simple-php"; then \
+			$$COMPOSE_CMD ps; \
+			echo ""; \
+			echo "$(PURPLE)Container Resource Usage:$(NC)"; \
+			docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" $$(docker ps --filter "name=simple-php" --format "{{.Names}}" 2>/dev/null) 2>/dev/null || echo "  No resource data available"; \
+		else \
+			echo "  No containers running"; \
+		fi; \
+	else \
+		echo "  Docker not available"; \
+	fi
+	@./scripts/status.sh 2>/dev/null || echo "$(YELLOW)⚠️  Detailed status script not available$(NC)"
 
-php-status: ## Show PHP version status and compatibility
-	@echo "$(BLUE)🐘 PHP Version Status$(NC)"
-	@./scripts/php-version-manager.sh status
+php-status: ## PHP version diagnostics and compatibility
+	@echo "$(BLUE)🐘 PHP Version Status for Simple PHP$(NC)"
+	@echo "================================================"
+	@if [ -f scripts/php-version-manager.sh ]; then \
+		./scripts/php-version-manager.sh status; \
+	else \
+		echo "$(YELLOW)⚠️  PHP version manager not available$(NC)"; \
+		echo "$(BLUE)System PHP version:$(NC)"; \
+		php --version 2>/dev/null || echo "  PHP not found"; \
+	fi
 
-network-status: ## Show network status and IP changes
-	@echo "$(BLUE)🌐 Network Status$(NC)"
-	@./scripts/network-manager.sh status
+network-status: ## Network configuration and IP change detection
+	@echo "$(BLUE)🌐 Network Status for Simple PHP$(NC)"
+	@echo "============================================="
+	@if [ -f scripts/network-manager.sh ]; then \
+		./scripts/network-manager.sh status; \
+	else \
+		echo "$(YELLOW)⚠️  Network manager not available$(NC)"; \
+		echo "$(BLUE)Current network configuration:$(NC)"; \
+		if [ -f config/app.env ]; then \
+			. config/app.env && echo "  Interface: $$NETWORK_INTERFACE"; \
+			. config/app.env && echo "  Port: $$APP_PORT"; \
+		fi; \
+	fi
 
-down: ## Complete cleanup - remove all application files and configuration
-	@echo "$(RED)🗑️ Complete cleanup of Simple PHP application...$(NC)"
-	@./scripts/cleanup.sh
+disable: ## Disable web server virtual host (keep containers running)
+	@echo "$(YELLOW)⏸️  Disabling Simple PHP web server...$(NC)"
+	@if [ -f scripts/webserver-manager.sh ]; then \
+		./scripts/webserver-manager.sh disable; \
+		echo "$(GREEN)✅ [disable] completed - application disabled$(NC)"; \
+		echo "$(BLUE)💡 Use 'make enable' to re-enable the application$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Web server manager not available$(NC)"; \
+		echo "$(BLUE)💡 Use 'make stop' to stop the application completely$(NC)"; \
+	fi
+
+enable: ## Enable web server virtual host
+	@echo "$(GREEN)▶️  Enabling Simple PHP web server...$(NC)"
+	@if [ -f scripts/webserver-manager.sh ]; then \
+		./scripts/webserver-manager.sh enable; \
+		echo "$(GREEN)✅ [enable] completed - application enabled$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Visit http://localhost:$(DEFAULT_PORT) to test$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Web server manager not available$(NC)"; \
+		echo "$(BLUE)💡 Use 'make start' to start the application$(NC)"; \
+	fi
+
+stop: ## Stop application and cleanup resources
+	@echo "$(YELLOW)🛑 Stopping Simple PHP application...$(NC)"
+	@if ./scripts/stop-app.sh 2>/dev/null; then \
+		echo "$(GREEN)✅ [stop] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Application stopped, containers may remain$(NC)"; \
+		echo "$(BLUE)💡 Use 'make down' for complete cleanup$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Stop script not available, attempting basic cleanup...$(NC)"; \
+		if command -v docker >/dev/null 2>&1; then \
+			COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+			$$COMPOSE_CMD stop 2>/dev/null || true; \
+		fi; \
+		echo "$(GREEN)✅ [stop] basic cleanup completed$(NC)"; \
+	fi
+
+down: ## Complete cleanup (remove containers, configs, logs)
+	@echo "$(RED)🗑️  Complete cleanup of Simple PHP application...$(NC)"
+	@echo "$(YELLOW)⚠️  This will remove all containers, configuration, and optionally volumes$(NC)"
+	@./scripts/stop-app.sh 2>/dev/null || true
+	@if command -v docker >/dev/null 2>&1; then \
+		COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+		if [ "${REMOVE_VOLUMES}" = "1" ]; then \
+			echo "$(YELLOW)🗑️  Removing containers and volumes...$(NC)"; \
+			$$COMPOSE_CMD down -v --remove-orphans 2>/dev/null || true; \
+		else \
+			echo "$(YELLOW)🗑️  Removing containers (keeping volumes)...$(NC)"; \
+			$$COMPOSE_CMD down --remove-orphans 2>/dev/null || true; \
+		fi; \
+		if [ "${CLEAR_CACHE}" = "1" ]; then \
+			echo "$(BLUE)🧹 Clearing application cache...$(NC)"; \
+			rm -rf cache/* var/cache/* storage/framework/cache/* logs/*.log 2>/dev/null || true; \
+		fi; \
+		echo "$(BLUE)🔍 Verifying cleanup...$(NC)"; \
+		REMAINING=$$(docker ps -a --filter "name=simple-php" --format "{{.Names}}" 2>/dev/null | wc -l); \
+		if [ "$$REMAINING" -eq 0 ]; then \
+			echo "$(GREEN)✅ [down] completed successfully - all containers removed$(NC)"; \
+		else \
+			echo "$(YELLOW)⚠️  Some containers may still exist, run 'docker ps -a' to check$(NC)"; \
+		fi; \
+	else \
+		echo "$(YELLOW)⚠️  Docker not available, skipping container cleanup$(NC)"; \
+	fi
+	@echo "$(BLUE)💡 Use 'REMOVE_VOLUMES=1 make down' to also remove data volumes$(NC)"
+	@echo "$(BLUE)💡 Use 'CLEAR_CACHE=1 make down' to also clear cache and logs$(NC)"
+
+# =============================================================================
+# FRAMEWORK-SPECIFIC COMMANDS
+# =============================================================================
+
+
+# =============================================================================
+# DOCKER COMPOSE UTILITIES
+# =============================================================================
+
+# Docker Compose command detection (supports both docker-compose and docker compose)
+DOCKER_COMPOSE_CMD := $(shell if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then echo "docker compose"; elif command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo ""; fi)
+
+# Validate Docker Compose availability
+check-docker-compose:
+	@if [ -z "$(DOCKER_COMPOSE_CMD)" ]; then \
+		echo "$(RED)❌ Docker Compose not found$(NC)"; \
+		echo "$(YELLOW)💡 Install Docker Compose:$(NC)"; \
+		echo "  sudo apt install docker-compose-plugin  # For v2"; \
+		echo "  sudo apt install docker-compose         # For v1"; \
+		exit 1; \
+	fi
+	@echo "$(GREEN)✅ Using: $(DOCKER_COMPOSE_CMD)$(NC)"
+
+# =============================================================================
+# ENVIRONMENT VARIABLES FOR ENHANCED CONTROL
+# =============================================================================
+# VERBOSE=1          - Enable detailed logging
+# CLEAR_CACHE=1      - Clear application cache during operations
+# REMOVE_VOLUMES=1   - Remove Docker volumes during cleanup
+# AUTO_CONFIRM=1     - Skip confirmation prompts (non-interactive mode)
+# PHP_VERSION=8.x    - Override PHP version selection
+# NETWORK_INTERFACE  - Override network interface (127.0.0.1, 0.0.0.0, custom IP)
+
+# =============================================================================
+# USAGE EXAMPLES
+# =============================================================================
+# make setup                    # Initial system setup
+# make compile                  # Interactive configuration
+# VERBOSE=1 make start          # Start with detailed logging
+# make status                   # Check application health
+# CLEAR_CACHE=1 make stop       # Stop and clear cache
+# REMOVE_VOLUMES=1 make down    # Complete cleanup with volumes

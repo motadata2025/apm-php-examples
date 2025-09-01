@@ -29,7 +29,7 @@ mkdir -p config
 # Function to check if app is running
 check_app_running() {
     echo -e "\n${PURPLE}🔍 Checking if application is running...${NC}"
-    
+
     local pid_file=".app.pid"
     if [ -f "$pid_file" ]; then
         local pid=$(cat "$pid_file")
@@ -42,8 +42,99 @@ check_app_running() {
             rm -f "$pid_file"
         fi
     fi
-    
+
     echo -e "  ${GREEN}✅ Application is not running${NC}"
+}
+
+# Function to open port for public access
+open_port_for_public_access() {
+    local port=$1
+
+    if [ -z "$port" ]; then
+        echo -e "  ${RED}❌ Error: No port specified for opening${NC}"
+        return 1
+    fi
+
+    echo -e "\n${PURPLE}🔓 Opening port $port for public internet access...${NC}"
+
+    local success=false
+
+    # Check if ufw is available and active
+    if command -v ufw >/dev/null 2>&1; then
+        echo -e "  ${BLUE}Checking UFW status...${NC}"
+        local ufw_status=$(sudo ufw status 2>/dev/null || echo "inactive")
+        if echo "$ufw_status" | grep -q "Status: active"; then
+            echo -e "  ${BLUE}Using UFW to open port $port...${NC}"
+            if sudo ufw allow $port/tcp >/dev/null 2>&1; then
+                echo -e "  ${GREEN}✅ Port $port opened via UFW${NC}"
+                success=true
+            else
+                echo -e "  ${YELLOW}⚠️  Failed to open port $port via UFW${NC}"
+            fi
+        else
+            echo -e "  ${YELLOW}⚠️  UFW is not active (status: inactive)${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}⚠️  UFW not available${NC}"
+    fi
+
+    # Check if iptables is available
+    if command -v iptables >/dev/null 2>&1; then
+        echo -e "  ${BLUE}Using iptables to open port $port...${NC}"
+        # Check if rule already exists
+        if sudo iptables -C INPUT -p tcp --dport $port -j ACCEPT >/dev/null 2>&1; then
+            echo -e "  ${GREEN}✅ Port $port already open in iptables${NC}"
+            success=true
+        else
+            # Add the rule
+            if sudo iptables -I INPUT -p tcp --dport $port -j ACCEPT >/dev/null 2>&1; then
+                echo -e "  ${GREEN}✅ Port $port opened via iptables${NC}"
+                success=true
+
+                # Try to save iptables rules (different methods for different systems)
+                if [ -d "/etc/iptables" ]; then
+                    sudo iptables-save > /etc/iptables/rules.v4 2>/dev/null && \
+                    echo -e "  ${GREEN}✅ iptables rules saved${NC}" || \
+                    echo -e "  ${YELLOW}⚠️  Could not save iptables rules${NC}"
+                elif command -v netfilter-persistent >/dev/null 2>&1; then
+                    sudo netfilter-persistent save >/dev/null 2>&1 && \
+                    echo -e "  ${GREEN}✅ iptables rules saved via netfilter-persistent${NC}" || \
+                    echo -e "  ${YELLOW}⚠️  Could not save iptables rules${NC}"
+                fi
+            else
+                echo -e "  ${YELLOW}⚠️  Failed to open port $port via iptables${NC}"
+            fi
+        fi
+    else
+        echo -e "  ${YELLOW}⚠️  iptables not available${NC}"
+    fi
+
+    # Check if firewall-cmd is available (CentOS/RHEL/Fedora)
+    if command -v firewall-cmd >/dev/null 2>&1; then
+        if sudo firewall-cmd --state >/dev/null 2>&1; then
+            echo -e "  ${BLUE}Using firewall-cmd to open port $port...${NC}"
+            if sudo firewall-cmd --permanent --add-port=$port/tcp >/dev/null 2>&1; then
+                sudo firewall-cmd --reload >/dev/null 2>&1
+                echo -e "  ${GREEN}✅ Port $port opened via firewall-cmd${NC}"
+                success=true
+            else
+                echo -e "  ${YELLOW}⚠️  Failed to open port $port via firewall-cmd${NC}"
+            fi
+        else
+            echo -e "  ${YELLOW}⚠️  firewalld not running${NC}"
+        fi
+    fi
+
+    if [ "$success" = true ]; then
+        echo -e "  ${GREEN}✅ Port $port successfully opened for internet access${NC}"
+    else
+        echo -e "  ${YELLOW}⚠️  Port opening may have failed - check firewall manually${NC}"
+        echo -e "  ${BLUE}Manual commands to try:${NC}"
+        echo -e "    ${BLUE}UFW: sudo ufw allow $port/tcp${NC}"
+        echo -e "    ${BLUE}iptables: sudo iptables -I INPUT -p tcp --dport $port -j ACCEPT${NC}"
+    fi
+
+    echo -e "  ${BLUE}💡 Note: Some cloud providers require additional security group/firewall rules${NC}"
 }
 
 # Function to get network configuration with dynamic IP management
@@ -79,6 +170,8 @@ get_network_config() {
                 echo -e "  ${GREEN}✅ Selected: public access ($machine_ip)${NC}"
                 echo -e "  ${YELLOW}⚠️  Note: IP may change on restart - consider option 3${NC}"
                 ./scripts/network-manager.sh save "public" "$machine_ip"
+                # Open port for public access
+                open_port_for_public_access "$DEFAULT_PORT"
                 break
                 ;;
             3)
@@ -89,6 +182,8 @@ get_network_config() {
                 echo -e "  ${GREEN}✅ Dynamic IP safe - will work after IP changes${NC}"
                 echo -e "  ${BLUE}Current public IP: $machine_ip${NC}"
                 ./scripts/network-manager.sh save "all-interfaces" "0.0.0.0"
+                # Open port for public access
+                open_port_for_public_access "$DEFAULT_PORT"
                 break
                 ;;
             4)
@@ -165,30 +260,25 @@ select_php_version() {
     local configured_version=$(./scripts/php-version-manager.sh configured)
     local recommended_version=$(./scripts/php-version-manager.sh recommend)
 
-    # Smart decision: Skip selection if already configured and compatible
+    # Always allow PHP version selection on each compile
     if [ -n "$configured_version" ]; then
-        echo -e "\n${BLUE}🔍 Checking current configuration...${NC}"
+        echo -e "\n${BLUE}🔍 Current configuration: PHP $configured_version${NC}"
 
         # Check if current version is still available
         if command -v "php$configured_version" >/dev/null 2>&1; then
-            # Check compatibility with any deployment type (we'll validate specific deployment later)
-            if ./scripts/php-version-manager.sh validate "$configured_version" "" 2>/dev/null; then
-                echo -e "  ${GREEN}✅ Using configured PHP $configured_version (compatible)${NC}"
-                SELECTED_PHP_VERSION="$configured_version"
-                return 0
-            else
-                echo -e "  ${YELLOW}⚠️  Configured PHP $configured_version has compatibility issues${NC}"
-            fi
+            echo -e "  ${GREEN}✅ PHP $configured_version is available${NC}"
         else
-            echo -e "  ${YELLOW}⚠️  Configured PHP $configured_version is no longer available${NC}"
+            echo -e "  ${YELLOW}⚠️  PHP $configured_version is no longer available${NC}"
         fi
 
-        # Ask if user wants to change or keep current version
+        # Always ask if user wants to change or keep current version
         echo -e "\n${YELLOW}Current PHP version: $configured_version${NC}"
-        read -t 15 -p "Keep current PHP version? (y/n, default: y): " keep_current || keep_current="y"
-        keep_current=$(echo "$keep_current" | tr -d '[:space:]')
+        read -t 15 -p "Change PHP version? (y/n, default: n): " change_version || change_version="n"
+        change_version=$(echo "$change_version" | tr -d '[:space:]')
 
-        if [[ "$keep_current" =~ ^[Yy]$ ]] || [ -z "$keep_current" ]; then
+        if [[ "$change_version" =~ ^[Yy]$ ]]; then
+            echo -e "  ${BLUE}📝 Selecting new PHP version...${NC}"
+        else
             if command -v "php$configured_version" >/dev/null 2>&1; then
                 echo -e "  ${GREEN}✅ Keeping PHP $configured_version${NC}"
                 SELECTED_PHP_VERSION="$configured_version"
@@ -196,16 +286,15 @@ select_php_version() {
             else
                 echo -e "  ${RED}❌ PHP $configured_version not available, must select new version${NC}"
             fi
-        else
-            echo -e "  ${BLUE}📝 Selecting new PHP version...${NC}"
         fi
     else
         echo -e "\n${BLUE}📝 No PHP version configured, selecting version...${NC}"
-        echo -e "  ${BLUE}💡 This determines which PHP version will:${NC}"
-        echo -e "     • Run your application"
-        echo -e "     • Process Composer dependencies"
-        echo -e "     • Be used for web server deployment"
     fi
+
+    echo -e "  ${BLUE}💡 This determines which PHP version will:${NC}"
+    echo -e "     • Run your application"
+    echo -e "     • Process Composer dependencies"
+    echo -e "     • Be used for web server deployment"
 
     # Show available versions for selection
     local available_versions=()
@@ -298,6 +387,65 @@ check_composer_needs_update() {
     return 0
 }
 
+# Function to check for missing PHP extensions and provide installation guidance
+check_missing_extensions() {
+    local php_cmd="$1"
+
+    echo -e "\n${PURPLE}🔍 Checking for Missing PHP Extensions${NC}"
+
+    # Run composer again to capture the error output
+    local composer_output
+    composer_output=$($php_cmd $(which composer) install --optimize-autoloader --no-dev 2>&1 || true)
+
+    # Check for missing extensions
+    if echo "$composer_output" | grep -q "ext-redis"; then
+        echo -e "  ${RED}❌ Missing PHP Redis extension${NC}"
+        echo -e "  ${YELLOW}📋 To fix this issue, run:${NC}"
+        echo -e "    ${BLUE}sudo apt install php$SELECTED_PHP_VERSION-redis${NC}"
+        echo -e "  ${YELLOW}💡 Or run: make setup - to install required extensions${NC}"
+    fi
+
+    if echo "$composer_output" | grep -q "ext-mysql\|ext-mysqli"; then
+        echo -e "  ${RED}❌ Missing PHP MySQL extension${NC}"
+        echo -e "  ${YELLOW}📋 To fix this issue, run:${NC}"
+        echo -e "    ${BLUE}sudo apt install php$SELECTED_PHP_VERSION-mysql${NC}"
+        echo -e "  ${YELLOW}💡 Or run: make setup - to install required extensions${NC}"
+    fi
+
+    if echo "$composer_output" | grep -q "ext-pgsql"; then
+        echo -e "  ${RED}❌ Missing PHP PostgreSQL extension${NC}"
+        echo -e "  ${YELLOW}📋 To fix this issue, run:${NC}"
+        echo -e "    ${BLUE}sudo apt install php$SELECTED_PHP_VERSION-pgsql${NC}"
+        echo -e "  ${YELLOW}💡 Or run: make setup - to install required extensions${NC}"
+    fi
+
+    if echo "$composer_output" | grep -q "ext-curl"; then
+        echo -e "  ${RED}❌ Missing PHP cURL extension${NC}"
+        echo -e "  ${YELLOW}📋 To fix this issue, run:${NC}"
+        echo -e "    ${BLUE}sudo apt install php$SELECTED_PHP_VERSION-curl${NC}"
+        echo -e "  ${YELLOW}💡 Or run: make setup - to install required extensions${NC}"
+    fi
+
+    if echo "$composer_output" | grep -q "ext-zip"; then
+        echo -e "  ${RED}❌ Missing PHP Zip extension${NC}"
+        echo -e "  ${YELLOW}📋 To fix this issue, run:${NC}"
+        echo -e "    ${BLUE}sudo apt install php$SELECTED_PHP_VERSION-zip${NC}"
+        echo -e "  ${YELLOW}💡 Or run: make setup - to install required extensions${NC}"
+    fi
+
+    if echo "$composer_output" | grep -q "ext-mbstring"; then
+        echo -e "  ${RED}❌ Missing PHP Mbstring extension${NC}"
+        echo -e "  ${YELLOW}📋 To fix this issue, run:${NC}"
+        echo -e "    ${BLUE}sudo apt install php$SELECTED_PHP_VERSION-mbstring${NC}"
+        echo -e "  ${YELLOW}💡 Or run: make setup - to install required extensions${NC}"
+    fi
+
+    echo -e "\n${PURPLE}🔧 Recommended Actions:${NC}"
+    echo -e "  ${BLUE}1. Run: make setup - to install all required extensions automatically${NC}"
+    echo -e "  ${BLUE}2. Then run: make compile - to retry compilation${NC}"
+    echo -e "  ${YELLOW}💡 The setup command will install all missing PHP extensions for your selected version${NC}"
+}
+
 # Function to install dependencies with auto-detection
 install_dependencies() {
     echo -e "\n${PURPLE}📦 Managing Dependencies${NC}"
@@ -350,6 +498,7 @@ install_dependencies() {
                     echo -e "  ${GREEN}✅ Dependencies installed successfully${NC}"
                 else
                     echo -e "  ${RED}❌ Dependency installation failed${NC}"
+                    check_missing_extensions "$php_cmd"
                     exit 1
                 fi
                 ;;
@@ -358,6 +507,7 @@ install_dependencies() {
                     echo -e "  ${GREEN}✅ Dependencies updated successfully${NC}"
                 else
                     echo -e "  ${RED}❌ Dependency update failed${NC}"
+                    check_missing_extensions "$php_cmd"
                     exit 1
                 fi
                 ;;

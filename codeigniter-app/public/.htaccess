@@ -1,21 +1,99 @@
-# Disable server signature start
-ServerSignature Off
+# CodeIgniter 4 Application .htaccess
+# Supports Apache mod_php, PHP-FPM, and Nginx PHP-FPM
 
-# Disable directory browsing
-Options All -Indexes
-
-# Disable server signature end
-
+# Enable URL Rewriting
 RewriteEngine On
 
-# Handle Angular and Vue.js requests
+# Security Headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+# PHP Configuration for mod_php
+<IfModule mod_php.c>
+    php_value memory_limit 256M
+    php_value max_execution_time 300
+    php_value upload_max_filesize 50M
+    php_value post_max_size 50M
+    php_value max_input_vars 3000
+    php_flag display_errors Off
+    php_flag log_errors On
+    php_value error_log /tmp/codeigniter_app_errors.log
+</IfModule>
+
+# PHP Configuration for PHP-FPM (via FastCGI)
+<IfModule mod_fcgid.c>
+    FcgidMaxRequestLen 52428800
+    FcgidIOTimeout 300
+    FcgidBusyTimeout 300
+    FcgidIdleTimeout 300
+</IfModule>
+
+# Directory Protection
+Options -Indexes
+Options +FollowSymLinks
+
+# Prevent access to sensitive files
+<FilesMatch "\.(env|ini|log|sh|sql|conf)$">
+    Require all denied
+</FilesMatch>
+
+# Prevent access to hidden files and CodeIgniter directories
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Prevent access to CodeIgniter directories
+RedirectMatch 404 /app/.*$
+RedirectMatch 404 /system/.*$
+RedirectMatch 404 /writable/.*$
+RedirectMatch 404 /vendor/.*$
+
+# CodeIgniter specific routes
+RewriteRule ^healthCheck$ index.php/healthCheck [QSA,L]
+RewriteRule ^testDatabases$ index.php/testDatabases [QSA,L]
+RewriteRule ^demoCrud$ index.php/demoCrud [QSA,L]
+RewriteRule ^testQueue$ index.php/testQueue [QSA,L]
+RewriteRule ^addQueueData$ index.php/addQueueData [QSA,L]
+RewriteRule ^readQueueData$ index.php/readQueueData [QSA,L]
+RewriteRule ^clearQueue$ index.php/clearQueue [QSA,L]
+
+# Handle API routes and front-end routing
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ index.php/$1 [L]
+RewriteRule ^(.*)$ index.php/$1 [QSA,L]
 
-<IfModule authz_core_module>
-    Require all denied
+# MIME Types
+AddType application/json .json
+AddType text/css .css
+AddType application/javascript .js
+
+# Compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
 </IfModule>
-<IfModule !authz_core_module>
-    Deny from all
+
+# Caching
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
 </IfModule>
+
+# Error Pages
+ErrorDocument 404 /index.php
+ErrorDocument 500 /index.php

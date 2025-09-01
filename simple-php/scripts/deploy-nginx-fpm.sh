@@ -17,9 +17,10 @@ NC='\033[0m' # No Color
 CONFIG_DIR="config"
 APP_CONFIG_FILE="$CONFIG_DIR/app.env"
 
-# Application info
-APP_NAME="simple-php"
-VHOST_NAME="simple-php"
+# Application info - Auto-detect from directory name
+CURRENT_DIR=$(basename "$(pwd)")
+APP_NAME="$CURRENT_DIR"
+VHOST_NAME="$CURRENT_DIR"
 
 # Function to load configuration
 load_configuration() {
@@ -110,7 +111,7 @@ create_nginx_vhost() {
     
     local nginx_dir="/var/www/${VHOST_NAME}"
     local document_root="$nginx_dir/public"
-    local server_name="simple-php.local"
+    local server_name="${VHOST_NAME}.local"
     local vhost_file="/etc/nginx/sites-available/${VHOST_NAME}"
     
     echo -e "  ${BLUE}Document Root: $document_root${NC}"

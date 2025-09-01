@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Simple PHP Application - Start Script
+# Laravel Application - Start Script
 # APM PHP Examples - Independent Application
 
 set -e
@@ -20,7 +20,7 @@ NETWORK_STATE_FILE="$CONFIG_DIR/network.state"
 PID_FILE="$CONFIG_DIR/app.pid"
 
 # Application info
-APP_NAME="Simple PHP"
+APP_NAME="Laravel"
 
 # Function to check if application is already running
 check_if_running() {
@@ -40,15 +40,15 @@ check_if_running() {
 # Function to check for IP changes and update configuration
 check_ip_changes() {
     echo -e "\n${PURPLE}🔍 Checking Network Status${NC}"
-    
+
     if [ ! -f "scripts/network-manager.sh" ]; then
         echo -e "  ${YELLOW}⚠️  Network manager not found, skipping IP check${NC}"
         return 0
     fi
-    
+
     local ip_status=$(./scripts/network-manager.sh check-change)
     local current_ip=$(./scripts/network-manager.sh current-ip)
-    
+
     case $ip_status in
         "changed")
             echo -e "  ${YELLOW}⚠️  IP address has changed!${NC}"
@@ -70,23 +70,23 @@ check_ip_changes() {
 # Function to load configuration
 load_configuration() {
     echo -e "\n${PURPLE}📋 Loading Configuration${NC}"
-    
+
     if [ ! -f "$APP_CONFIG_FILE" ]; then
         echo -e "  ${RED}❌ Configuration file not found${NC}"
         echo -e "  ${YELLOW}Run: make compile - to configure the application${NC}"
         exit 1
     fi
-    
+
     # Source configuration
     source "$APP_CONFIG_FILE"
-    
+
     # Validate required variables
     if [ -z "$APP_PORT" ] || [ -z "$PHP_VERSION" ] || [ -z "$DEPLOYMENT_TYPE" ]; then
         echo -e "  ${RED}❌ Invalid configuration file${NC}"
         echo -e "  ${YELLOW}Run: make compile - to reconfigure the application${NC}"
         exit 1
     fi
-    
+
     echo -e "  ${GREEN}✅ Configuration loaded${NC}"
     echo -e "    ${BLUE}PHP Version: $PHP_VERSION${NC}"
     echo -e "    ${BLUE}Port: $APP_PORT${NC}"
@@ -97,7 +97,7 @@ load_configuration() {
 # Function to validate deployment readiness
 validate_deployment() {
     echo -e "\n${PURPLE}🔍 Validating Deployment${NC}"
-    
+
     # Check if webserver manager is available
     if [ -f "scripts/webserver-manager.sh" ]; then
         if ./scripts/webserver-manager.sh validate "$PHP_VERSION" "$DEPLOYMENT_TYPE"; then
@@ -112,10 +112,53 @@ validate_deployment() {
     fi
 }
 
+# Laravel-specific APP_KEY verification
+verify_laravel_app_key() {
+    echo -e "  ${BLUE}🔑 Verifying Laravel APP_KEY...${NC}"
+
+    # Check if .env file exists
+    if [[ ! -f ".env" ]]; then
+        echo -e "  ${RED}❌ .env file not found${NC}"
+        echo -e "  ${YELLOW}💡 Run 'make compile' to configure the application${NC}"
+        exit 1
+    fi
+
+    # Check APP_KEY
+    local current_key=$(grep "^APP_KEY=" .env 2>/dev/null | cut -d= -f2 || echo "")
+
+    if [[ -z "$current_key" ]] || [[ "$current_key" == "base64:\$(openssl rand -base64 32)" ]]; then
+        echo -e "  ${YELLOW}⚠️  APP_KEY not configured, generating...${NC}"
+
+        # Generate new APP_KEY
+        local new_key="base64:$(openssl rand -base64 32)"
+
+        # Update .env file
+        if grep -q "^APP_KEY=" .env; then
+            sed -i "s|^APP_KEY=.*|APP_KEY=$new_key|" .env
+        else
+            echo "APP_KEY=$new_key" >> .env
+        fi
+
+        echo -e "  ${GREEN}✅ APP_KEY generated and saved${NC}"
+
+        # Clear Laravel caches
+        if [[ -d "vendor" ]] && command -v php >/dev/null 2>&1; then
+            php artisan config:clear >/dev/null 2>&1 || true
+            php artisan cache:clear >/dev/null 2>&1 || true
+            rm -rf bootstrap/cache/*.php 2>/dev/null || true
+        fi
+    else
+        echo -e "  ${GREEN}✅ APP_KEY configured${NC}"
+    fi
+}
+
 # Function to start the application
 start_application() {
     echo -e "\n${PURPLE}🚀 Starting $APP_NAME Application${NC}"
-    
+
+    # Laravel-specific: Verify APP_KEY is configured
+    verify_laravel_app_key
+
     # Check if port is available (only for PHP-CLI deployments)
     if [ "$DEPLOYMENT_TYPE" = "php-cli" ]; then
         if command -v netstat >/dev/null 2>&1; then
@@ -130,7 +173,7 @@ start_application() {
             fi
         fi
     fi
-    
+
     # Get deployment command
     local start_cmd=""
     case $DEPLOYMENT_TYPE in
@@ -142,7 +185,15 @@ start_application() {
             start_cmd="php${PHP_VERSION} -S ${NETWORK_INTERFACE}:${APP_PORT} -t public"
             ;;
         "apache-fpm")
-            echo -e "  ${BLUE}Deploying with Apache PHP-FPM...${NC}"
+            echo -e "\n${PURPLE}🧹 Clearing Laravel Cache${NC}"
+            echo -e "  ${BLUE}Forcing complete cache regeneration...${NC}"
+            rm -f bootstrap/cache/config.php 2>/dev/null || true
+            rm -f bootstrap/cache/services.php 2>/dev/null || true
+            rm -f bootstrap/cache/packages.php 2>/dev/null || true
+            rm -f bootstrap/cache/routes.php 2>/dev/null || true
+            echo -e "  ${GREEN}✅ Laravel cache cleared${NC}"
+
+            echo -e "\n${BLUE}Deploying with Apache PHP-FPM...${NC}"
             ./scripts/deploy-apache-fpm.sh
             return 0
             ;;
@@ -161,26 +212,26 @@ start_application() {
             exit 1
             ;;
     esac
-    
+
     # Start the application
     echo -e "  ${BLUE}Starting command: $start_cmd${NC}"
     echo -e "  ${GREEN}✅ Application starting...${NC}"
-    
+
     # Start in background and save PID
     nohup $start_cmd > logs/app.log 2>&1 &
     local app_pid=$!
     echo $app_pid > "$PID_FILE"
-    
+
     # Wait a moment and check if it started successfully
     sleep 2
     if ps -p "$app_pid" > /dev/null 2>&1; then
         echo -e "  ${GREEN}✅ Application started successfully (PID: $app_pid)${NC}"
-        
+
         # Show access information
         local current_ip=$(./scripts/network-manager.sh current-ip 2>/dev/null || echo "localhost")
         echo -e "\n${PURPLE}🌐 Access Information${NC}"
         echo -e "================================"
-        
+
         if [ "$NETWORK_INTERFACE" = "127.0.0.1" ]; then
             echo -e "  ${BLUE}Local access: http://127.0.0.1:$APP_PORT${NC}"
         elif [ "$NETWORK_INTERFACE" = "0.0.0.0" ]; then
@@ -190,12 +241,12 @@ start_application() {
         else
             echo -e "  ${BLUE}Access: http://$NETWORK_INTERFACE:$APP_PORT${NC}"
         fi
-        
+
         echo -e "\n${YELLOW}Management commands:${NC}"
         echo -e "  ${BLUE}make stop${NC}    - Stop the application"
         echo -e "  ${BLUE}make status${NC}  - Check application status"
         echo -e "  ${BLUE}tail -f logs/app.log${NC} - View application logs"
-        
+
     else
         echo -e "  ${RED}❌ Application failed to start${NC}"
         echo -e "  ${YELLOW}Check logs: tail logs/app.log${NC}"
@@ -208,10 +259,10 @@ start_application() {
 main() {
     echo -e "${BLUE}🚀 $APP_NAME - Application Startup${NC}"
     echo -e "====================================="
-    
+
     # Ensure logs directory exists
     mkdir -p logs
-    
+
     check_if_running
     check_ip_changes
     load_configuration

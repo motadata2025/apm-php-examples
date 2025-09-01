@@ -1,49 +1,103 @@
+# Simple PHP Application - Supporting Services Only
+# Application runs locally, Docker provides database/cache services
+
 version: '3.8'
 
-# Simple PHP Application - Docker Compose
-# Supports multi-PHP version deployment
-
 services:
-  simple-php:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: ${PHP_VERSION:-8.4}
-    container_name: apm-simple-php
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8000}:8000"
-    volumes:
-      - .:/var/www/html
-      - ./logs:/var/www/html/logs
+
+  # MySQL Database for Simple PHP
+  simple-php-mysql:
+    image: mysql:8.0
+    container_name: simple_php_mysql
     environment:
-      - APP_ENV=${APP_ENV:-production}
-      - PHP_VERSION=${PHP_VERSION:-8.4}
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_DATABASE=apm_examples
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=rootpassword
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DATABASE=apm_examples
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=postgrespassword
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    # depends_on removed - connects to external shared services
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: simple_php_db
+      MYSQL_USER: simple_php_user
+      MYSQL_PASSWORD: simple_php_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - simple_php_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
+      - simple-php-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
-  # Note: This application connects to shared services via external network
-  # Shared services (mysql, postgres, redis) are managed by ../docker-compose.services.yml
+  # PostgreSQL Database for Simple PHP
+  simple-php-postgres:
+    image: postgres:15
+    container_name: simple_php_postgres
+    environment:
+      POSTGRES_DB: simple_php_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - simple_php_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - simple-php-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d simple_php_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache for Simple PHP
+  simple-php-redis:
+    image: redis:7-alpine
+    container_name: simple_php_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"
+    volumes:
+      - simple_php_redis_data:/data
+    networks:
+      - simple-php-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Adminer for Simple PHP Database Management
+  simple-php-adminer:
+    image: adminer:latest
+    container_name: simple_php_adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - simple-php-network
+    restart: unless-stopped
+    depends_on:
+      - simple-php-mysql
+      - simple-php-postgres
+    profiles:
+      - admin
+
+volumes:
+  simple_php_mysql_data:
+    driver: local
+  simple_php_postgres_data:
+    driver: local
+  simple_php_redis_data:
+    driver: local
 
 networks:
-  apm-network:
-    external: true
+  simple-php-network:
+    driver: bridge
+    name: simple_php_network
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16

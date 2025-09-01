@@ -17,9 +17,10 @@ NC='\033[0m' # No Color
 CONFIG_DIR="config"
 APP_CONFIG_FILE="$CONFIG_DIR/app.env"
 
-# Application info
-APP_NAME="simple-php"
-VHOST_NAME="simple-php"
+# Application info - Auto-detect from directory name
+CURRENT_DIR=$(basename "$(pwd)")
+APP_NAME="$CURRENT_DIR"
+VHOST_NAME="$CURRENT_DIR"
 
 # Function to load configuration
 load_configuration() {
@@ -79,6 +80,14 @@ copy_application_to_apache() {
 
     echo -e "  ${GREEN}✅ Application copied successfully${NC}"
 
+    # Clear Laravel cache in deployed location
+    echo -e "\n${PURPLE}🧹 Clearing Deployed Laravel Cache${NC}"
+    sudo rm -f "$apache_dir/bootstrap/cache/config.php" 2>/dev/null || true
+    sudo rm -f "$apache_dir/bootstrap/cache/services.php" 2>/dev/null || true
+    sudo rm -f "$apache_dir/bootstrap/cache/packages.php" 2>/dev/null || true
+    sudo rm -f "$apache_dir/bootstrap/cache/routes.php" 2>/dev/null || true
+    echo -e "  ${GREEN}✅ Deployed Laravel cache cleared${NC}"
+
     # Store the apache directory path for cleanup
     echo "APACHE_APP_DIR=\"$apache_dir\"" >> "$CONFIG_DIR/app.env"
 }
@@ -89,7 +98,7 @@ create_apache_vhost() {
 
     local apache_dir="/var/www/${VHOST_NAME}"
     local document_root="$apache_dir/public"
-    local server_name="simple-php.local"
+    local server_name="${VHOST_NAME}.local"
     local vhost_file="/etc/apache2/sites-available/${VHOST_NAME}.conf"
     
     echo -e "  ${BLUE}Document Root: $document_root${NC}"

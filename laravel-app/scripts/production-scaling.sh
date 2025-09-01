@@ -20,13 +20,17 @@ APP_CONFIG_FILE="$CONFIG_DIR/app.env"
 
 # Function to load configuration
 load_configuration() {
-    if [ ! -f "$APP_CONFIG_FILE" ]; then
-        echo -e "${RED}❌ Configuration file not found${NC}"
-        echo -e "${YELLOW}Run: make compile - to configure the application${NC}"
-        exit 1
-    fi
-    
-    source "$APP_CONFIG_FILE"
+    # Use default values for CodeIgniter production scaling
+    # CodeIgniter uses config/app.env for configuration, not shell variables
+    echo -e "${BLUE}Using default configuration for CodeIgniter production scaling${NC}"
+
+    # Set default values for production scaling
+    PHP_VERSION="8.4"
+    DEPLOYMENT_TYPE="apache-fpm"
+    APP_PORT="8002"
+
+    # Note: CodeIgniter configuration is handled through config/app.env
+    # No need to source shell variables
 }
 
 # Function to configure PHP-FPM for production scaling

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Enable Application Script
-# APM PHP Examples - Laravel Application
+# APM PHP Examples - Laravel App Application
 
 set -e
 
@@ -18,7 +18,7 @@ CONFIG_DIR="config"
 APP_CONFIG_FILE="$CONFIG_DIR/app.env"
 
 # Application info
-APP_NAME="laravel-app"
+APP_NAME="Laravel"
 VHOST_NAME="laravel-app"
 
 # Function to load configuration
@@ -95,9 +95,51 @@ show_access_info() {
     echo -e "  ${YELLOW}make status${NC}   - Check application status"
 }
 
+# Function to enable Apache site
+enable_apache_site() {
+    echo -e "\n${PURPLE}🌐 Enabling Apache Site${NC}"
+
+    # Enable the site (assuming configuration already exists)
+    if sudo a2ensite "${VHOST_NAME}.conf" 2>/dev/null; then
+        echo -e "  ${GREEN}✅ Site ${VHOST_NAME} enabled${NC}"
+    else
+        echo -e "  ${YELLOW}⚠️  Site ${VHOST_NAME} was already enabled or configuration not found${NC}"
+    fi
+
+    # Reload Apache
+    if sudo systemctl reload apache2 2>/dev/null; then
+        echo -e "  ${GREEN}✅ Apache reloaded${NC}"
+    else
+        echo -e "  ${YELLOW}⚠️  Failed to reload Apache${NC}"
+    fi
+}
+
+# Function to enable Nginx site
+enable_nginx_site() {
+    echo -e "\n${PURPLE}🌐 Enabling Nginx Site${NC}"
+
+    # Enable the site (assuming configuration already exists)
+    if sudo ln -sf "/etc/nginx/sites-available/${VHOST_NAME}" "/etc/nginx/sites-enabled/${VHOST_NAME}" 2>/dev/null; then
+        echo -e "  ${GREEN}✅ Site ${VHOST_NAME} enabled${NC}"
+    else
+        echo -e "  ${YELLOW}⚠️  Site ${VHOST_NAME} was already enabled or configuration not found${NC}"
+    fi
+
+    # Test and reload Nginx
+    if sudo nginx -t 2>/dev/null; then
+        if sudo systemctl reload nginx 2>/dev/null; then
+            echo -e "  ${GREEN}✅ Nginx reloaded${NC}"
+        else
+            echo -e "  ${YELLOW}⚠️  Failed to reload Nginx${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}⚠️  Nginx configuration test failed${NC}"
+    fi
+}
+
 # Main execution
 main() {
-    echo -e "${BLUE}▶️  Enabling Laravel Application${NC}"
+    echo -e "${BLUE}▶️  Enabling Laravel App Application${NC}"
     echo -e "===================================="
     
     load_configuration
@@ -107,8 +149,7 @@ main() {
             enable_apache_site
             ;;
         "nginx-fpm")
-            echo -e "${YELLOW}⚠️  Nginx deployment enable not implemented yet${NC}"
-            echo -e "${BLUE}Use: make start - to start with PHP built-in server${NC}"
+            enable_nginx_site
             ;;
         "php-cli"|*)
             echo -e "${BLUE}PHP built-in server deployment${NC}"

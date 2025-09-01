@@ -1,0 +1,148 @@
+# Simple PHP Application - Simplified Makefile
+# APM PHP Examples - Independent Application
+
+.PHONY: help setup compile start disable enable stop down
+
+# Configuration
+APP_NAME = simple-php
+DEFAULT_PORT = 8000
+PHP_VERSION ?= 8.4
+NETWORK_INTERFACE ?= 127.0.0.1
+
+# Colors for output
+RED=\033[0;31m
+GREEN=\033[0;32m
+YELLOW=\033[1;33m
+BLUE=\033[0;34m
+PURPLE=\033[0;35m
+NC=\033[0m # No Color
+
+help: ## Show available commands
+	@echo "$(BLUE)Simple PHP Application - APM Testing$(NC)"
+	@echo "======================================"
+	@echo ""
+	@echo "Available commands:"
+	@echo "  $(YELLOW)make setup$(NC)      - Check system requirements and setup"
+	@echo "  $(YELLOW)make compile$(NC)    - Compile application for deployment"
+	@echo "  $(YELLOW)make start$(NC)      - Start the application"
+	@echo "  $(YELLOW)make status$(NC)        - Show application status"
+	@echo "  $(YELLOW)make php-status$(NC)    - Show PHP version status and compatibility"
+	@echo "  $(YELLOW)make network-status$(NC) - Show network status and IP changes"
+	@echo "  $(YELLOW)make disable$(NC)    - Disable the application"
+	@echo "  $(YELLOW)make enable$(NC)     - Enable the application"
+	@echo "  $(YELLOW)make stop$(NC)       - Stop and cleanup application"
+	@echo "  $(YELLOW)make down$(NC)       - Complete cleanup (remove all files and config)"
+	@echo ""
+
+setup: ## Check system requirements and setup
+	@echo "$(BLUE)🔍 Checking system requirements...$(NC)"
+	@if [ ! -f scripts/common-functions.sh ]; then \
+		echo "$(RED)❌ [setup] failed: Common functions not found$(NC)"; \
+		echo "$(YELLOW)💡 Ensure all scripts are present in scripts/ directory$(NC)"; \
+		exit 1; \
+	fi
+	@chmod +x scripts/check-system-hardened.sh scripts/migrate-config.sh scripts/common-functions.sh 2>/dev/null || true
+	@if ./scripts/check-system-hardened.sh; then \
+		echo "$(GREEN)✅ [setup] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Run 'docker ps' to see running containers$(NC)"; \
+	else \
+		echo "$(RED)❌ [setup] failed: System requirements not met$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/check-system-hardened.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'VERBOSE=1 make setup' for detailed output$(NC)"; \
+		exit 1; \
+	fi
+
+compile: ## Compile application for deployment
+	@echo "$(BLUE)� Compiling Simple PHP application...$(NC)"
+	@./scripts/compile-app.sh
+
+start: ## Start the application with isolated Docker containers
+	@echo "$(BLUE)🚀 Starting Simple PHP application with isolated containers...$(NC)"
+	@./scripts/start-app.sh
+
+disable: ## Disable the application
+	@echo "$(YELLOW)⏸️  Disabling Simple PHP application...$(NC)"
+	@./scripts/disable-app.sh
+
+enable: ## Enable the application
+	@echo "$(GREEN)▶️  Enabling Simple PHP application...$(NC)"
+	@./scripts/enable-app.sh
+
+stop: ## Stop the application containers
+	@echo "$(YELLOW)🛑 Stopping Simple PHP application containers...$(NC)"
+	@./scripts/stop-app.sh
+
+# Development helpers
+test: ## Run tests
+	@echo "$(BLUE)🧪 Running tests...$(NC)"
+	@php vendor/bin/phpunit
+
+install: ## Install dependencies
+	@echo "$(BLUE)📦 Installing dependencies...$(NC)"
+	@composer install --optimize-autoloader
+
+status: ## Show application status with resource monitoring
+	@echo "$(BLUE)📊 Simple PHP Application Status$(NC)"
+	@echo "================================="
+	@if [ -f config/runtime.env ]; then \
+		echo "$(PURPLE)Configuration Status:$(NC)"; \
+		. config/runtime.env && echo "  App: $$APP_NAME ($$APP_PORT)"; \
+		. config/runtime.env && echo "  PHP: $$PHP_VERSION ($$DEPLOYMENT_TYPE)"; \
+		. config/runtime.env && echo "  Config: $$CONFIG_SOURCE ($$CONFIG_VERSION)"; \
+	else \
+		echo "$(YELLOW)⚠️  Configuration: Not found (run 'make compile')$(NC)"; \
+	fi
+	@echo ""
+	@echo "$(PURPLE)Docker Container Status:$(NC)"
+	@if command -v docker >/dev/null 2>&1; then \
+		COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+		if $$COMPOSE_CMD ps 2>/dev/null | grep -q "simple_php"; then \
+			$$COMPOSE_CMD ps; \
+			echo ""; \
+			echo "$(PURPLE)Container Resource Usage:$(NC)"; \
+			docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" $$(docker ps --filter "name=simple_php" --format "{{.Names}}" 2>/dev/null) 2>/dev/null || echo "  No resource data available"; \
+		else \
+			echo "  No containers running"; \
+		fi; \
+	else \
+		echo "  Docker not available"; \
+	fi
+	@./scripts/status.sh 2>/dev/null || echo "$(YELLOW)⚠️  Detailed status script not available$(NC)"
+
+php-status: ## Show PHP version status and compatibility
+	@echo "$(BLUE)🐘 PHP Version Status$(NC)"
+	@./scripts/php-version-manager.sh status
+
+network-status: ## Show network status and IP changes
+	@echo "$(BLUE)🌐 Network Status$(NC)"
+	@./scripts/network-manager.sh status
+
+down: ## Complete cleanup - remove all application files and configuration
+	@echo "$(RED)🗑️ Complete cleanup of Simple PHP application...$(NC)"
+	@echo "$(YELLOW)⚠️  This will remove all containers, configuration, and optionally volumes$(NC)"
+	@./scripts/stop-app.sh 2>/dev/null || true
+	@if command -v docker >/dev/null 2>&1; then \
+		COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+		if [ "${REMOVE_VOLUMES}" = "1" ]; then \
+			echo "$(YELLOW)🗑️ Removing containers and volumes...$(NC)"; \
+			$$COMPOSE_CMD down -v --remove-orphans 2>/dev/null || true; \
+		else \
+			echo "$(YELLOW)🗑️ Removing containers (keeping volumes)...$(NC)"; \
+			$$COMPOSE_CMD down --remove-orphans 2>/dev/null || true; \
+		fi; \
+		if [ "${CLEAR_CACHE}" = "1" ]; then \
+			echo "$(BLUE)🧹 Clearing application cache...$(NC)"; \
+			rm -rf cache/* logs/*.log 2>/dev/null || true; \
+		fi; \
+		echo "$(BLUE)🔍 Verifying cleanup...$(NC)"; \
+		REMAINING=$$(docker ps -a --filter "name=simple_php" --format "{{.Names}}" 2>/dev/null | wc -l); \
+		if [ "$$REMAINING" -eq 0 ]; then \
+			echo "$(GREEN)✅ [down] completed successfully - all containers removed$(NC)"; \
+		else \
+			echo "$(YELLOW)⚠️  Some containers may still exist, run 'docker ps -a' to check$(NC)"; \
+		fi; \
+	else \
+		echo "$(YELLOW)⚠️  Docker not available, skipping container cleanup$(NC)"; \
+	fi
+	@echo "$(BLUE)💡 Use 'REMOVE_VOLUMES=1 make down' to also remove data volumes$(NC)"
+	@echo "$(BLUE)💡 Use 'CLEAR_CACHE=1 make down' to also clear cache and logs$(NC)"

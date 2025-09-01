@@ -53,15 +53,26 @@ $app->addErrorMiddleware($_ENV['APP_DEBUG'] ?? true, true, true);
 $app->addBodyParsingMiddleware();
 
 // Routes
+// Main dashboard route
 $app->get('/', [ApmController::class, 'dashboard']);
+
+// Health check route (comprehensive)
+$app->get('/health', [ApmController::class, 'healthCheck']);
+
+// AJAX API routes for the dashboard (like Simple PHP)
+$app->post('/', [ApmController::class, 'handleAjax']);
+
+// Individual API routes for direct access
 $app->post('/test-databases', [ApmController::class, 'testDatabases']);
+$app->post('/create-tables', [ApmController::class, 'createTables']);
 $app->post('/demo-crud', [ApmController::class, 'demoCrud']);
 $app->post('/fetch-api-data', [ApmController::class, 'fetchApiData']);
 $app->post('/test-queue', [ApmController::class, 'testQueue']);
 $app->post('/add-queue-data', [ApmController::class, 'addQueueData']);
 $app->post('/read-queue-data', [ApmController::class, 'readQueueData']);
 $app->post('/clear-queue', [ApmController::class, 'clearQueue']);
-$app->get('/health', [ApmController::class, 'health']);
+$app->post('/generate-random-data', [ApmController::class, 'generateNewRandomData']);
+$app->post('/debug-env', [ApmController::class, 'debugEnv']);
 
 // Run app
 $app->run();

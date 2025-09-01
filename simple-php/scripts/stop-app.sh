@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Simple PHP Application - Stop Script
+# Slim Framework Application - Stop Script
 # APM PHP Examples - Independent Application
 
 set -e
@@ -81,10 +81,14 @@ stop_apache_deployment() {
     fi
 
     # Disable Apache site
-    if sudo a2dissite "${VHOST_NAME}.conf" 2>/dev/null; then
+    local disable_output
+    disable_output=$(sudo a2dissite "${VHOST_NAME}.conf" 2>&1)
+    local disable_status=$?
+
+    if [ $disable_status -eq 0 ] || echo "$disable_output" | grep -q "disabled"; then
         echo -e "  ${GREEN}✅ Apache site disabled${NC}"
     else
-        echo -e "  ${YELLOW}⚠️  Apache site was not enabled${NC}"
+        echo -e "  ${YELLOW}⚠️  Site ${VHOST_NAME} was not enabled${NC}"
     fi
 
     # Remove virtual host configuration
@@ -123,28 +127,27 @@ stop_apache_deployment() {
 stop_nginx_deployment() {
     echo -e "\n${PURPLE}🛑 Stopping Nginx Deployment${NC}"
 
-    local vhost_name="simple-php"
-
     # Disable the site
-    if [ -L "/etc/nginx/sites-enabled/${vhost_name}" ]; then
+    if [ -L "/etc/nginx/sites-enabled/${VHOST_NAME}" ]; then
         echo -e "  ${BLUE}Disabling Nginx site...${NC}"
-        sudo rm -f "/etc/nginx/sites-enabled/${vhost_name}"
+        sudo rm -f "/etc/nginx/sites-enabled/${VHOST_NAME}"
         echo -e "  ${GREEN}✅ Nginx site disabled${NC}"
     else
         echo -e "  ${YELLOW}⚠️  Nginx site already disabled${NC}"
     fi
 
     # Remove virtual host configuration
-    if [ -f "/etc/nginx/sites-available/${vhost_name}" ]; then
+    if [ -f "/etc/nginx/sites-available/${VHOST_NAME}" ]; then
         echo -e "  ${BLUE}Removing virtual host configuration...${NC}"
-        sudo rm -f "/etc/nginx/sites-available/${vhost_name}"
+        sudo rm -f "/etc/nginx/sites-available/${VHOST_NAME}"
         echo -e "  ${GREEN}✅ Virtual host configuration removed${NC}"
     fi
 
     # Remove application copy from Nginx directory
-    if [ -n "$NGINX_APP_DIR" ] && [ -d "$NGINX_APP_DIR" ]; then
+    local nginx_dir="/var/www/${VHOST_NAME}"
+    if [ -d "$nginx_dir" ]; then
         echo -e "  ${BLUE}Removing application copy from Nginx directory...${NC}"
-        sudo rm -rf "$NGINX_APP_DIR"
+        sudo rm -rf "$nginx_dir"
         echo -e "  ${GREEN}✅ Application copy removed${NC}"
     else
         echo -e "  ${YELLOW}⚠️  No application copy found in Nginx directory${NC}"
@@ -190,9 +193,9 @@ stop_application() {
 main() {
     echo -e "${BLUE}🛑 $APP_NAME - Application Shutdown${NC}"
     echo -e "======================================"
-    
+
     stop_application
-    
+
     echo -e "\n${GREEN}✅ Shutdown complete${NC}"
 }
 

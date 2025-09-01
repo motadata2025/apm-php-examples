@@ -15,25 +15,37 @@
             <p>{{ phpVersion }}</p>
         </div>
         <div class="info-card">
-            <h3>Slim Version</h3>
-            <p>{{ slimVersion }}</p>
+            <h3>🔧 Framework</h3>
+            <p>{{ framework }}</p>
         </div>
         <div class="info-card">
-            <h3>Environment</h3>
-            <p>{{ environment|title }}</p>
+            <h3>🌐 Web Server</h3>
+            <p>{{ deploymentType }}</p>
         </div>
         <div class="info-card">
-            <h3>Framework</h3>
-            <p>Slim</p>
+            <h3>⚡ Status</h3>
+            <p>Ready for Operations</p>
         </div>
     </div>
 
     <div class="main-content">
+        <!-- Health Check Section -->
+        <div class="section">
+            <h2>🏥 Health Check</h2>
+            <div class="button-group">
+                <button class="btn" onclick="checkHealth()">Check Application Health</button>
+            </div>
+            <div class="loader" id="health-loader"></div>
+            <div class="alert" id="health-alert"></div>
+            <div class="result-area" id="health-results">Click the button above to check application health...</div>
+        </div>
+
         <!-- Database Operations Section -->
         <div class="section">
             <h2>🗄️ Database Operations</h2>
             <div class="button-group">
                 <button class="btn" onclick="testDatabases()">Test Database Connections</button>
+                <button class="btn secondary" onclick="createTables()">Create Tables</button>
                 <button class="btn success" onclick="demoCrud()">Demo CRUD Operations</button>
             </div>
             <div class="loader" id="db-loader"></div>
@@ -55,14 +67,21 @@
         <!-- Queue Operations Section -->
         <div class="section">
             <h2>📋 Queue System Operations</h2>
+            <div class="queue-info">
+                <strong>Queue Name:</strong> <span id="queue-name">slim_84_apache_fpm</span><br>
+                <strong>TTL:</strong> 1 minute (auto-expiry)<br>
+                <strong>Backend:</strong> Redis
+            </div>
             <div class="button-group">
                 <button class="btn" onclick="testQueue()">Demo Queue Operations</button>
                 <button class="btn success" onclick="addQueueData()">Add Data to Queue</button>
-                <button class="btn warning" onclick="readQueueData()">Read Data from Queue</button>
+                <button class="btn secondary" onclick="readQueueData()">Read Data from Queue</button>
                 <button class="btn danger" onclick="clearQueue()">Clear Queue</button>
             </div>
-
-            <textarea class="queue-input" id="queue-data" placeholder='Enter JSON data to add to queue, e.g., {"message": "Hello World", "priority": 1}'></textarea>
+            <div class="queue-input-group">
+                <textarea class="queue-input" id="queue-data" rows="3" placeholder="Auto-generated data will appear here..."></textarea>
+                <button class="btn" onclick="generateRandomData()">Generate New Data</button>
+            </div>
 
             <div class="loader" id="queue-loader"></div>
             <div class="alert" id="queue-alert"></div>
@@ -128,6 +147,24 @@
                 if (response.success) {
                     updateResults('db', response.data);
                     showAlert('db', 'Database connections tested successfully!');
+                } else {
+                    showAlert('db', 'Error: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                hideLoader('db');
+                showAlert('db', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    function createTables() {
+        showLoader('db');
+        makeRequest('/create-tables')
+            .then(response => {
+                hideLoader('db');
+                if (response.success) {
+                    updateResults('db', response.data);
+                    showAlert('db', 'Tables created successfully!');
                 } else {
                     showAlert('db', 'Error: ' + response.error, 'error');
                 }
@@ -271,9 +308,24 @@
             });
     }
 
-    // Initialize with sample data
+    function generateRandomData() {
+        makeRequest('/generate-random-data')
+            .then(response => {
+                if (response.success) {
+                    document.getElementById('queue-data').value = JSON.stringify(response.data, null, 2);
+                } else {
+                    showAlert('queue', 'Error generating data: ' + response.error, 'error');
+                }
+            })
+            .catch(error => {
+                showAlert('queue', 'Network error: ' + error.message, 'error');
+            });
+    }
+
+    // Initialize with auto-generated data
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('queue-data').value = '{"message": "Hello from Slim Framework", "timestamp": "' + new Date().toISOString() + '", "priority": 1}';
+        // Generate initial random data
+        generateRandomData();
     });
 </script>
 {% endblock %}

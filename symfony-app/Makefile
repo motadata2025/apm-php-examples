@@ -1,210 +1,267 @@
-# Symfony Application - Production-Grade Makefile
-# Supports PHP version changes, Apache/Nginx deployment, and network accessibility
+# Symfony Application - Standardized Makefile
+# APM PHP Examples - Final Standardization Implementation
 
-# Configuration
-PHP_VERSION ?= 8.4
-ENVIRONMENT ?= dev
+.PHONY: help setup compile start status php-status network-status disable enable stop down console
+
+# =============================================================================
+# CONFIGURATION
+# =============================================================================
 APP_NAME = symfony-app
 DEFAULT_PORT = 8002
+PHP_VERSION ?= 8.4
 NETWORK_INTERFACE ?= 0.0.0.0
 
-# Colors for output
+# =============================================================================
+# COLORS FOR OUTPUT
+# =============================================================================
 RED=\033[0;31m
 GREEN=\033[0;32m
 YELLOW=\033[1;33m
 BLUE=\033[0;34m
+PURPLE=\033[0;35m
+CYAN=\033[0;36m
 NC=\033[0m # No Color
 
-.PHONY: help setup compile start disable enable stop down test install update console dev status
+# =============================================================================
+# DEFAULT TARGET
+# =============================================================================
+.DEFAULT_GOAL := help
 
-# Default target
-help:
-	@echo "Symfony Application - Available Commands:"
+help: ## Show available commands
+	@echo "$(BLUE)Symfony Application - APM Testing (Standardized)$(NC)"
+	@echo "================================================================"
 	@echo ""
-	@echo "Setup Commands:"
-	@echo "  make setup          - Setup application dependencies"
-	@echo "  make build          - Build Docker container"
-	@echo "  make install        - Install PHP dependencies"
-	@echo "  make cache-clear    - Clear Symfony cache"
+	@echo "$(PURPLE)🔧 Core Operations:$(NC)"
+	@echo "  $(YELLOW)make setup$(NC)         - Check system requirements and setup Docker services"
+	@echo "  $(YELLOW)make compile$(NC)       - Interactive configuration wizard (PHP, deployment, network)"
+	@echo "  $(YELLOW)make start$(NC)         - Deploy and start the application"
+	@echo "  $(YELLOW)make status$(NC)        - Comprehensive application status with resource monitoring"
+	@echo "  $(YELLOW)make stop$(NC)          - Stop application and cleanup resources"
+	@echo "  $(YELLOW)make down$(NC)          - Complete cleanup (remove containers, configs, logs)"
 	@echo ""
-	@echo "Runtime Commands:"
-	@echo "  make start          - Start the application"
-	@echo "  make stop           - Stop the application"
-	@echo "  make restart        - Restart the application"
+	@echo "$(PURPLE)🔍 Diagnostics:$(NC)"
+	@echo "  $(YELLOW)make php-status$(NC)    - PHP version diagnostics and compatibility"
+	@echo "  $(YELLOW)make network-status$(NC) - Network configuration and IP change detection"
 	@echo ""
-	@echo "Development Commands:"
-	@echo "  make test           - Run tests"
-	@echo "  make logs           - View application logs"
-	@echo "  make console        - Run Symfony console commands"
+	@echo "$(PURPLE)⚡ Service Management:$(NC)"
+	@echo "  $(YELLOW)make disable$(NC)       - Disable web server virtual host (keep containers)"
+	@echo "  $(YELLOW)make enable$(NC)        - Enable web server virtual host"
 	@echo ""
-	@echo "Network Configuration:"
-	@echo "  make network-local  - Configure for local access (127.0.0.1)"
-	@echo "  make network-public - Configure for public access (0.0.0.0)"
+	@echo "$(PURPLE)🎼 Symfony Specific:$(NC)"
+	@echo "  $(YELLOW)make console$(NC)       - Symfony Console CLI"
 	@echo ""
-	@echo "Deployment Commands:"
-	@echo "  make apache         - Deploy with Apache"
-	@echo "  make nginx          - Deploy with Nginx"
-	@echo "  make deploy         - Deploy for production"
-	@echo "  make php-version    - Change PHP version (use PHP_VERSION=x.x)"
+	@echo "$(PURPLE)💡 Standardized Features:$(NC)"
+	@echo "  • Cross-platform compatibility (Ubuntu, RHEL, Arch, etc.)"
+	@echo "  • Robust error handling with detailed diagnostics"
+	@echo "  • Port conflict detection and automatic resolution"
+	@echo "  • Real-time resource monitoring and health checks"
+	@echo "  • Configuration profiles (development/production)"
+	@echo "  • Automatic firewall configuration for public access"
 	@echo ""
-	@echo "Cleanup Commands:"
-	@echo "  make clean          - Clean up containers and volumes"
+
+setup: ## Check system requirements and setup Docker services
+	@echo "$(BLUE)🔍 Checking system requirements for Symfony...$(NC)"
+	@if [ ! -f scripts/common-functions.sh ]; then \
+		echo "$(RED)❌ [setup] failed: Common functions not found$(NC)"; \
+		echo "$(YELLOW)💡 Ensure standardized scripts are present in scripts/ directory$(NC)"; \
+		exit 1; \
+	fi
+	@chmod +x scripts/*.sh 2>/dev/null || true
+	@if ./scripts/check-system-hardened.sh; then \
+		echo "$(GREEN)✅ [setup] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Run 'docker ps' to see running containers$(NC)"; \
+		echo "$(BLUE)💡 Next step: Run 'make compile' to configure the application$(NC)"; \
+	else \
+		echo "$(RED)❌ [setup] failed: System requirements not met$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/check-system.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'VERBOSE=1 make setup' for detailed output$(NC)"; \
+		exit 1; \
+	fi
+
+compile: ## Interactive configuration wizard (PHP version, deployment type, network)
+	@echo "$(BLUE)🧙 Starting Configuration Wizard for Symfony...$(NC)"
+	@if [ ! -f scripts/compile-app-enhanced.sh ]; then \
+		echo "$(RED)❌ [compile] failed: Enhanced compilation script not found$(NC)"; \
+		echo "$(YELLOW)💡 Ensure scripts/compile-app-enhanced.sh exists$(NC)"; \
+		exit 1; \
+	fi
+	@chmod +x scripts/compile-app-enhanced.sh 2>/dev/null || true
+	@if ./scripts/compile-app-enhanced.sh; then \
+		echo "$(GREEN)✅ [compile] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Check config/app.env for settings$(NC)"; \
+		echo "$(BLUE)💡 Next step: Run 'make start' to deploy the application$(NC)"; \
+		if [ "${CLEAR_CACHE}" = "1" ]; then \
+			echo "$(BLUE)🧹 Clearing application cache...$(NC)"; \
+			rm -rf var/cache/* 2>/dev/null || true; \
+		fi; \
+	else \
+		echo "$(RED)❌ [compile] failed: Configuration incomplete$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/compile-app.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'VERBOSE=1 make compile' for detailed output$(NC)"; \
+		exit 1; \
+	fi
+
+start: ## Deploy and start the application
+	@echo "$(BLUE)🚀 Starting Symfony application...$(NC)"
+	@if [ ! -f config/app.env ]; then \
+		echo "$(RED)❌ [start] failed: Configuration not found$(NC)"; \
+		echo "$(YELLOW)💡 Run 'make compile' first to configure the application$(NC)"; \
+		exit 1; \
+	fi
+	@if ./scripts/start-app.sh; then \
+		echo "$(GREEN)✅ [start] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Visit http://localhost:$(DEFAULT_PORT) to test$(NC)"; \
+		echo "$(BLUE)💡 Management: Use 'make status' to monitor the application$(NC)"; \
+	else \
+		echo "$(RED)❌ [start] failed: Application startup failed$(NC)"; \
+		echo "$(YELLOW)💡 Check logs in logs/start-app.log$(NC)"; \
+		echo "$(YELLOW)💡 Run 'make status' to diagnose issues$(NC)"; \
+		exit 1; \
+	fi
+
+status: ## Comprehensive application status with resource monitoring
+	@echo "$(BLUE)📊 Symfony Application Status$(NC)"
+	@echo "================================================"
+	@if [ -f config/app.env ]; then \
+		echo "$(PURPLE)Configuration Status:$(NC)"; \
+		. config/app.env && echo "  App: $$APP_NAME (Port: $$APP_PORT)"; \
+		. config/app.env && echo "  PHP: $$PHP_VERSION ($$DEPLOYMENT_TYPE)"; \
+		. config/app.env && echo "  Environment: $$APP_ENV (Debug: $$APP_DEBUG)"; \
+		. config/app.env && echo "  Network: $$NETWORK_INTERFACE"; \
+	else \
+		echo "$(YELLOW)⚠️  Configuration: Not found (run 'make compile')$(NC)"; \
+	fi
 	@echo ""
-	@echo "$(YELLOW)Simplified Commands:$(NC)"
-	@echo "  $(BLUE)make setup$(NC)    - Check system requirements and setup"
-	@echo "  $(BLUE)make compile$(NC)  - Compile application for deployment"
-	@echo "  $(BLUE)make start$(NC)    - Start the application"
-	@echo "  $(BLUE)make disable$(NC)  - Disable the application"
-	@echo "  $(BLUE)make enable$(NC)   - Enable the application"
-	@echo "  $(BLUE)make stop$(NC)     - Stop and cleanup application"
-	@echo "  $(BLUE)make down$(NC)     - Remove all containers and volumes"
+	@echo "$(PURPLE)Docker Container Status:$(NC)"
+	@if command -v docker >/dev/null 2>&1; then \
+		COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+		if $$COMPOSE_CMD ps 2>/dev/null | grep -q "$(APP_NAME)"; then \
+			$$COMPOSE_CMD ps; \
+			echo ""; \
+			echo "$(PURPLE)Container Resource Usage:$(NC)"; \
+			docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}" $$(docker ps --filter "name=$(APP_NAME)" --format "{{.Names}}" 2>/dev/null) 2>/dev/null || echo "  No resource data available"; \
+		else \
+			echo "  No containers running"; \
+		fi; \
+	else \
+		echo "  Docker not available"; \
+	fi
+	@./scripts/status.sh 2>/dev/null || echo "$(YELLOW)⚠️  Detailed status script not available$(NC)"
 
-# Setup application
-setup: build install cache-clear
-	@echo "Symfony application setup complete!"
+php-status: ## PHP version diagnostics and compatibility
+	@echo "$(BLUE)🐘 PHP Version Status for Symfony$(NC)"
+	@echo "================================================"
+	@if [ -f scripts/php-version-manager.sh ]; then \
+		./scripts/php-version-manager.sh status; \
+	else \
+		echo "$(YELLOW)⚠️  PHP version manager not available$(NC)"; \
+		echo "$(BLUE)System PHP version:$(NC)"; \
+		php --version 2>/dev/null || echo "  PHP not found"; \
+	fi
 
-# Build Docker container
-build:
-	@echo "Building Symfony Docker container..."
-	@docker build -t apm-symfony-app .
+network-status: ## Network configuration and IP change detection
+	@echo "$(BLUE)🌐 Network Status for Symfony$(NC)"
+	@echo "============================================="
+	@if [ -f scripts/network-manager.sh ]; then \
+		./scripts/network-manager.sh status; \
+	else \
+		echo "$(YELLOW)⚠️  Network manager not available$(NC)"; \
+		echo "$(BLUE)Current network configuration:$(NC)"; \
+		if [ -f config/app.env ]; then \
+			. config/app.env && echo "  Interface: $$NETWORK_INTERFACE"; \
+			. config/app.env && echo "  Port: $$APP_PORT"; \
+		fi; \
+	fi
 
-# Install dependencies
-install:
-	@echo "Installing Symfony dependencies..."
-	@docker run --rm -v $(PWD):/app -w /app composer:latest install
-	@if [ ! -f .env.local ]; then echo "APP_SECRET=$$(openssl rand -hex 16)" > .env.local; fi
+disable: ## Disable web server virtual host (keep containers running)
+	@echo "$(YELLOW)⏸️  Disabling Symfony web server...$(NC)"
+	@if [ -f scripts/webserver-manager.sh ]; then \
+		./scripts/webserver-manager.sh disable; \
+		echo "$(GREEN)✅ [disable] completed - application disabled$(NC)"; \
+		echo "$(BLUE)💡 Use 'make enable' to re-enable the application$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Web server manager not available$(NC)"; \
+		echo "$(BLUE)💡 Use 'make stop' to stop the application completely$(NC)"; \
+	fi
 
-# Clear Symfony cache
-cache-clear:
-	@echo "Clearing Symfony cache..."
-	@docker run --rm -v $(PWD):/app -w /app apm-symfony-app php bin/console cache:clear
+enable: ## Enable web server virtual host
+	@echo "$(GREEN)▶️  Enabling Symfony web server...$(NC)"
+	@if [ -f scripts/webserver-manager.sh ]; then \
+		./scripts/webserver-manager.sh enable; \
+		echo "$(GREEN)✅ [enable] completed - application enabled$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Visit http://localhost:$(DEFAULT_PORT) to test$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Web server manager not available$(NC)"; \
+		echo "$(BLUE)💡 Use 'make start' to start the application$(NC)"; \
+	fi
 
-# Start application
-start:
-	@echo "Starting Symfony application..."
-	@docker-compose -f ../docker-compose.yml up -d symfony-app
-	@echo "Symfony application is running at http://localhost:8083"
+stop: ## Stop application and cleanup resources
+	@echo "$(YELLOW)🛑 Stopping Symfony application...$(NC)"
+	@if ./scripts/stop-app.sh 2>/dev/null; then \
+		echo "$(GREEN)✅ [stop] completed successfully$(NC)"; \
+		echo "$(BLUE)🔍 Verification: Application stopped, containers may remain$(NC)"; \
+		echo "$(BLUE)💡 Use 'make down' for complete cleanup$(NC)"; \
+	else \
+		echo "$(YELLOW)⚠️  Stop script not available, attempting basic cleanup...$(NC)"; \
+		if command -v docker >/dev/null 2>&1; then \
+			COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+			$$COMPOSE_CMD stop 2>/dev/null || true; \
+		fi; \
+		echo "$(GREEN)✅ [stop] basic cleanup completed$(NC)"; \
+	fi
 
-# Stop application
-stop:
-	@echo "Stopping Symfony application..."
-	@docker-compose -f ../docker-compose.yml stop symfony-app
+down: ## Complete cleanup (remove containers, configs, logs)
+	@echo "$(RED)🗑️  Complete cleanup of Symfony application...$(NC)"
+	@echo "$(YELLOW)⚠️  This will remove all containers, configuration, and optionally volumes$(NC)"
+	@./scripts/stop-app.sh 2>/dev/null || true
+	@if command -v docker >/dev/null 2>&1; then \
+		COMPOSE_CMD=$$(if docker compose version >/dev/null 2>&1; then echo "docker compose"; else echo "docker-compose"; fi); \
+		if [ "${REMOVE_VOLUMES}" = "1" ]; then \
+			echo "$(YELLOW)🗑️  Removing containers and volumes...$(NC)"; \
+			$$COMPOSE_CMD down -v --remove-orphans 2>/dev/null || true; \
+		else \
+			echo "$(YELLOW)🗑️  Removing containers (keeping volumes)...$(NC)"; \
+			$$COMPOSE_CMD down --remove-orphans 2>/dev/null || true; \
+		fi; \
+		if [ "${CLEAR_CACHE}" = "1" ]; then \
+			echo "$(BLUE)🧹 Clearing application cache...$(NC)"; \
+			rm -rf var/cache/* logs/*.log 2>/dev/null || true; \
+		fi; \
+		echo "$(BLUE)🔍 Verifying cleanup...$(NC)"; \
+		REMAINING=$$(docker ps -a --filter "name=$(APP_NAME)" --format "{{.Names}}" 2>/dev/null | wc -l); \
+		if [ "$$REMAINING" -eq 0 ]; then \
+			echo "$(GREEN)✅ [down] completed successfully - all containers removed$(NC)"; \
+		else \
+			echo "$(YELLOW)⚠️  Some containers may still exist, run 'docker ps -a' to check$(NC)"; \
+		fi; \
+	else \
+		echo "$(YELLOW)⚠️  Docker not available, skipping container cleanup$(NC)"; \
+	fi
+	@echo "$(BLUE)💡 Use 'REMOVE_VOLUMES=1 make down' to also remove data volumes$(NC)"
+	@echo "$(BLUE)💡 Use 'CLEAR_CACHE=1 make down' to also clear cache and logs$(NC)"
 
-# Restart application
-restart: stop start
+# =============================================================================
+# FRAMEWORK-SPECIFIC COMMANDS
+# =============================================================================
 
-# Run tests
-test:
-	@echo "Running Symfony tests..."
-	@docker run --rm -v $(PWD):/app -w /app apm-symfony-app php bin/phpunit
+console: ## Symfony Console CLI
+	@echo "$(BLUE)🎼 Symfony Console CLI$(NC)"
+	@if [ -f bin/console ]; then \
+		php bin/console list; \
+	else \
+		echo "$(RED)❌ Symfony console not found$(NC)"; \
+		exit 1; \
+	fi
 
-# View logs
-logs:
-	@docker-compose -f ../docker-compose.yml logs -f symfony-app
+# =============================================================================
+# ENVIRONMENT VARIABLES FOR ENHANCED CONTROL
+# =============================================================================
+# VERBOSE=1          - Enable detailed logging
+# CLEAR_CACHE=1      - Clear application cache during operations
+# REMOVE_VOLUMES=1   - Remove Docker volumes during cleanup
+# AUTO_CONFIRM=1     - Skip confirmation prompts (non-interactive mode)
+# PHP_VERSION=8.x    - Override PHP version selection
+# NETWORK_INTERFACE  - Override network interface (127.0.0.1, 0.0.0.0, custom IP)
 
-# Clean up
-clean:
-	@echo "Cleaning up Symfony application..."
-	@docker-compose -f ../docker-compose.yml down
-	@docker rmi apm-symfony-app || true
 
-# Development helpers
-console:
-	@docker run --rm -it -v $(PWD):/app -w /app --network apm-php-examples_apm-network apm-symfony-app php bin/console
-
-dev-shell:
-	@docker run --rm -it -v $(PWD):/app -w /app apm-symfony-app bash
-
-composer-update:
-	@docker run --rm -v $(PWD):/app -w /app composer:latest update
-
-# Network Configuration Commands
-network-local: ## Configure for local access (127.0.0.1)
-	@echo "$(GREEN)Configuring Symfony for local access...$(NC)"
-	@$(MAKE) start NETWORK_INTERFACE=127.0.0.1
-	@echo "$(GREEN)✅ Configured for local access$(NC)"
-
-network-public: ## Configure for public access (0.0.0.0)
-	@echo "$(GREEN)Configuring Symfony for public access...$(NC)"
-	@$(MAKE) start NETWORK_INTERFACE=0.0.0.0
-	@echo "$(GREEN)✅ Configured for public access$(NC)"
-	@echo "$(YELLOW)⚠️  Application is now accessible from the internet!$(NC)"
-
-# PHP Version Management
-php-version: ## Change PHP version (use PHP_VERSION=x.x)
-	@echo "$(GREEN)Changing PHP version to $(PHP_VERSION)...$(NC)"
-	@sed -i 's/FROM php:[0-9]\+\.[0-9]\+/FROM php:$(PHP_VERSION)/' Dockerfile
-	@$(MAKE) build
-	@echo "$(GREEN)✅ PHP version changed to $(PHP_VERSION)$(NC)"
-
-# Deployment Options
-apache: ## Deploy with Apache
-	@echo "$(GREEN)Deploying Symfony with Apache...$(NC)"
-	@docker run -d --name $(APP_NAME)-apache \
-		-p $(PORT):80 \
-		-v $(PWD)/public:/var/www/html \
-		--network apm-php-examples_apm-network \
-		php:$(PHP_VERSION)-apache
-	@echo "$(GREEN)✅ Symfony deployed with Apache on port $(PORT)$(NC)"
-
-nginx: ## Deploy with Nginx
-	@echo "$(GREEN)Deploying Symfony with Nginx...$(NC)"
-	@docker run -d --name $(APP_NAME)-nginx \
-		-p $(PORT):80 \
-		-v $(PWD)/public:/var/www/html \
-		--network apm-php-examples_apm-network \
-		nginx:alpine
-	@echo "$(GREEN)✅ Symfony deployed with Nginx on port $(PORT)$(NC)"
-
-deploy: ## Deploy for production
-	@echo "$(GREEN)Deploying Symfony for production...$(NC)"
-	@$(MAKE) build ENVIRONMENT=prod
-	@$(MAKE) start ENVIRONMENT=prod NETWORK_INTERFACE=0.0.0.0
-	@echo "$(GREEN)✅ Symfony deployed for production$(NC)"
-
-# Environment Management
-dev: ## Start in development mode
-	@$(MAKE) start ENVIRONMENT=dev
-
-prod: ## Start in production mode
-	@$(MAKE) start ENVIRONMENT=prod
-
-status: ## Show application status
-	@echo "$(GREEN)Symfony Application Status:$(NC)"
-	@docker ps --filter "name=$(APP_NAME)" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-
-# Symfony specific commands
-debug-router:
-	@docker run --rm -v $(PWD):/app -w /app apm-symfony-app php bin/console debug:router
-
-debug-container:
-	@docker run --rm -v $(PWD):/app -w /app apm-symfony-app php bin/console debug:container
-
-messenger-consume:
-	@docker run --rm -it -v $(PWD):/app -w /app --network apm-php-examples_apm-network apm-symfony-app php bin/console messenger:consume async
-
-# Simplified Commands for APM Testing
-compile: ## Compile application for deployment
-	@echo "$(BLUE)🔨 Compiling Symfony application...$(NC)"
-	@./scripts/compile-app.sh
-
-disable: ## Disable the application
-	@echo "$(YELLOW)⏸️  Disabling Symfony application...$(NC)"
-	@./scripts/disable-app.sh
-
-enable: ## Enable the application
-	@echo "$(GREEN)▶️  Enabling Symfony application...$(NC)"
-	@./scripts/enable-app.sh
-
-down: ## Remove containers and cleanup
-	@echo "$(RED)🗑️  Cleaning up Symfony application...$(NC)"
-	@./scripts/cleanup.sh
-
-# Development helpers for simplified workflow
-update: ## Update dependencies
-	@echo "$(BLUE)🔄 Updating dependencies...$(NC)"
-	@composer update
-
-dev-simple: ## Start development server (simplified)
-	@echo "$(BLUE)🔧 Starting development server...$(NC)"
-	@php -S localhost:$(DEFAULT_PORT) -t public
+# Docker Compose command detection (supports both docker-compose and docker compose)

@@ -40,15 +40,15 @@ check_if_running() {
 # Function to check for IP changes and update configuration
 check_ip_changes() {
     echo -e "\n${PURPLE}🔍 Checking Network Status${NC}"
-    
+
     if [ ! -f "scripts/network-manager.sh" ]; then
         echo -e "  ${YELLOW}⚠️  Network manager not found, skipping IP check${NC}"
         return 0
     fi
-    
+
     local ip_status=$(./scripts/network-manager.sh check-change)
     local current_ip=$(./scripts/network-manager.sh current-ip)
-    
+
     case $ip_status in
         "changed")
             echo -e "  ${YELLOW}⚠️  IP address has changed!${NC}"
@@ -70,23 +70,23 @@ check_ip_changes() {
 # Function to load configuration
 load_configuration() {
     echo -e "\n${PURPLE}📋 Loading Configuration${NC}"
-    
+
     if [ ! -f "$APP_CONFIG_FILE" ]; then
         echo -e "  ${RED}❌ Configuration file not found${NC}"
         echo -e "  ${YELLOW}Run: make compile - to configure the application${NC}"
         exit 1
     fi
-    
+
     # Source configuration
     source "$APP_CONFIG_FILE"
-    
+
     # Validate required variables
     if [ -z "$APP_PORT" ] || [ -z "$PHP_VERSION" ] || [ -z "$DEPLOYMENT_TYPE" ]; then
         echo -e "  ${RED}❌ Invalid configuration file${NC}"
         echo -e "  ${YELLOW}Run: make compile - to reconfigure the application${NC}"
         exit 1
     fi
-    
+
     echo -e "  ${GREEN}✅ Configuration loaded${NC}"
     echo -e "    ${BLUE}PHP Version: $PHP_VERSION${NC}"
     echo -e "    ${BLUE}Port: $APP_PORT${NC}"
@@ -97,7 +97,7 @@ load_configuration() {
 # Function to validate deployment readiness
 validate_deployment() {
     echo -e "\n${PURPLE}🔍 Validating Deployment${NC}"
-    
+
     # Check if webserver manager is available
     if [ -f "scripts/webserver-manager.sh" ]; then
         if ./scripts/webserver-manager.sh validate "$PHP_VERSION" "$DEPLOYMENT_TYPE"; then
@@ -115,7 +115,7 @@ validate_deployment() {
 # Function to start the application
 start_application() {
     echo -e "\n${PURPLE}🚀 Starting $APP_NAME Application${NC}"
-    
+
     # Check if port is available (only for PHP-CLI deployments)
     if [ "$DEPLOYMENT_TYPE" = "php-cli" ]; then
         if command -v netstat >/dev/null 2>&1; then
@@ -130,7 +130,7 @@ start_application() {
             fi
         fi
     fi
-    
+
     # Get deployment command
     local start_cmd=""
     case $DEPLOYMENT_TYPE in
@@ -161,26 +161,26 @@ start_application() {
             exit 1
             ;;
     esac
-    
+
     # Start the application
     echo -e "  ${BLUE}Starting command: $start_cmd${NC}"
     echo -e "  ${GREEN}✅ Application starting...${NC}"
-    
+
     # Start in background and save PID
     nohup $start_cmd > logs/app.log 2>&1 &
     local app_pid=$!
     echo $app_pid > "$PID_FILE"
-    
+
     # Wait a moment and check if it started successfully
     sleep 2
     if ps -p "$app_pid" > /dev/null 2>&1; then
         echo -e "  ${GREEN}✅ Application started successfully (PID: $app_pid)${NC}"
-        
+
         # Show access information
         local current_ip=$(./scripts/network-manager.sh current-ip 2>/dev/null || echo "localhost")
         echo -e "\n${PURPLE}🌐 Access Information${NC}"
         echo -e "================================"
-        
+
         if [ "$NETWORK_INTERFACE" = "127.0.0.1" ]; then
             echo -e "  ${BLUE}Local access: http://127.0.0.1:$APP_PORT${NC}"
         elif [ "$NETWORK_INTERFACE" = "0.0.0.0" ]; then
@@ -190,12 +190,12 @@ start_application() {
         else
             echo -e "  ${BLUE}Access: http://$NETWORK_INTERFACE:$APP_PORT${NC}"
         fi
-        
+
         echo -e "\n${YELLOW}Management commands:${NC}"
         echo -e "  ${BLUE}make stop${NC}    - Stop the application"
         echo -e "  ${BLUE}make status${NC}  - Check application status"
         echo -e "  ${BLUE}tail -f logs/app.log${NC} - View application logs"
-        
+
     else
         echo -e "  ${RED}❌ Application failed to start${NC}"
         echo -e "  ${YELLOW}Check logs: tail logs/app.log${NC}"
@@ -208,10 +208,10 @@ start_application() {
 main() {
     echo -e "${BLUE}🚀 $APP_NAME - Application Startup${NC}"
     echo -e "====================================="
-    
+
     # Ensure logs directory exists
     mkdir -p logs
-    
+
     check_if_running
     check_ip_changes
     load_configuration

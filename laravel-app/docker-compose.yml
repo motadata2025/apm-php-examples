@@ -1,61 +1,103 @@
+# Laravel Application - Supporting Services Only
+# Application runs locally, Docker provides database/cache services
+
 version: '3.8'
 
-# Laravel Application - Docker Compose
-# Supports multi-PHP version deployment
-
 services:
-  laravel-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: ${PHP_VERSION:-8.4}
-    container_name: apm-laravel-app
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8001}:8001"
-    volumes:
-      - .:/var/www/html
-      - ./storage/logs:/var/www/html/storage/logs
+
+  # MySQL Database for Laravel
+  laravel-app-mysql:
+    image: mysql:8.0
+    container_name: laravel-app_mysql
     environment:
-      - APP_ENV=${APP_ENV:-production}
-      - PHP_VERSION=${PHP_VERSION:-8.4}
-      - DB_CONNECTION=mysql
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=apm_examples
-      - DB_USERNAME=root
-      - DB_PASSWORD=rootpassword
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - mysql
-      - postgres
-      - redis
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: laravel_app_db
+      MYSQL_USER: laravel-app_user
+      MYSQL_PASSWORD: laravel-app_password
+    ports:
+      - "3311:3306"
+    volumes:
+      - laravel-app_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
+      - laravel-app-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
-  # Import shared services
-  mysql:
-    extends:
-      file: ../docker-compose.services.yml
-      service: mysql
+  # PostgreSQL Database for Laravel
+  laravel-app-postgres:
+    image: postgres:15
+    container_name: laravel-app_postgres
+    environment:
+      POSTGRES_DB: laravel_app_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5437:5432"
+    volumes:
+      - laravel-app_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - laravel-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d laravel_app_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
-  postgres:
-    extends:
-      file: ../docker-compose.services.yml
-      service: postgres
+  # Redis Cache for Laravel
+  laravel-app-redis:
+    image: redis:7-alpine
+    container_name: laravel-app_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6384:6379"
+    volumes:
+      - laravel-app_redis_data:/data
+    networks:
+      - laravel-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
-  redis:
-    extends:
-      file: ../docker-compose.services.yml
-      service: redis
+  # Adminer for Laravel Database Management
+  laravel-app-adminer:
+    image: adminer:latest
+    container_name: laravel-app_adminer
+    ports:
+      - "8084:8080"
+    networks:
+      - laravel-app-network
+    restart: unless-stopped
+    depends_on:
+      - laravel-app-mysql
+      - laravel-app-postgres
+    profiles:
+      - admin
+
+volumes:
+  laravel-app_mysql_data:
+    driver: local
+  laravel-app_postgres_data:
+    driver: local
+  laravel-app_redis_data:
+    driver: local
 
 networks:
-  apm-network:
-    external: true
+  laravel-app-network:
+    driver: bridge
+    name: laravel-app_network
+    ipam:
+      config:
+        - subnet: 172.34.0.0/16

@@ -1,65 +1,103 @@
+# Slim Framework Application - Supporting Services Only
+# Application runs locally, Docker provides database/cache services
+
 version: '3.8'
 
-# Slim Framework Application - Docker Compose
-# Supports multi-PHP version deployment
-
 services:
-  slim-framework:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: ${PHP_VERSION:-8.4}
-    container_name: apm-slim-framework
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8003}:8003"
-    volumes:
-      - .:/var/www/html
-      - ./var/log:/var/www/html/var/log
+
+  # MySQL Database for Slim Framework
+  slim-framework-mysql:
+    image: mysql:8.0
+    container_name: slim-framework_mysql
     environment:
-      - APP_ENV=${APP_ENV:-production}
-      - PHP_VERSION=${PHP_VERSION:-8.4}
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - MYSQL_DATABASE=apm_examples
-      - MYSQL_USERNAME=root
-      - MYSQL_PASSWORD=rootpassword
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DATABASE=apm_examples
-      - POSTGRES_USERNAME=postgres
-      - POSTGRES_PASSWORD=postgrespassword
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - mysql
-      - postgres
-      - redis
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: slim_framework_db
+      MYSQL_USER: slim-framework_user
+      MYSQL_PASSWORD: slim-framework_password
+    ports:
+      - "3309:3306"
+    volumes:
+      - slim-framework_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
+      - slim-framework-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
-  # Import shared services
-  mysql:
-    extends:
-      file: ../docker-compose.services.yml
-      service: mysql
+  # PostgreSQL Database for Slim Framework
+  slim-framework-postgres:
+    image: postgres:15
+    container_name: slim-framework_postgres
+    environment:
+      POSTGRES_DB: slim_framework_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5435:5432"
+    volumes:
+      - slim-framework_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - slim-framework-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d slim_framework_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
-  postgres:
-    extends:
-      file: ../docker-compose.services.yml
-      service: postgres
+  # Redis Cache for Slim Framework
+  slim-framework-redis:
+    image: redis:7-alpine
+    container_name: slim-framework_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6382:6379"
+    volumes:
+      - slim-framework_redis_data:/data
+    networks:
+      - slim-framework-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
-  redis:
-    extends:
-      file: ../docker-compose.services.yml
-      service: redis
+  # Adminer for Slim Framework Database Management
+  slim-framework-adminer:
+    image: adminer:latest
+    container_name: slim-framework_adminer
+    ports:
+      - "8081:8080"
+    networks:
+      - slim-framework-network
+    restart: unless-stopped
+    depends_on:
+      - slim-framework-mysql
+      - slim-framework-postgres
+    profiles:
+      - admin
+
+volumes:
+  slim-framework_mysql_data:
+    driver: local
+  slim-framework_postgres_data:
+    driver: local
+  slim-framework_redis_data:
+    driver: local
 
 networks:
-  apm-network:
-    external: true
+  slim-framework-network:
+    driver: bridge
+    name: slim-framework_network
+    ipam:
+      config:
+        - subnet: 172.31.0.0/16

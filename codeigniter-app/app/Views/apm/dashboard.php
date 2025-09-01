@@ -179,13 +179,43 @@
             border: 1px solid #f5c6cb;
         }
 
+        .queue-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+
+        .queue-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
         .queue-input {
-            width: 100%;
+            flex: 1;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             margin-bottom: 15px;
             font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .queue-input:focus {
+            outline: none;
+            border-color: #e67e22;
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
         }
 
         @media (max-width: 768px) {
@@ -218,11 +248,11 @@
             </div>
             <div class="info-card">
                 <h3>CodeIgniter Version</h3>
-                <p><?= esc($ciVersion) ?></p>
+                <p><?= esc($frameworkVersion) ?></p>
             </div>
             <div class="info-card">
-                <h3>Environment</h3>
-                <p><?= esc(ucfirst($environment)) ?></p>
+                <h3>Web Server</h3>
+                <p><?= esc($webServer) ?></p>
             </div>
             <div class="info-card">
                 <h3>Framework</h3>
@@ -231,11 +261,23 @@
         </div>
 
         <div class="main-content">
+            <!-- Health Check Section -->
+            <div class="section">
+                <h2>🏥 Health Check</h2>
+                <div class="button-group">
+                    <button class="btn" onclick="checkHealth()">Check Application Health</button>
+                </div>
+                <div class="loader" id="health-loader"></div>
+                <div class="alert" id="health-alert"></div>
+                <div class="result-area" id="health-results">Click the button above to check application health...</div>
+            </div>
+
             <!-- Database Operations Section -->
             <div class="section">
                 <h2>🗄️ Database Operations</h2>
                 <div class="button-group">
                     <button class="btn" onclick="testDatabases()">Test Database Connections</button>
+                    <button class="btn secondary" onclick="createTables()">Create Tables</button>
                     <button class="btn success" onclick="demoCrud()">Demo CRUD Operations</button>
                 </div>
                 <div class="loader" id="db-loader"></div>
@@ -257,15 +299,21 @@
             <!-- Queue Operations Section -->
             <div class="section">
                 <h2>📋 Queue System Operations</h2>
+                <div class="queue-info">
+                    <strong>Queue Name:</strong> <span id="queue-name">codeigniter_84_apache_fpm</span><br>
+                    <strong>TTL:</strong> 1 minute (auto-expiry)<br>
+                    <strong>Backend:</strong> Redis
+                </div>
                 <div class="button-group">
                     <button class="btn" onclick="testQueue()">Demo Queue Operations</button>
                     <button class="btn success" onclick="addQueueData()">Add Data to Queue</button>
-                    <button class="btn warning" onclick="readQueueData()">Read Data from Queue</button>
+                    <button class="btn secondary" onclick="readQueueData()">Read Data from Queue</button>
                     <button class="btn danger" onclick="clearQueue()">Clear Queue</button>
                 </div>
-
-                <textarea class="queue-input" id="queue-data" placeholder='Enter JSON data to add to queue, e.g., {"message": "Hello World", "priority": 1}'></textarea>
-
+                <div class="queue-input-group">
+                    <textarea class="queue-input" id="queue-data" rows="3" placeholder="Auto-generated data will appear here..."></textarea>
+                    <button class="btn" onclick="generateRandomData()">Generate New Data</button>
+                </div>
                 <div class="loader" id="queue-loader"></div>
                 <div class="alert" id="queue-alert"></div>
                 <div class="result-area" id="queue-results">Use the buttons above to interact with the CodeIgniter queue system...</div>
@@ -319,6 +367,22 @@
             }).then(response => response.json());
         }
 
+        // Health Check
+        function checkHealth() {
+            showLoader('health');
+            fetch('<?= base_url('apm/healthCheck') ?>')
+                .then(response => response.json())
+                .then(data => {
+                    hideLoader('health');
+                    updateResults('health', data);
+                    showAlert('health', 'Health check completed successfully!');
+                })
+                .catch(error => {
+                    hideLoader('health');
+                    showAlert('health', 'Network error: ' + error.message, 'error');
+                });
+        }
+
         // Database operations
         function testDatabases() {
             showLoader('db');
@@ -328,6 +392,24 @@
                     if (response.success) {
                         updateResults('db', response.data);
                         showAlert('db', 'Database connections tested successfully!');
+                    } else {
+                        showAlert('db', 'Error: ' + response.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    hideLoader('db');
+                    showAlert('db', 'Network error: ' + error.message, 'error');
+                });
+        }
+
+        function createTables() {
+            showLoader('db');
+            makeRequest('<?= base_url('apm/createTables') ?>')
+                .then(response => {
+                    hideLoader('db');
+                    if (response.success) {
+                        updateResults('db', response.data);
+                        showAlert('db', 'Tables created successfully!');
                     } else {
                         showAlert('db', 'Error: ' + response.error, 'error');
                     }
@@ -471,9 +553,24 @@
                 });
         }
 
-        // Initialize with sample data
+        function generateRandomData() {
+            makeRequest('<?= base_url('apm/generateNewRandomData') ?>')
+                .then(response => {
+                    if (response.success) {
+                        document.getElementById('queue-data').value = JSON.stringify(response.data, null, 2);
+                    } else {
+                        showAlert('queue', 'Error generating data: ' + response.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    showAlert('queue', 'Network error: ' + error.message, 'error');
+                });
+        }
+
+        // Initialize with auto-generated data
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('queue-data').value = '{"message": "Hello from CodeIgniter", "timestamp": "' + new Date().toISOString() + '", "priority": 1}';
+            // Generate initial random data
+            generateRandomData();
         });
     </script>
 </body>

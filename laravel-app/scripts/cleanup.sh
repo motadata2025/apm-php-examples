@@ -172,26 +172,53 @@ cleanup_logs() {
     fi
 }
 
-# Function to cleanup Docker containers (optional)
+# Function to cleanup Docker containers
 cleanup_docker() {
     echo -e "\n${PURPLE}🐳 Docker Cleanup${NC}"
-    
-    read -t 10 -p "Stop and remove Docker containers? (y/n): " remove_docker || remove_docker="n"
-    if [[ "$remove_docker" =~ ^[Yy]$ ]]; then
-        echo -e "  ${BLUE}Stopping Docker services...${NC}"
-        if [ -f "docker-compose.services.yml" ]; then
-            docker compose -f docker-compose.services.yml down 2>/dev/null || true
-            echo -e "  ${GREEN}✅ Docker services stopped${NC}"
+
+    # Check if application has Docker containers
+    if [ -f "docker-compose.yml" ]; then
+        echo -e "  ${BLUE}Application Docker containers detected${NC}"
+
+        # Stop and remove containers using docker-helper.sh
+        echo -e "  ${BLUE}Stopping and removing application containers...${NC}"
+        if [ -f "scripts/docker-helper.sh" ]; then
+            ./scripts/docker-helper.sh app-down 2>/dev/null || true
+        else
+            # Fallback to direct docker compose commands
+            if command -v "docker" >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+                docker compose down 2>/dev/null || true
+            elif command -v "docker-compose" >/dev/null 2>&1; then
+                docker-compose down 2>/dev/null || true
+            fi
         fi
-        
-        read -t 10 -p "Remove Docker volumes (will delete all data)? (y/n): " remove_volumes || remove_volumes="n"
+        echo -e "  ${GREEN}✅ Application containers stopped${NC}"
+
+        read -t 10 -p "Remove Docker volumes (will delete all database data)? (y/n): " remove_volumes || remove_volumes="y"
         if [[ "$remove_volumes" =~ ^[Yy]$ ]]; then
             echo -e "  ${BLUE}Removing Docker volumes...${NC}"
-            docker compose -f docker-compose.services.yml down -v 2>/dev/null || true
+            if [ -f "scripts/docker-helper.sh" ]; then
+                ./scripts/docker-helper.sh down docker-compose.yml 2>/dev/null || true
+                # Use direct command for volume removal since docker-helper doesn't support -v flag
+                if command -v "docker" >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+                    docker compose down -v 2>/dev/null || true
+                elif command -v "docker-compose" >/dev/null 2>&1; then
+                    docker-compose down -v 2>/dev/null || true
+                fi
+            else
+                # Fallback to direct docker compose commands
+                if command -v "docker" >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+                    docker compose down -v 2>/dev/null || true
+                elif command -v "docker-compose" >/dev/null 2>&1; then
+                    docker-compose down -v 2>/dev/null || true
+                fi
+            fi
             echo -e "  ${GREEN}✅ Docker volumes removed${NC}"
+        else
+            echo -e "  ${YELLOW}⚠️  Docker volumes preserved${NC}"
         fi
     else
-        echo -e "  ${YELLOW}⚠️  Docker containers preserved${NC}"
+        echo -e "  ${YELLOW}⚠️  No docker-compose.yml found - no containers to clean${NC}"
     fi
 }
 

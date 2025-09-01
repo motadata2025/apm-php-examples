@@ -2,14 +2,32 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 
 // Load environment variables
-if (file_exists(__DIR__ . '/../.env')) {
-    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) {
-            continue;
+$envFiles = [
+    __DIR__ . '/../.env',
+    __DIR__ . '/../config/app.env'
+];
+
+foreach ($envFiles as $envFile) {
+    if (file_exists($envFile)) {
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line) || strpos($line, '#') === 0) {
+                continue;
+            }
+            if (strpos($line, '=') !== false) {
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim($value);
+                // Remove quotes if present
+                if ((substr($value, 0, 1) === '"' && substr($value, -1) === '"') ||
+                    (substr($value, 0, 1) === "'" && substr($value, -1) === "'")) {
+                    $value = substr($value, 1, -1);
+                }
+                $_ENV[$name] = $value;
+            }
         }
-        list($name, $value) = explode('=', $line, 2);
-        $_ENV[trim($name)] = trim($value);
+        break; // Use first found file
     }
 }
 
@@ -139,6 +157,33 @@ function handleAjaxRequest() {
                 echo json_encode(['success' => true, 'data' => $results]);
                 break;
 
+            case 'create_tables':
+                $results = DatabaseConnection::createTables();
+                echo json_encode(['success' => true, 'data' => $results]);
+                break;
+
+            case 'debug_env':
+                $envFiles = [
+                    __DIR__ . '/../config/app.env',
+                    __DIR__ . '/../.env'
+                ];
+                $fileStatus = [];
+                foreach ($envFiles as $file) {
+                    $fileStatus[$file] = file_exists($file) ? 'exists' : 'not found';
+                }
+
+                $envVars = [
+                    'MYSQL_HOST' => $_ENV['MYSQL_HOST'] ?? 'not set',
+                    'MYSQL_PORT' => $_ENV['MYSQL_PORT'] ?? 'not set',
+                    'MYSQL_DATABASE' => $_ENV['MYSQL_DATABASE'] ?? 'not set',
+                    'POSTGRES_HOST' => $_ENV['POSTGRES_HOST'] ?? 'not set',
+                    'POSTGRES_PORT' => $_ENV['POSTGRES_PORT'] ?? 'not set',
+                    'REDIS_HOST' => $_ENV['REDIS_HOST'] ?? 'not set',
+                    'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? 'not set'
+                ];
+                echo json_encode(['success' => true, 'env' => $envVars, 'files' => $fileStatus]);
+                break;
+
             case 'demo_crud':
                 $userModel = new UserModel();
                 $results = $userModel->demo();
@@ -152,28 +197,70 @@ function handleAjaxRequest() {
                 break;
 
             case 'test_queue':
-                $queueManager = new QueueManager('demo_queue');
+                $queueName = getApplicationQueueName();
+                $queueManager = new QueueManager($queueName);
                 $results = $queueManager->demo();
-                echo json_encode(['success' => true, 'data' => $results]);
+                echo json_encode(['success' => true, 'data' => $results, 'queue_name' => $queueName]);
                 break;
 
             case 'add_queue_data':
-                $queueManager = new QueueManager('demo_queue');
-                $data = json_decode($_POST['data'] ?? '{}', true);
-                $result = $queueManager->enqueue('demo_queue', $data);
-                echo json_encode(['success' => $result, 'message' => 'Data added to queue']);
+                $queueName = getApplicationQueueName();
+
+                // Generate batch of 3 randomized records
+                $batchData = [];
+                for ($i = 0; $i < 3; $i++) {
+                    $batchData[] = [
+                        'id' => rand(1000, 9999),
+                        'message' => 'Simple PHP queue message ' . rand(100, 999),
+                        'timestamp' => date('Y-m-d H:i:s'),
+                        'priority' => rand(1, 5),
+                        'type' => 'simple_php_batch',
+                        'batch_index' => $i + 1,
+                        'queue_name' => $queueName,
+                        'ttl' => 60 // 1 minute TTL (non-modifiable)
+                    ];
+                }
+
+                $queueManager = new QueueManager($queueName);
+                $successCount = 0;
+
+                // Add each item to queue
+                foreach ($batchData as $data) {
+                    $result = $queueManager->enqueue($queueName, $data);
+                    if ($result) $successCount++;
+                }
+
+                echo json_encode([
+                    'success' => $successCount > 0,
+                    'message' => "Batch of {$successCount}/3 items added to queue successfully",
+                    'queue_name' => $queueName,
+                    'batch_data' => $batchData,
+                    'total_added' => $successCount,
+                    'message_ttl' => '1 minute (non-modifiable)'
+                ]);
                 break;
 
             case 'read_queue_data':
-                $queueManager = new QueueManager('demo_queue');
-                $data = $queueManager->getAllQueueData('demo_queue');
-                echo json_encode(['success' => true, 'data' => $data, 'count' => count($data)]);
+                $queueName = getApplicationQueueName();
+                $queueManager = new QueueManager($queueName);
+                $data = $queueManager->getAllQueueData($queueName);
+                echo json_encode([
+                    'success' => true,
+                    'data' => $data,
+                    'count' => count($data),
+                    'queue_name' => $queueName
+                ]);
                 break;
 
             case 'clear_queue':
-                $queueManager = new QueueManager('demo_queue');
-                $result = $queueManager->clearQueue('demo_queue');
-                echo json_encode(['success' => $result, 'message' => 'Queue cleared']);
+                $queueName = getApplicationQueueName();
+                $queueManager = new QueueManager($queueName);
+                $result = $queueManager->clearQueue($queueName);
+                echo json_encode([
+                    'success' => $result,
+                    'message' => 'Queue cleared',
+                    'queue_name' => $queueName
+                ]);
                 break;
 
             case 'generate_random_data':
@@ -256,6 +343,41 @@ function detectWebServerType() {
             return 'PHP Built-in Server';
         default:
             return 'Unknown Web Server (' . $sapi . ')';
+    }
+}
+
+/**
+ * Generate application-specific queue name
+ * Format: simple_php_{php_version}_{web_server}
+ */
+function getApplicationQueueName(): string
+{
+    $phpVersion = str_replace('.', '', phpversion()); // e.g., 84 for 8.4
+    $webServer = getWebServerType();
+
+    return sprintf('simple_php_%s_%s', $phpVersion, $webServer);
+}
+
+/**
+ * Get web server type for queue naming
+ */
+function getWebServerType(): string
+{
+    $sapi = php_sapi_name();
+    $server = $_SERVER['SERVER_SOFTWARE'] ?? '';
+
+    if ($sapi === 'cli-server') {
+        return 'php_builtin';
+    } elseif (strpos($server, 'Apache') !== false) {
+        if (function_exists('apache_get_modules') && in_array('mod_php', apache_get_modules())) {
+            return 'apache_modphp';
+        } else {
+            return 'apache_fpm';
+        }
+    } elseif (strpos($server, 'nginx') !== false) {
+        return 'nginx_fpm';
+    } else {
+        return 'unknown';
     }
 }
 

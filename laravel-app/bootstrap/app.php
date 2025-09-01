@@ -17,6 +17,63 @@ $app = new Illuminate\Foundation\Application(
 
 /*
 |--------------------------------------------------------------------------
+| Load Configuration
+|--------------------------------------------------------------------------
+|
+| Load the application configuration and register all service providers
+| manually to ensure they are properly loaded.
+|
+*/
+
+// Register configuration service
+$app->singleton('config', function ($app) {
+    $config = new Illuminate\Config\Repository();
+
+    // Load all configuration files
+    $configFiles = [
+        'app' => 'app.php',
+        'view' => 'view.php',
+        'database' => 'database.php',
+        'session' => 'session.php',
+        'cache' => 'cache.php',
+        'queue' => 'queue.php',
+    ];
+
+    foreach ($configFiles as $key => $file) {
+        $configPath = $app->configPath($file);
+        if (file_exists($configPath)) {
+            $configData = require $configPath;
+            $config->set($key, $configData);
+        }
+    }
+
+    return $config;
+});
+
+// Register essential service providers manually (in dependency order)
+$essentialProviders = [
+    'Illuminate\Filesystem\FilesystemServiceProvider',
+    'Illuminate\Encryption\EncryptionServiceProvider',
+    'Illuminate\Hashing\HashServiceProvider',
+    'Illuminate\Translation\TranslationServiceProvider',
+    'Illuminate\Validation\ValidationServiceProvider',
+    'Illuminate\View\ViewServiceProvider',
+    'Illuminate\Session\SessionServiceProvider',
+    'Illuminate\Cache\CacheServiceProvider',
+    'Illuminate\Database\DatabaseServiceProvider',
+    'Illuminate\Queue\QueueServiceProvider',
+    'App\Providers\AppServiceProvider',
+    'App\Providers\RouteServiceProvider',
+];
+
+foreach ($essentialProviders as $provider) {
+    if (class_exists($provider)) {
+        $app->register($provider);
+    }
+}
+
+/*
+|--------------------------------------------------------------------------
 | Bind Important Interfaces
 |--------------------------------------------------------------------------
 |

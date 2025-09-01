@@ -5,7 +5,7 @@
 
 # Configuration
 APP_NAME = slim-framework
-DEFAULT_PORT = 8003
+DEFAULT_PORT = 8001
 PHP_VERSION ?= 8.4
 NETWORK_INTERFACE ?= 127.0.0.1
 
@@ -21,13 +21,16 @@ help: ## Show available commands
 	@echo "=========================================="
 	@echo ""
 	@echo "Available commands:"
-	@echo "  $(YELLOW)make setup$(NC)    - Check system requirements and setup"
-	@echo "  $(YELLOW)make compile$(NC)  - Compile application for deployment"
-	@echo "  $(YELLOW)make start$(NC)    - Start the application"
-	@echo "  $(YELLOW)make disable$(NC)  - Disable the application"
-	@echo "  $(YELLOW)make enable$(NC)   - Enable the application"
-	@echo "  $(YELLOW)make stop$(NC)     - Stop and cleanup application"
-	@echo "  $(YELLOW)make down$(NC)     - Remove all containers and volumes"
+	@echo "  $(YELLOW)make setup$(NC)      - Check system requirements and setup"
+	@echo "  $(YELLOW)make compile$(NC)    - Compile application for deployment"
+	@echo "  $(YELLOW)make start$(NC)      - Start the application"
+	@echo "  $(YELLOW)make status$(NC)        - Show application status"
+	@echo "  $(YELLOW)make php-status$(NC)    - Show PHP version status and compatibility"
+	@echo "  $(YELLOW)make network-status$(NC) - Show network status and IP changes"
+	@echo "  $(YELLOW)make disable$(NC)    - Disable the application"
+	@echo "  $(YELLOW)make enable$(NC)     - Enable the application"
+	@echo "  $(YELLOW)make stop$(NC)       - Stop and cleanup application"
+	@echo "  $(YELLOW)make down$(NC)       - Complete cleanup (remove all files and config)"
 	@echo ""
 
 setup: ## Check system requirements and setup
@@ -80,3 +83,12 @@ status: ## Show application status
 	@echo "===================================="
 	@./scripts/status.sh
 
+php-status: ## Show PHP version status and compatibility
+	@echo "$(BLUE)🐘 PHP Version Status$(NC)"
+	@./scripts/php-version-manager.sh status
+
+network-status: ## Show network status and IP changes
+	@echo "$(BLUE)🌐 Network Status$(NC)"
+	@./scripts/network-manager.sh status
+
+# Docker Compose command detection (supports both docker-compose and docker compose)

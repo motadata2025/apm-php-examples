@@ -1,115 +1,84 @@
+# Shared Docker Services for APM PHP Examples
+# This file provides common services (MySQL, PostgreSQL, Redis) for all applications
+
 version: '3.8'
 
-# APM PHP Examples - Shared Services
-# Provides MySQL, PostgreSQL, and Redis for all applications
-
 services:
-  # MySQL Database
+  # MySQL Database Service
   mysql:
     image: mysql:8.0
-    container_name: apm-mysql
+    container_name: apm_mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: apm_examples
+      MYSQL_DATABASE: apm_shared_db
       MYSQL_USER: apm_user
       MYSQL_PASSWORD: apm_password
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      - apm_network
+    command: --default-authentication-plugin=mysql_native_password
 
-  # PostgreSQL Database
+  # PostgreSQL Database Service
   postgres:
     image: postgres:15
-    container_name: apm-postgres
+    container_name: apm_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: apm_examples
+      POSTGRES_DB: apm_shared_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
     ports:
-      - "5433:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - apm_network
 
-  # Redis Cache
+  # Redis Cache and Queue Service
   redis:
     image: redis:7-alpine
-    container_name: apm-redis
+    container_name: apm_redis
     restart: unless-stopped
     ports:
-      - "6380:6379"
+      - "6382:6379"
     volumes:
       - redis_data:/data
     networks:
-      - apm-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
+      - apm_network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
 
-  # phpMyAdmin for MySQL Management
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: apm-phpmyadmin
+  # Adminer for Database Management
+  adminer:
+    image: adminer:latest
+    container_name: apm_adminer
     restart: unless-stopped
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
-      PMA_USER: root
-      PMA_PASSWORD: rootpassword
     ports:
-      - "8080:80"
+      - "8092:8080"
+    networks:
+      - apm_network
     depends_on:
       - mysql
-    networks:
-      - apm-network
-
-  # pgAdmin for PostgreSQL Management
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: apm-pgadmin
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "8081:80"
-    depends_on:
       - postgres
-    networks:
-      - apm-network
 
   # Redis Commander for Redis Management
   redis-commander:
     image: rediscommander/redis-commander:latest
-    container_name: apm-redis-commander
+    container_name: apm_redis_commander
     restart: unless-stopped
     environment:
-      REDIS_HOSTS: local:redis:6379
+      REDIS_HOSTS: local:apm_redis:6379
     ports:
-      - "8082:8081"
+      - "8093:8081"
+    networks:
+      - apm_network
     depends_on:
       - redis
-    networks:
-      - apm-network
 
 volumes:
   mysql_data:
@@ -120,8 +89,8 @@ volumes:
     driver: local
 
 networks:
-  apm-network:
+  apm_network:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.25.0.0/16

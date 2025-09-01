@@ -1,60 +1,103 @@
+# CodeIgniter Application - Supporting Services Only
+# Application runs locally, Docker provides database/cache services
+
 version: '3.8'
 
-# CodeIgniter Application - Docker Compose
-# Supports multi-PHP version deployment
-
 services:
-  codeigniter-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PHP_VERSION: ${PHP_VERSION:-8.4}
-    container_name: apm-codeigniter-app
-    restart: unless-stopped
-    ports:
-      - "${APP_PORT:-8004}:8004"
-    volumes:
-      - .:/var/www/html
-      - ./writable/logs:/var/www/html/writable/logs
+
+  # MySQL Database for CodeIgniter
+  codeigniter-app-mysql:
+    image: mysql:8.0
+    container_name: codeigniter-app_mysql
     environment:
-      - CI_ENVIRONMENT=${CI_ENVIRONMENT:-production}
-      - PHP_VERSION=${PHP_VERSION:-8.4}
-      - database.default.hostname=mysql
-      - database.default.database=apm_examples
-      - database.default.username=root
-      - database.default.password=rootpassword
-      - database.default.port=3306
-      - redis.host=redis
-      - redis.port=6379
-    depends_on:
-      - mysql
-      - postgres
-      - redis
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: codeigniter_app_db
+      MYSQL_USER: codeigniter-app_user
+      MYSQL_PASSWORD: codeigniter-app_password
+    ports:
+      - "3310:3306"
+    volumes:
+      - codeigniter-app_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
-      - apm-network
+      - codeigniter-app-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
-  # Import shared services
-  mysql:
-    extends:
-      file: ../docker-compose.services.yml
-      service: mysql
+  # PostgreSQL Database for CodeIgniter
+  codeigniter-app-postgres:
+    image: postgres:15
+    container_name: codeigniter-app_postgres
+    environment:
+      POSTGRES_DB: codeigniter_app_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5436:5432"
+    volumes:
+      - codeigniter-app_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - codeigniter-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d codeigniter_app_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
-  postgres:
-    extends:
-      file: ../docker-compose.services.yml
-      service: postgres
+  # Redis Cache for CodeIgniter
+  codeigniter-app-redis:
+    image: redis:7-alpine
+    container_name: codeigniter-app_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6383:6379"
+    volumes:
+      - codeigniter-app_redis_data:/data
+    networks:
+      - codeigniter-app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
-  redis:
-    extends:
-      file: ../docker-compose.services.yml
-      service: redis
+  # Adminer for CodeIgniter Database Management
+  codeigniter-app-adminer:
+    image: adminer:latest
+    container_name: codeigniter-app_adminer
+    ports:
+      - "8083:8080"
+    networks:
+      - codeigniter-app-network
+    restart: unless-stopped
+    depends_on:
+      - codeigniter-app-mysql
+      - codeigniter-app-postgres
+    profiles:
+      - admin
+
+volumes:
+  codeigniter-app_mysql_data:
+    driver: local
+  codeigniter-app_postgres_data:
+    driver: local
+  codeigniter-app_redis_data:
+    driver: local
 
 networks:
-  apm-network:
-    external: true
+  codeigniter-app-network:
+    driver: bridge
+    name: codeigniter-app_network
+    ipam:
+      config:
+        - subnet: 172.33.0.0/16

@@ -141,4 +141,76 @@ class DatabaseConnection
 
         return $results;
     }
+
+    public static function createTables(): array
+    {
+        $results = [];
+
+        // Create MySQL tables
+        try {
+            $mysql = self::getMysqlConnection();
+
+            // Create users table
+            $mysql->exec("
+                CREATE TABLE IF NOT EXISTS users (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                )
+            ");
+
+            // Create posts table
+            $mysql->exec("
+                CREATE TABLE IF NOT EXISTS posts (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                )
+            ");
+
+            $results['mysql'] = 'Tables created successfully';
+        } catch (\Exception $e) {
+            $results['mysql'] = 'Failed: ' . $e->getMessage();
+        }
+
+        // Create PostgreSQL tables
+        try {
+            $postgres = self::getPostgresConnection();
+
+            // Create users table
+            $postgres->exec("
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ");
+
+            // Create posts table
+            $postgres->exec("
+                CREATE TABLE IF NOT EXISTS posts (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    title VARCHAR(255) NOT NULL,
+                    content TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ");
+
+            $results['postgres'] = 'Tables created successfully';
+        } catch (\Exception $e) {
+            $results['postgres'] = 'Failed: ' . $e->getMessage();
+        }
+
+        return $results;
+    }
 }
