@@ -6,13 +6,13 @@ This document defines the standardized port allocation scheme for all PHP framew
 
 ## ✅ **Finalized Port Allocation**
 
-| Application | MySQL | PostgreSQL | Redis | phpMyAdmin | pgAdmin | Redis Commander |
-|-------------|-------|------------|-------|------------|---------|-----------------|
-| **simple-php** | 3307 | 5433 | 6380 | 8080 | 8081 | 8082 |
-| **symfony-app** | 3308 | 5434 | 6381 | 8083 | 8084 | 8085 |
-| **slim-framework** | 3309 | 5435 | 6382 | 8086 | 8087 | 8088 |
-| **codeigniter-app** | 3310 | 5436 | 6383 | 8089 | 8090 | 8091 |
-| **laravel-app** | 3311 | 5437 | 6384 | 8092 | 8093 | 8094 |
+|     Application     | MySQL | PostgreSQL | Redis | phpMyAdmin | pgAdmin | Redis Commander |
+|---------------------|-------|------------|-------|------------|---------|-----------------|
+| **simple-php**      | 3307  |     5433   | 6380  |    8080    |   8081  |       8082      |
+| **symfony-app**     | 3308  |     5434   | 6381  |    8083    |   8084  |       8085      |
+| **slim-framework**  | 3309  |     5435   | 6382  |    8086    |   8087  |       8088      |
+| **codeigniter-app** | 3310  |     5436   | 6383  |    8089    |   8090  |       8091      |
+| **laravel-app**     | 3311  |     5437   | 6384  |    8092    |   8093  |       8094      |
 
 ## 🔧 **Issues Fixed**
 

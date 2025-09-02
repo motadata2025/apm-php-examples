@@ -10,6 +10,7 @@ $routes->get('/', 'ApmController::index');
 
 // Health check route (comprehensive)
 $routes->get('/health', 'ApmController::healthCheck');
+$routes->get("api/metrics", "Health::metrics");
 
 // AJAX API routes for the dashboard (like Simple PHP)
 $routes->post('/', 'ApmController::handleAjax');
@@ -26,3 +27,4 @@ $routes->post('apm/clearQueue', 'ApmController::clearQueue');
 $routes->post('apm/generateNewRandomData', 'ApmController::generateNewRandomData');
 $routes->post('apm/debugEnv', 'ApmController::debugEnv');
 $routes->get('apm/healthCheck', 'ApmController::healthCheck');
+$routes->get("api/metrics", "Health::metrics");

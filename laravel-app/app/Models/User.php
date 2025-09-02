@@ -6,9 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ */
 class User extends Model
 {
     use HasFactory, SoftDeletes;
+
+    protected $dates = ['created_at', 'updated_at'];
 
     /**
      * The table associated with the model.
@@ -21,6 +30,7 @@ class User extends Model
     protected $fillable = [
         'name',
         'email',
+        'password',
     ];
 
     /**

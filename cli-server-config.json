@@ -1,0 +1,140 @@
+{
+  "cli_server_configuration": {
+    "description": "PHP APM Applications CLI Server Configuration",
+    "version": "1.0.0",
+    "default_settings": {
+      "ip": "0.0.0.0",
+      "port": 8080,
+      "document_root": "public"
+    },
+    "applications": {
+      "simple-php": {
+        "name": "Simple PHP APM Application",
+        "description": "Pure PHP implementation with APM monitoring",
+        "default_port": 8080,
+        "document_root": "public",
+        "startup_command": "php -S {ip}:{port} -t public",
+        "health_endpoint": "/health",
+        "api_endpoints": [
+          "/",
+          "/health",
+          "/api/health",
+          "/api/metrics",
+          "/monitoring"
+        ],
+        "features": [
+          "APM monitoring",
+          "Health checks",
+          "Performance metrics",
+          "Database connections",
+          "Queue management"
+        ]
+      },
+      "laravel-app": {
+        "name": "Laravel APM Application",
+        "description": "Laravel framework with APM integration",
+        "default_port": 8081,
+        "document_root": "public",
+        "startup_command": "php -S {ip}:{port} -t public",
+        "health_endpoint": "/health",
+        "api_endpoints": [
+          "/",
+          "/health",
+          "/apm",
+          "/api/health",
+          "/monitoring"
+        ],
+        "features": [
+          "Laravel framework",
+          "Eloquent ORM",
+          "APM integration",
+          "Queue system",
+          "Caching"
+        ]
+      },
+      "symfony-app": {
+        "name": "Symfony APM Application", 
+        "description": "Symfony framework with APM monitoring",
+        "default_port": 8082,
+        "document_root": "public",
+        "startup_command": "php -S {ip}:{port} -t public",
+        "health_endpoint": "/health",
+        "api_endpoints": [
+          "/",
+          "/health",
+          "/apm",
+          "/monitoring"
+        ],
+        "features": [
+          "Symfony framework",
+          "Dependency injection",
+          "APM monitoring",
+          "Service container",
+          "Event system"
+        ]
+      },
+      "slim-framework": {
+        "name": "Slim Framework APM Application",
+        "description": "Slim micro-framework with APM capabilities",
+        "default_port": 8083,
+        "document_root": "public",
+        "startup_command": "php -S {ip}:{port} -t public",
+        "health_endpoint": "/health",
+        "api_endpoints": [
+          "/",
+          "/health",
+          "/apm",
+          "/monitoring"
+        ],
+        "features": [
+          "Slim micro-framework",
+          "Lightweight",
+          "APM monitoring",
+          "REST API",
+          "Middleware support"
+        ]
+      },
+      "codeigniter-app": {
+        "name": "CodeIgniter APM Application",
+        "description": "CodeIgniter framework with APM integration",
+        "default_port": 8084,
+        "document_root": "public",
+        "startup_command": "php -S {ip}:{port} -t public",
+        "health_endpoint": "/health",
+        "api_endpoints": [
+          "/",
+          "/health",
+          "/apm",
+          "/monitoring"
+        ],
+        "features": [
+          "CodeIgniter framework",
+          "MVC architecture",
+          "APM monitoring",
+          "Database abstraction",
+          "Form validation"
+        ]
+      }
+    },
+    "network_options": {
+      "ip_addresses": {
+        "all_interfaces": "0.0.0.0",
+        "localhost_only": "127.0.0.1",
+        "description": "Use 0.0.0.0 for external access, 127.0.0.1 for local only"
+      },
+      "port_ranges": {
+        "development": "8080-8089",
+        "testing": "9000-9009", 
+        "staging": "7000-7009",
+        "minimum": 1024,
+        "maximum": 65535
+      }
+    },
+    "usage_examples": [
+      "./start-cli-server.sh simple-php 0.0.0.0 8080",
+      "./start-cli-server.sh laravel-app 127.0.0.1 8081",
+      "./start-simple-php.sh 0.0.0.0 9000",
+      "./start-laravel-app.sh 127.0.0.1 9001"
+    ]
+  }
+}

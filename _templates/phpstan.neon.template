@@ -1,0 +1,55 @@
+# PHPStan Configuration Template for APM PHP Examples
+# Provides maximum static analysis coverage
+
+parameters:
+    level: 8
+    paths:
+        - src
+        - public
+        - lib
+        - app
+    
+    excludePaths:
+        - vendor
+        - tests
+        - var/cache
+        - storage
+        - bootstrap/cache
+    
+    ignoreErrors:
+        # Framework-specific ignores (to be customized per app)
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+::factory\(\)#'
+        - '#Access to an undefined property [a-zA-Z0-9\\_]+::\$[a-zA-Z0-9_]+#'
+    
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: true
+    
+    # Enable bleeding edge features
+    treatPhpDocTypesAsCertain: false
+    
+    # Memory limit for analysis
+    memoryLimitFile: 1G
+    
+    # Parallel processing
+    parallel:
+        jobSize: 20
+        maximumNumberOfProcesses: 32
+        minimumNumberOfJobsPerProcess: 2
+    
+    # Additional checks
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    
+    # Type coverage
+    typeAliases:
+        UserId: 'int<1, max>'
+        Email: 'non-empty-string'
+        
+    # Stub files for better analysis
+    stubFiles:
+        # Add framework-specific stubs if needed
+    
+    # Bootstrap file for constants/functions
+    bootstrapFiles:
+        # Add if needed per application

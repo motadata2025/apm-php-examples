@@ -114,7 +114,7 @@ class ApmController extends AbstractController
                 }
             }
 
-            return new JsonResponse($health, 200, [], JsonResponse::DEFAULT_ENCODING_OPTIONS | JSON_PRETTY_PRINT);
+            return new JsonResponse($health, 200, [], false);
         } catch (Exception $e) {
             return new JsonResponse([
                 'status' => 'unhealthy',
@@ -127,7 +127,7 @@ class ApmController extends AbstractController
     /**
      * Get system uptime
      */
-    private function getUptime(): ?int
+    private function getUptime(): ?float
     {
         if (file_exists('/proc/uptime')) {
             $uptime = file_get_contents('/proc/uptime');
@@ -536,7 +536,7 @@ class ApmController extends AbstractController
 
             $results['demo_data_added'] = $successCount;
             $results['queue_name'] = $queueName;
-            $results['queue_length'] = $redis->llen($queueName) ?? 0;
+            $results['queue_length'] = $redis->llen($queueName);
             $results['message'] = 'Symfony demo queue operations completed';
 
             return new JsonResponse(['success' => true, 'data' => $results]);

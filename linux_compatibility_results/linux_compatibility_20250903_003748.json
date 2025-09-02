@@ -1,0 +1,7 @@
+{
+        "distribution": "Ubuntu",
+        "version": "24.04",
+        "codename": "noble",
+        "kernel": "6.14.0-29-generic",
+        "architecture": "x86_64"
+    }

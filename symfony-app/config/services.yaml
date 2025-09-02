@@ -11,6 +11,7 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Shared/'
 
     App\Controller\:
         resource: '../src/Controller/'

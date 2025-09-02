@@ -1,0 +1,101 @@
+# {{APP_NAME}} Application - Supporting Services
+# Standardized Docker Compose configuration for APM PHP Examples
+
+services:
+
+  # MySQL Database for {{APP_NAME}}
+  {{APP_SLUG}}-mysql:
+    image: mysql:8.0
+    container_name: {{APP_SLUG}}_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: {{APP_SLUG}}_db
+      MYSQL_USER: {{APP_SLUG}}_user
+      MYSQL_PASSWORD: {{APP_SLUG}}_password
+    ports:
+      - "{{MYSQL_PORT}}:3306"
+    volumes:
+      - {{APP_SLUG}}_mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - {{APP_SLUG}}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # PostgreSQL Database for {{APP_NAME}}
+  {{APP_SLUG}}-postgres:
+    image: postgres:15
+    container_name: {{APP_SLUG}}_postgres
+    environment:
+      POSTGRES_DB: {{APP_SLUG}}_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "{{POSTGRES_PORT}}:5432"
+    volumes:
+      - {{APP_SLUG}}_postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - {{APP_SLUG}}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d {{APP_SLUG}}_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache for {{APP_NAME}}
+  {{APP_SLUG}}-redis:
+    image: redis:7-alpine
+    container_name: {{APP_SLUG}}_redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "{{REDIS_PORT}}:6379"
+    volumes:
+      - {{APP_SLUG}}_redis_data:/data
+    networks:
+      - {{APP_SLUG}}-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  # Adminer for {{APP_NAME}} Database Management
+  {{APP_SLUG}}-adminer:
+    image: adminer:latest
+    container_name: {{APP_SLUG}}_adminer
+    ports:
+      - "{{ADMINER_PORT}}:8080"
+    networks:
+      - {{APP_SLUG}}-network
+    restart: unless-stopped
+    depends_on:
+      - {{APP_SLUG}}-mysql
+      - {{APP_SLUG}}-postgres
+    profiles:
+      - admin
+
+volumes:
+  {{APP_SLUG}}_mysql_data:
+    driver: local
+  {{APP_SLUG}}_postgres_data:
+    driver: local
+  {{APP_SLUG}}_redis_data:
+    driver: local
+
+networks:
+  {{APP_SLUG}}-network:
+    driver: bridge
+    name: {{APP_SLUG}}_network
+    ipam:
+      config:
+        - subnet: {{SUBNET}}

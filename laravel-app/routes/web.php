@@ -14,6 +14,11 @@ use App\Http\Controllers\ApmController;
 |
 */
 
+// Root route for CLI server compatibility
+Route::get('/', function () {
+    return '<h1>🚀 Laravel APM Application</h1><p>✅ Laravel Framework Working</p><p>✅ CLI Server Mode Active</p><p><a href="/health">Health Check</a> | <a href="/apm">APM Dashboard</a></p>';
+});
+
 // Simple test route to verify Laravel is working
 Route::get('/test', function () {
     return '<h1>🎉 Laravel is Working!</h1><p>✅ APP_KEY automation successful</p><p>✅ Service providers loaded</p><p>✅ Routes working</p>';

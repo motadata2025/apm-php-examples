@@ -1,3 +1,14 @@
+<?php
+// Define variables for the page
+$framework = 'Simple PHP';
+$phpVersion = PHP_VERSION;
+$deploymentType = $_SERVER['SERVER_SOFTWARE'] ?? 'PHP Built-in Server';
+$randomData = [
+    'id' => uniqid(),
+    'timestamp' => date('c'),
+    'data' => 'Sample queue data for testing'
+];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

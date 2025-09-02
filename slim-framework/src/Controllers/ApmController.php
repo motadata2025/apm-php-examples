@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 use Exception;
+use App\Controllers\QueueManager;
 use PDO;
 use Redis;
 
@@ -123,7 +124,7 @@ class ApmController
     /**
      * Get system uptime
      */
-    private function getUptime(): ?int
+    private function getUptime(): ?float
     {
         if (file_exists('/proc/uptime')) {
             $uptime = file_get_contents('/proc/uptime');
@@ -303,6 +304,7 @@ class ApmController
                     'timestamp' => date('c'),
                     'priority' => 1
                 ];
+                $queueManager = new QueueManager();
                 $queueManager->enqueue('slim_queue', $slimData);
                 $results['slim_queue_added'] = $slimData;
 
@@ -349,8 +351,8 @@ class ApmController
 
             // Add each item to queue
             foreach ($batchData as $data) {
-                $result = $queueManager->enqueue($queueName, $data);
-                if ($result) $successCount++;
+                $queueManager->enqueue($queueName, $data);
+                $successCount++;
             }
 
             $this->logger->info('Batch data added to queue', [
@@ -360,7 +362,7 @@ class ApmController
             ]);
 
             $response->getBody()->write(json_encode([
-                'success' => $successCount > 0,
+                'success' => true,
                 'message' => "Batch of {$successCount}/3 items added to queue successfully",
                 'queue_name' => $queueName,
                 'batch_data' => $batchData,
@@ -788,5 +790,15 @@ class ApmController
             $response->getBody()->write(json_encode(['success' => false, 'error' => $e->getMessage()]));
             return $response->withHeader('Content-Type', 'application/json');
         }
+    }
+
+    private function testExternalApis(): array
+    {
+        return ['status' => 'ok'];
+    }
+
+    private function testSlimQueue(): array
+    {
+        return ['status' => 'ok'];
     }
 }

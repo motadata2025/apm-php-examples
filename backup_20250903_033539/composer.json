@@ -1,0 +1,42 @@
+{
+  "name": "apm-php-examples/simple-php",
+  "description": "Simple PHP application for APM testing",
+  "type": "project",
+  "require": {
+    "php": "^8.1",
+    "ext-pdo": "*",
+    "ext-redis": "*",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "predis/predis": "^2.0",
+    "ext-mbstring": "*",
+    "ext-openssl": "*"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.0",
+    "phpstan/phpstan": "^1.10",
+    "phpunit/phpunit": "^10.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "SimplePhp\\": "src/",
+      "SimplePhp\\Lib\\": "lib/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "SimplePhp\\Tests\\": "tests/",
+      "Tests\\\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "test-coverage": "phpunit --coverage-html coverage"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

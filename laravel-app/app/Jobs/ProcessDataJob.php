@@ -8,7 +8,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Shared\Utils\QueueManager;
+use App\Shared\Utils\QueueManager;
 
 class ProcessDataJob implements ShouldQueue
 {
@@ -44,7 +44,7 @@ class ProcessDataJob implements ShouldQueue
                 'status' => 'completed'
             ];
 
-            $queueManager->enqueue('laravel_processed', $processedData);
+            $queueManager->push($processedData);
 
             Log::info('ProcessDataJob completed successfully', [
                 'processed_data' => $processedData,

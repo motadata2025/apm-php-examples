@@ -1,104 +1,169 @@
-# APM PHP Examples
+# APM PHP Examples - Clean Sample Applications
 
-A comprehensive collection of production-ready PHP applications demonstrating Application Performance Monitoring (APM) integration with multiple deployment options and scaling capabilities.
+A minimal collection of PHP framework applications designed for Application Performance Monitoring (APM) testing and demonstration. This branch contains simplified, runnable sample applications with Docker essentials and documentation.
 
-## Project Structure
+## Repository Structure
 
 ```
 apm-php-examples/
-├── Dockerfile                 # Parent-level Docker configuration
-├── docker-compose.yml         # Multi-service Docker setup
-├── Makefile                   # Global automation commands
+├── requirements_overview.md   # Consolidated requirements for all apps
+├── README.md                  # This file
+├── DOCKER_PORTS.md           # Port allocation reference
 ├── simple-php/               # Vanilla PHP application
 ├── laravel-app/              # Laravel framework application
 ├── symfony-app/              # Symfony framework application
 ├── slim-framework/           # Slim framework application
-├── codeigniter-app/          # CodeIgniter framework application
-├── shared/                   # Shared utilities and configurations
-└── docs/                     # Additional documentation
+└── codeigniter-app/          # CodeIgniter framework application
 ```
 
-## Features
+## Applications Overview
 
-Each application includes:
+Each application is a complete, runnable example with:
 
-- **Responsive UI** displaying PHP version and framework information
-- **Multi-database operations** (MySQL, PostgreSQL)
-- **External API integrations** (JSONPlaceholder, JokeAPI)
-- **Queue system operations** (Redis/RabbitMQ)
-- **Comprehensive error handling** and logging
-- **Unit testing suite**
-- **Docker containerization**
+- **Docker containerization** with Dockerfile and docker-compose.yml
+- **Multi-database support** (MySQL, PostgreSQL, Redis)
+- **Minimal source code** required for demonstration
+- **Clean documentation** and setup instructions
+- **Isolated port allocation** to prevent conflicts
 
-## Quick Start
+## Port Allocation
+
+| Application       | App  | MySQL | PostgreSQL | Redis | Adminer |
+|-------------------|------|-------|------------|-------|---------|
+| simple-php        | 8000 | 3307  | 5433       | 6380  | 8080    |
+| slim-framework    | 8001 | 3309  | 5435       | 6382  | 8081    |
+| symfony-app       | 8002 | 3308  | 5434       | 6381  | 8082    |
+| codeigniter-app   | 8003 | 3310  | 5436       | 6383  | 8083    |
+| laravel-app       | 8004 | 3311  | 5437       | 6384  | 8084    |
+
+## 🚀 CLI Server Mode Quick Start (Recommended)
 
 ### Prerequisites
 
-- Docker and Docker Compose
-- Make (for automation commands)
-- Git
+- PHP 8.1+ (8.3 recommended)
+- Composer (for dependency management)
+- Linux distribution (Ubuntu, CentOS, RHEL, etc.)
 
-### Setup All Applications
+### Universal Setup
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd apm-php-examples
+# 1. Check demo status (optional)
+chmod +x demo-status-check.sh
+./demo-status-check.sh
 
-# Setup infrastructure and build all applications
-make setup
+# 2. Start all applications with CLI server
+./start-cli-server.sh simple-php 0.0.0.0 8080 &
+./start-cli-server.sh laravel-app 0.0.0.0 8081 &
+./start-cli-server.sh symfony-app 0.0.0.0 8082 &
+./start-cli-server.sh slim-framework 0.0.0.0 8083 &
+./start-cli-server.sh codeigniter-app 0.0.0.0 8084 &
 
-# Start all services
-make start
+# 3. Access applications
+curl http://localhost:8080/  # Simple PHP APM
+curl http://localhost:8081/  # Laravel APM
+curl http://localhost:8082/  # Symfony APM
+curl http://localhost:8083/  # Slim Framework APM
+curl http://localhost:8084/  # CodeIgniter APM
 
-# View running endpoints
-make endpoints
+# 4. View in browser
+# http://localhost:8080/  # Simple PHP APM Dashboard
+# http://localhost:8081/  # Laravel APM Dashboard
+# http://localhost:8082/  # Symfony APM Dashboard
+# http://localhost:8083/  # Slim Framework APM Dashboard
+# http://localhost:8084/  # CodeIgniter APM Dashboard
 ```
 
-### Setup Individual Applications
+### 💡 Database Connection Status
+
+**Expected behavior**: You may see database connection failures like:
+```json
+{
+  "mysql": "Failed: MySQL connection failed...",
+  "postgres": "Failed: PostgreSQL connection failed...",
+  "redis": "Connected"
+}
+```
+
+**This is normal and expected** for demonstration purposes. The applications work without databases and will show connection status for monitoring purposes.
+
+- ✅ **For Demo**: No database setup required
+- 📖 **For Full Setup**: See `DATABASE_SETUP_GUIDE.md`
+
+---
+
+## 🐳 Docker Mode (Alternative)
+
+### Prerequisites
+
+- Docker and Docker Compose v2
+- PHP 8.1+ (for local development)
+- Composer (for dependency management)
+
+### Running Any Application
 
 ```bash
-# Setup specific application
+# Navigate to application directory
+cd {application-name}
+
+# Start Docker services (databases, cache)
+docker compose up -d
+
+# Install PHP dependencies
+composer install
+
+# Start the application (method varies by framework)
+# See individual application README for specific commands
+```
+
+### Example: Running Simple PHP
+
+```bash
+cd simple-php
+docker compose up -d
+composer install
+php -S localhost:8000 -t public
+```
+
+### Example: Running Laravel
+
+```bash
 cd laravel-app
-make setup
-make start
+docker compose up -d
+composer install
+php artisan key:generate
+php artisan serve --port=8004
 ```
 
-## Available Commands
+## Application Details
 
-### Global Commands (from root directory)
+Each application includes:
 
-- `make setup` - Sets up Docker infrastructure for all apps
-- `make start` - Starts all applications and services
-- `make stop` - Stops all applications and services
-- `make clean` - Removes all containers and volumes
-- `make test` - Runs tests for all applications
-- `make endpoints` - Displays all running application endpoints
+- **Dockerfile**: Ready-to-use container configuration
+- **docker-compose.yml**: Database and cache services
+- **composer.json**: PHP dependencies
+- **README.md**: Application-specific setup instructions
+- **Minimal source code**: Essential files for demonstration
 
-### Application-Specific Commands
+## Verification
 
-Each application directory supports:
+After starting any application:
 
-- `make setup` - Setup application dependencies
-- `make start` - Start the application
-- `make stop` - Stop the application
-- `make test` - Run application tests
-- `make logs` - View application logs
+```bash
+# Check Docker services
+docker compose ps
 
-## PHP Versions Supported
+# Test application
+curl http://localhost:{port}
 
-- PHP 8.1
-- PHP 8.2
-- PHP 8.3
-- PHP 8.4
+# Access database management (optional)
+# Adminer available at http://localhost:{adminer-port}
+```
 
-## Services Included
+## Documentation
 
-- **MySQL 8.0** - Primary SQL database
-- **PostgreSQL 15** - Secondary SQL database
-
-- **Redis 7.0** - Caching and queue system
-- **RabbitMQ 3.11** - Message queue system
+- **requirements_overview.md**: Complete setup requirements for all applications
+- **DOCKER_PORTS.md**: Detailed port allocation and conflict resolution
+- Individual application READMEs: Framework-specific instructions
 
 ## Applications
 
@@ -117,192 +182,11 @@ Lightweight Slim application with database abstraction and queue operations.
 ### 5. CodeIgniter (`codeigniter-app/`)
 CodeIgniter application with Active Record and external API integration.
 
-## Database Schema
+## Getting Started
 
-All applications use a consistent user schema:
+For detailed setup requirements and troubleshooting, see:
+- `requirements_overview.md` - Complete setup guide
+- `DOCKER_PORTS.md` - Port allocation details
+- Individual application READMEs for framework-specific instructions
 
-```sql
-CREATE TABLE users (
-  id BIGSERIAL PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-```
-
-## External APIs
-
-- **JSONPlaceholder**: `https://jsonplaceholder.typicode.com/posts`
-- **JokeAPI**: `https://sv443.net/jokeapi/v2/joke/Any`
-
-## Testing
-
-Run comprehensive tests:
-
-```bash
-# All applications
-make test
-
-# Specific application
-cd laravel-app && make test
-```
-
-## Current Implementation Status
-
-### ✅ Completed Components
-
-1. **Project Structure** - Complete directory structure with all application folders
-2. **Shared Utilities** - Database connections, User models, API clients, Queue management
-3. **Database Schema** - MySQL and PostgreSQL initialization scripts
-4. **Simple PHP Application** - Fully functional vanilla PHP application with:
-   - Responsive UI with PHP version display
-   - Multi-database operations (MySQL, PostgreSQL)
-   - External API integrations (JSONPlaceholder, JokeAPI)
-   - Redis queue operations
-   - Docker configuration
-   - Unit tests
-   - Makefile automation
-
-5. **Laravel Application** - Complete Laravel framework implementation with:
-   - **MVC Architecture** - Controllers, Models, Views following Laravel conventions
-   - **Eloquent ORM** - Database operations using Laravel's ORM alongside shared utilities
-   - **Blade Templates** - Responsive UI with Laravel's templating engine
-   - **Laravel HTTP Client** - External API calls using Laravel's built-in HTTP client
-   - **Laravel Queue System** - Job processing with Redis backend
-   - **Route Management** - RESTful routes with named route support
-   - **CSRF Protection** - Built-in security features
-   - **Environment Configuration** - Proper .env setup for multi-database connections
-   - **Feature Tests** - Comprehensive test suite using Laravel's testing framework
-   - **Artisan Commands** - Laravel CLI integration
-   - **Docker Configuration** - Optimized for Laravel with Apache virtual host
-   - **Makefile Automation** - Laravel-specific commands including migrations
-
-6. **Symfony Application** - Complete Symfony framework implementation with:
-   - **MVC Architecture** - Controllers, Entities, Templates following Symfony conventions
-   - **Doctrine ORM** - Database operations using Doctrine alongside shared utilities
-   - **Twig Templates** - Responsive UI with Symfony's templating engine
-   - **Symfony HTTP Client** - External API calls using Symfony's HTTP client component
-   - **Symfony Messenger** - Message handling with Redis transport
-   - **Route Annotations** - Modern PHP 8+ attribute-based routing
-   - **Dependency Injection** - Symfony's powerful DI container
-   - **Environment Configuration** - Flexible .env configuration system
-   - **Web Test Cases** - Comprehensive functional testing with Symfony's test framework
-   - **Console Commands** - Symfony Console component integration
-   - **Docker Configuration** - Optimized for Symfony with Apache and OPcache
-   - **Makefile Automation** - Symfony-specific commands including cache management
-
-7. **Slim Framework Application** - Complete Slim microframework implementation with:
-   - **Lightweight Architecture** - Minimal, fast microframework approach
-   - **PSR-7 HTTP Messages** - Modern HTTP request/response handling
-   - **Twig Templates** - Responsive UI with Twig templating engine
-   - **Guzzle HTTP Client** - External API calls using Guzzle HTTP client
-   - **Dependency Injection** - PHP-DI container for service management
-   - **Middleware Support** - Extensible middleware pipeline
-   - **Environment Configuration** - DotEnv-based configuration management
-   - **Monolog Logging** - Comprehensive logging with Monolog
-   - **PHPUnit Testing** - Unit and integration testing framework
-   - **Docker Configuration** - Optimized for Slim with Apache URL rewriting
-   - **Makefile Automation** - Slim-specific commands including development server
-
-8. **CodeIgniter Application** - Complete CodeIgniter framework implementation with:
-   - **MVC Architecture** - Controllers, Models, Views following CodeIgniter conventions
-   - **Active Record Pattern** - Database operations using CodeIgniter's Active Record
-   - **PHP Views** - Responsive UI with native PHP templating
-   - **Multiple HTTP Clients** - Both Guzzle and CodeIgniter's HTTP client
-   - **Environment Configuration** - CodeIgniter's .env configuration system
-   - **Spark CLI** - CodeIgniter's command-line interface
-   - **Route Groups** - Organized routing with CodeIgniter's router
-   - **Built-in Logging** - CodeIgniter's logging system
-   - **CIUnitTestCase** - CodeIgniter-specific testing framework
-   - **Docker Configuration** - Optimized for CodeIgniter with proper permissions
-   - **Makefile Automation** - CodeIgniter-specific commands including Spark CLI
-
-### ✅ **Project Complete!**
-
-All five PHP applications have been successfully implemented, demonstrating comprehensive APM integration patterns across different PHP frameworks and approaches.
-
-## Testing the Current Setup
-
-### Quick Test
-
-```bash
-# Setup the infrastructure
-make setup
-
-# Start all services
-make start
-
-# Check if Simple PHP is running
-curl http://localhost:8081
-
-# View endpoints
-make endpoints
-```
-
-### Manual Testing
-
-1. **Simple PHP Application**: http://localhost:8081
-   - Test database connections
-   - Try CRUD operations
-   - Fetch external API data
-   - Test queue operations
-
-2. **Laravel Application**: http://localhost:8082
-   - Laravel-specific UI with Blade templates
-   - Eloquent ORM demonstrations
-   - Laravel HTTP client for external APIs
-   - Laravel Queue system with job processing
-   - Health check endpoint: http://localhost:8082/health
-
-3. **Symfony Application**: http://localhost:8083
-   - Symfony-specific UI with Twig templates
-   - Doctrine ORM demonstrations
-   - Symfony HTTP client for external APIs
-   - Symfony Messenger for message handling
-   - Health check endpoint: http://localhost:8083/health
-
-4. **Slim Framework Application**: http://localhost:8084
-   - Slim microframework UI with Twig templates
-   - PDO database operations demonstrations
-   - Guzzle HTTP client for external APIs
-   - Redis queue operations with shared utilities
-   - Health check endpoint: http://localhost:8084/health
-
-5. **CodeIgniter Application**: http://localhost:8085
-   - CodeIgniter framework UI with PHP views
-   - Active Record database operations demonstrations
-   - Multiple HTTP clients (Guzzle + CodeIgniter)
-   - Redis queue operations with shared utilities
-   - Health check endpoint: http://localhost:8085/health
-
-6. **Database Services**:
-   - MySQL: localhost:3306
-   - PostgreSQL: localhost:5432
-
-
-4. **Queue Services**:
-   - Redis: localhost:6379
-   - RabbitMQ: localhost:5672
-   - RabbitMQ Management: http://localhost:15672
-
-## Architecture Overview
-
-The project follows a modular architecture:
-
-- **Shared utilities** (`shared/`) provide common functionality across all applications
-- **Individual applications** implement framework-specific patterns while using shared utilities
-- **Docker containers** ensure consistent environments across different PHP versions
-- **Database initialization** scripts set up consistent schemas across all databases
-- **Queue systems** demonstrate both Redis and RabbitMQ integration
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details.
+This clean branch provides minimal, working examples perfect for APM testing and demonstration.

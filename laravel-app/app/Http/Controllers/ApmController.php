@@ -123,7 +123,7 @@ class ApmController extends Controller
     /**
      * Get system uptime
      */
-    private function getUptime(): ?int
+    private function getUptime(): ?float
     {
         if (file_exists('/proc/uptime')) {
             $uptime = file_get_contents('/proc/uptime');
@@ -452,7 +452,7 @@ class ApmController extends Controller
 
             $results['demo_data_added'] = $successCount;
             $results['queue_name'] = $queueName;
-            $results['queue_length'] = $redis->llen($queueName) ?? 0;
+            $results['queue_length'] = $redis->llen($queueName);
             $results['message'] = 'Laravel demo queue operations completed';
 
             return response()->json(['success' => true, 'data' => $results]);

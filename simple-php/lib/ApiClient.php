@@ -10,9 +10,10 @@ use Exception;
  */
 class ApiClient
 {
-    private $baseUrl;
-    private $timeout;
-    private $headers;
+    private string $baseUrl;
+    private int $timeout;
+    /** @var array<string, string> */
+    private array $headers;
 
     public function __construct(string $baseUrl = '', int $timeout = 10)
     {
@@ -27,6 +28,10 @@ class ApiClient
     /**
      * Make GET request
      */
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
     public function get(string $endpoint, array $params = []): array
     {
         $url = $this->buildUrl($endpoint, $params);
@@ -35,6 +40,10 @@ class ApiClient
 
     /**
      * Make POST request
+     */
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
     public function post(string $endpoint, array $data = []): array
     {

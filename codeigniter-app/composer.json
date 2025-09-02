@@ -1,48 +1,60 @@
 {
-    "name": "apm-php-examples/codeigniter-app",
-    "type": "project",
-    "description": "CodeIgniter application for APM testing",
-    "keywords": ["codeigniter", "framework", "apm", "monitoring"],
-    "license": "MIT",
-    "require": {
-        "php": "^8.1",
-        "codeigniter4/framework": "^4.4",
-        "guzzlehttp/guzzle": "^7.2",
-
-        "predis/predis": "^2.0"
+  "name": "apm-php-examples/codeigniter-app",
+  "type": "project",
+  "description": "CodeIgniter application for APM testing",
+  "keywords": [
+    "codeigniter",
+    "framework",
+    "apm",
+    "monitoring"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": "^8.1",
+    "codeigniter4/framework": "^4.4",
+    "guzzlehttp/guzzle": "^7.2",
+    "predis/predis": "^2.0",
+    "ext-pdo": "*",
+    "ext-redis": "*",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*"
+  },
+  "require-dev": {
+    "fakerphp/faker": "^1.9.1",
+    "mikey179/vfsstream": "^1.6",
+    "phpstan/phpstan": "^1.10",
+    "friendsofphp/php-cs-fixer": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Config\\": "app/Config/",
+      "App\\Lib\\": "lib/"
     },
-    "require-dev": {
-        "fakerphp/faker": "^1.9.1",
-        "mikey179/vfsstream": "^1.6",
-        "phpunit/phpunit": "^10.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "Config\\": "app/Config/",
-            "App\\Lib\\": "lib/"
-        },
-        "exclude-from-classmap": [
-            "**/Database/Migrations/**"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\Support\\": "tests/_support",
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "test": "phpunit",
-        "post-update-cmd": [
-            "@composer dump-autoload"
-        ]
-    },
-    "config": {
-        "optimize-autoloader": true,
-        "preferred-install": "dist",
-        "sort-packages": true
-    },
-    "minimum-stability": "stable",
-    "prefer-stable": true
+    "exclude-from-classmap": [
+      "**/Database/Migrations/**"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\Support\\": "tests/_support",
+      "Tests\\": "tests/",
+      "Tests\\\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "post-update-cmd": [
+      "@composer dump-autoload"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
 }
