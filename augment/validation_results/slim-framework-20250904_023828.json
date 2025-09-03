@@ -1,0 +1,114 @@
+{
+  "timestamp": "20250904_023828",
+  "app": "slim-framework",
+  "php_version": "8.4.12",
+  "tests": {
+    "db_check": 
+{
+    "ok": true,
+    "payload": {
+        "mysql": "OK",
+        "pg": "OK",
+        "details": {
+            "mysql": {
+                "ok": true,
+                "message": "MySQL connection successful"
+            },
+            "pg": {
+                "ok": true,
+                "message": "PostgreSQL connection successful"
+            }
+        }
+    }
+},
+    "db_crud": 
+{
+    "ok": true,
+    "payload": {
+        "mysql": {
+            "ok": true,
+            "inserted_id": "5",
+            "inserted_data": {
+                "id": 5,
+                "name": "apm_e914c77c",
+                "value": "val_1756933708_e914c77c",
+                "created_at": "2025-09-03 21:08:28"
+            },
+            "count_before": 4,
+            "count_after": 5
+        },
+        "pg": {
+            "ok": true,
+            "inserted_id": 6,
+            "inserted_data": {
+                "id": 6,
+                "name": "apm_d9be43a0",
+                "value": "val_1756933708_d9be43a0",
+                "created_at": "2025-09-03 21:08:28.29545"
+            },
+            "count_before": 5,
+            "count_after": 6
+        }
+    }
+},
+    "redis_insert_bulk": 
+{
+    "ok": true,
+    "payload": {
+        "inserted_values": [
+            "bulk_val_1756933708_c24a1a7c_0",
+            "bulk_val_1756933708_ee43f8ae_1",
+            "bulk_val_1756933708_823f9bdc_2"
+        ],
+        "new_length": 3
+    }
+},
+    "redis_insert_single": 
+{
+    "ok": true,
+    "payload": {
+        "inserted_value": "single_val_1756933708_05bb9deb",
+        "queue_length": 4
+    }
+},
+    "redis_read_single": 
+{
+    "ok": true,
+    "payload": {
+        "popped_value": "bulk_val_1756933708_c24a1a7c_0",
+        "remaining_length": 3
+    }
+},
+    "redis_clear": 
+{
+    "ok": true,
+    "payload": {
+        "previous_length": 3,
+        "current_length": 0
+    }
+},
+    "external_api": 
+{
+    "ok": true,
+    "payload": {
+        "status": "success",
+        "http_code": 200,
+        "body": {
+            "args": [],
+            "headers": {
+                "Accept": "*/*",
+                "Host": "httpbin.org",
+                "User-Agent": "Slim-Framework-APM/1.0",
+                "X-Amzn-Trace-Id": "Root=1-68b8ae4e-2e04a4a523262e0301f58999"
+            },
+            "origin": "49.14.165.66",
+            "url": "https://httpbin.org/get"
+        },
+        "duration_ms": 1972.55
+    }
+}  },
+  "summary": {
+    "all_tests_passed": true,
+    "completed_at": "2025-09-04T02:38:30+05:30"
+  }
+}
