@@ -1,0 +1,52 @@
+CodeIgniter App - PHP 8.1 Wrapper
+==================================
+Setting timezone to UTC...
+Running PHP with timezone fix...
+{
+    "app": "codeigniter-app",
+    "php_version": "8.1.33",
+    "timestamp": 1756932683,
+    "total_duration": 3.3827428817749023,
+    "web_ok": true,
+    "mysql_ok": true,
+    "pg_ok": true,
+    "redis_ok": true,
+    "external_ok": true,
+    "success": true,
+    "errors": [],
+    "details": {
+        "web": {
+            "success": true,
+            "duration": 0.0004029273986816406,
+            "http_code": 200,
+            "has_codeigniter_text": true,
+            "has_php_version": true,
+            "url": "http://127.0.0.1:8082/"
+        },
+        "mysql": {
+            "success": true,
+            "duration": 0.0017750263214111328,
+            "table_exists": true,
+            "user_count": 5
+        },
+        "postgresql": {
+            "success": true,
+            "duration": 0.01291799545288086,
+            "table_exists": true,
+            "user_count": 6
+        },
+        "redis": {
+            "success": true,
+            "duration": 0.00096893310546875,
+            "client": "redis_extension",
+            "test_passed": true
+        },
+        "http": {
+            "success": true,
+            "duration": 3.3656270503997803,
+            "method": "curl",
+            "http_code": 200,
+            "json_valid": true
+        }
+    }
+}

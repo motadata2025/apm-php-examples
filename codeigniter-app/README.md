@@ -27,7 +27,21 @@ A CodeIgniter-based Application Performance Monitoring (APM) dashboard that demo
 
 ## Installation & Setup
 
-### 1. Start Services
+### 1. Install Dependencies (if needed)
+```bash
+# For standard PHP installations
+composer install
+
+# For PHP 8.1 users (if encountering timezone errors)
+./composer-php81.sh install
+```
+
+**Note for PHP 8.1 users**: If you encounter timezone database corruption errors with Composer, use the provided wrapper script:
+```bash
+./composer-php81.sh install
+```
+
+### 2. Start Services
 ```bash
 # Start Docker services (MySQL, PostgreSQL, Redis)
 docker compose up -d
@@ -36,7 +50,7 @@ docker compose up -d
 docker compose ps
 ```
 
-### 2. Environment Configuration
+### 3. Environment Configuration
 The application uses the existing `.env` file with these key variables:
 
 ```env
@@ -184,6 +198,17 @@ codeigniter-app/
 2. **Database Connection**: Verify Docker services are running
 3. **Redis Extension**: Install php-redis or use Predis via Composer
 4. **Permissions**: Ensure validate.sh is executable (`chmod +x validate.sh`)
+5. **PHP 8.1 Timezone Database Corruption**:
+   - Error: "Timezone database is corrupt" when running Composer or PHP scripts
+   - Solution: Use the provided wrapper scripts:
+     - For Composer: `./composer-php81.sh [arguments]`
+     - For PHP: `./php-php81.sh [arguments]`
+     - For validation: `./validate.sh` (automatically detects PHP 8.1)
+   - Alternative: Run with timezone settings manually:
+     ```bash
+     TZ=UTC php -d date.timezone=UTC composer install
+     TZ=UTC php -d date.timezone=UTC validator.php
+     ```
 
 ### Logs and Debugging
 

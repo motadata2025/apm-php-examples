@@ -39,8 +39,20 @@ if [[ ! -f "$VALIDATOR_PHP" ]]; then
     exit 1
 fi
 
+# Detect PHP version and use appropriate command
+PHP_VERSION=$(php -r "echo PHP_VERSION_ID;")
+PHP_WRAPPER="$SCRIPT_DIR/php-php81.sh"
+
+# Use PHP wrapper for PHP 8.1 if available, otherwise use standard php
+if [[ $PHP_VERSION -ge 80100 && $PHP_VERSION -lt 80200 && -x "$PHP_WRAPPER" ]]; then
+    echo "Using PHP 8.1 wrapper for timezone fix..." >&2
+    PHP_CMD="$PHP_WRAPPER"
+else
+    PHP_CMD="php"
+fi
+
 # Run the PHP validator with timeout and save results
-if timeout 120 php "$VALIDATOR_PHP" | tee "$RESULT_FILE"; then
+if timeout 120 "$PHP_CMD" "$VALIDATOR_PHP" | tee "$RESULT_FILE"; then
     echo "Validation results saved to: $RESULT_FILE" >&2
     exit 0
 else
