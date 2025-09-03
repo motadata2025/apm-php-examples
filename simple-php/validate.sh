@@ -12,11 +12,9 @@ ENV_EXAMPLE="$SCRIPT_DIR/.env.example"
 # Ensure .env file exists
 if [[ ! -f "$ENV_FILE" ]]; then
     if [[ -f "$ENV_EXAMPLE" ]]; then
-        echo "Creating .env from .env.example..." >&2
         cp "$ENV_EXAMPLE" "$ENV_FILE"
     else
-        echo "ERROR: No .env or .env.example file found" >&2
-        echo '{"app":"simple-php","success":false,"error":"env_file_missing","timestamp":'$(date +%s)'}' 
+        echo '{"app":"simple-php","success":false,"error":"env_file_missing","timestamp":'$(date +%s)'}'
         exit 1
     fi
 fi

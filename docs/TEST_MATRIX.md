@@ -8,7 +8,11 @@ This document tracks validation results for all PHP applications across differen
 
 | OS | OS_Version | PHP_Version | App | Validated | Timestamp | Notes | Logs_Link |
 |---|---|---|---|---|---|---|---|
-| | | | | | | | |
+| Ubuntu | 22.04 | 8.3.25 | simple-php | Y | 1756893300 | All tests passed | augment/validation_results/1756893297-simple-php.json |
+| Ubuntu | 22.04 | 8.3.25 | slim-framework | Y | 1756893300 | All tests passed | augment/validation_results/1756893297-slim-framework.json |
+| Ubuntu | 22.04 | 8.3.25 | symfony-app | Y | 1756893300 | All tests passed | augment/validation_results/1756893297-symfony-app.json |
+| Ubuntu | 22.04 | 8.3.25 | laravel-app | Y | 1756893300 | All tests passed | augment/validation_results/1756893297-laravel-app.json |
+| Ubuntu | 22.04 | 8.3.25 | codeigniter-app | Y | 1756893300 | All tests passed | augment/validation_results/1756893297-codeigniter-app.json |
 
 ## Legend
 

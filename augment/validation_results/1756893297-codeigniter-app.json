@@ -1,0 +1,40 @@
+Creating .env from .env.example...
+{
+    "app": "codeigniter-app",
+    "php_version": "8.3.25",
+    "timestamp": 1756893315,
+    "total_duration": 3.9277851581573486,
+    "mysql_ok": true,
+    "pg_ok": true,
+    "redis_ok": true,
+    "http_ok": true,
+    "success": true,
+    "errors": [],
+    "details": {
+        "mysql": {
+            "success": true,
+            "duration": 0.011402130126953125,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "postgresql": {
+            "success": true,
+            "duration": 0.010153055191040039,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "redis": {
+            "success": true,
+            "duration": 0.0007131099700927734,
+            "client": "redis_extension",
+            "test_passed": true
+        },
+        "http": {
+            "success": true,
+            "duration": 3.9048168659210205,
+            "method": "curl",
+            "http_code": 200,
+            "json_valid": true
+        }
+    }
+}

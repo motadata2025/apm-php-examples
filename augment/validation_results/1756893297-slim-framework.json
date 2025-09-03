@@ -1,0 +1,40 @@
+Creating .env from .env.example...
+{
+    "app": "slim-framework",
+    "php_version": "8.3.25",
+    "timestamp": 1756893303,
+    "total_duration": 2.5418949127197266,
+    "mysql_ok": true,
+    "pg_ok": true,
+    "redis_ok": true,
+    "http_ok": true,
+    "success": true,
+    "errors": [],
+    "details": {
+        "mysql": {
+            "success": true,
+            "duration": 0.0064470767974853516,
+            "table_exists": false,
+            "note": "users table not found, but connection successful"
+        },
+        "postgresql": {
+            "success": true,
+            "duration": 0.00925302505493164,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "redis": {
+            "success": true,
+            "duration": 0.0005500316619873047,
+            "client": "redis_extension",
+            "test_passed": true
+        },
+        "http": {
+            "success": true,
+            "duration": 2.5248751640319824,
+            "method": "curl",
+            "http_code": 200,
+            "json_valid": true
+        }
+    }
+}

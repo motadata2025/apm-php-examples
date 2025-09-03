@@ -12,7 +12,7 @@ ENV_EXAMPLE="$SCRIPT_DIR/.env.example"
 # Ensure .env file exists
 if [[ ! -f "$ENV_FILE" ]]; then
     if [[ -f "$ENV_EXAMPLE" ]]; then
-        echo "Creating .env from .env.example..." >&2
+        # Creating .env from .env.example (silent)
         cp "$ENV_EXAMPLE" "$ENV_FILE"
     else
         echo "ERROR: No .env or .env.example file found" >&2
