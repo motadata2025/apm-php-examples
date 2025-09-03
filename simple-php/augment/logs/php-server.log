@@ -1,0 +1,160 @@
+[Wed Sep  3 18:08:23 2025] PHP 8.3.25 Development Server (http://0.0.0.0:8080) started
+[Wed Sep  3 18:08:28 2025] 127.0.0.1:46466 Accepted
+[Wed Sep  3 18:08:28 2025] 127.0.0.1:46466 [200]: GET /
+[Wed Sep  3 18:08:28 2025] 127.0.0.1:46466 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46476 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46476 [200]: GET /
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46476 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46482 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46482 [200]: GET /assets/styles.css
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46492 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46482 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46492 [200]: GET /assets/app.js
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46492 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46500 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46500 [200]: GET /api/php-version
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46500 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46502 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46502 [200]: GET /
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46502 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46516 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46516 [200]: GET /assets/styles.css
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46516 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46532 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46532 [200]: GET /assets/app.js
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46532 Closing
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46536 Accepted
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46536 [200]: GET /api/php-version
+[Wed Sep  3 18:08:34 2025] 127.0.0.1:46536 Closing
+[Wed Sep  3 18:08:46 2025] 127.0.0.1:57298 Accepted
+[Wed Sep  3 18:08:49 2025] 127.0.0.1:57298 [200]: POST /api/external
+[Wed Sep  3 18:08:49 2025] 127.0.0.1:57298 Closing
+[Wed Sep  3 18:08:50 2025] 127.0.0.1:53156 Accepted
+[Wed Sep  3 18:08:50 2025] 127.0.0.1:53156 [200]: POST /api/db/check
+[Wed Sep  3 18:08:50 2025] 127.0.0.1:53156 Closing
+[Wed Sep  3 18:09:06 2025] 127.0.0.1:50994 Accepted
+[Wed Sep  3 18:09:06 2025] 127.0.0.1:50994 [200]: POST /api/db/crud
+[Wed Sep  3 18:09:06 2025] 127.0.0.1:50994 Closing
+[Wed Sep  3 18:09:15 2025] 127.0.0.1:35504 Accepted
+[Wed Sep  3 18:09:15 2025] 127.0.0.1:35504 [500]: POST /api/redis/insert-multiple?count=3
+[Wed Sep  3 18:09:15 2025] 127.0.0.1:35504 Closing
+[Wed Sep  3 18:09:17 2025] 127.0.0.1:38518 Accepted
+[Wed Sep  3 18:09:17 2025] 127.0.0.1:38518 [500]: POST /api/redis/insert-single
+[Wed Sep  3 18:09:17 2025] 127.0.0.1:38518 Closing
+[Wed Sep  3 18:09:18 2025] 127.0.0.1:38530 Accepted
+[Wed Sep  3 18:09:18 2025] 127.0.0.1:38530 [500]: POST /api/redis/read-single
+[Wed Sep  3 18:09:18 2025] 127.0.0.1:38530 Closing
+[Wed Sep  3 18:09:19 2025] 127.0.0.1:38540 Accepted
+[Wed Sep  3 18:09:19 2025] 127.0.0.1:38540 [500]: POST /api/redis/clear
+[Wed Sep  3 18:09:19 2025] 127.0.0.1:38540 Closing
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38554 Accepted
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38554 [200]: GET /
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38554 Closing
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38570 Accepted
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38570 [200]: GET /api/php-version
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38570 Closing
+[Wed Sep  3 18:09:22 2025] 127.0.0.1:38580 Accepted
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38580 [200]: POST /api/external
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38580 Closing
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38592 Accepted
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38592 [200]: POST /api/db/check
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38592 Closing
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38594 Accepted
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38594 [200]: POST /api/db/crud
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38594 Closing
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38604 Accepted
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38604 [500]: POST /api/redis/insert-multiple
+[Wed Sep  3 18:09:24 2025] 127.0.0.1:38604 Closing
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38746 Accepted
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38746 [200]: GET /
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38746 Closing
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38750 Accepted
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38750 [200]: GET /assets/styles.css
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38750 Closing
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38758 Accepted
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38758 [200]: GET /assets/app.js
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38758 Closing
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38766 Accepted
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38766 [404]: GET /favicon.ico - No such file or directory
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38766 Closing
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38770 Accepted
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38770 [200]: GET /api/php-version
+[Wed Sep  3 18:11:15 2025] 127.0.0.1:38770 Closing
+[Wed Sep  3 18:11:16 2025] 127.0.0.1:38784 Accepted
+[Wed Sep  3 18:11:18 2025] 127.0.0.1:38784 [500]: POST /api/external
+[Wed Sep  3 18:11:18 2025] 127.0.0.1:38784 Closing
+[Wed Sep  3 18:11:20 2025] 127.0.0.1:42336 Accepted
+[Wed Sep  3 18:11:20 2025] 127.0.0.1:42336 [200]: POST /api/db/check
+[Wed Sep  3 18:11:20 2025] 127.0.0.1:42336 Closing
+[Wed Sep  3 18:11:21 2025] 127.0.0.1:42350 Accepted
+[Wed Sep  3 18:11:21 2025] 127.0.0.1:42350 [200]: POST /api/db/crud
+[Wed Sep  3 18:11:21 2025] 127.0.0.1:42350 Closing
+[Wed Sep  3 18:11:35 2025] 127.0.0.1:42224 Accepted
+[Wed Sep  3 18:11:35 2025] 127.0.0.1:42224 [200]: POST /api/redis/insert-multiple?count=3
+[Wed Sep  3 18:11:35 2025] 127.0.0.1:42224 Closing
+[Wed Sep  3 18:11:36 2025] 127.0.0.1:42240 Accepted
+[Wed Sep  3 18:11:36 2025] 127.0.0.1:42240 [200]: POST /api/redis/insert-single
+[Wed Sep  3 18:11:36 2025] 127.0.0.1:42240 Closing
+[Wed Sep  3 18:11:37 2025] 127.0.0.1:46904 Accepted
+[Wed Sep  3 18:11:37 2025] 127.0.0.1:46904 [200]: POST /api/redis/read-single
+[Wed Sep  3 18:11:37 2025] 127.0.0.1:46904 Closing
+[Wed Sep  3 18:11:40 2025] 127.0.0.1:46914 Accepted
+[Wed Sep  3 18:11:40 2025] 127.0.0.1:46914 [200]: POST /api/redis/insert-single
+[Wed Sep  3 18:11:40 2025] 127.0.0.1:46914 Closing
+[Wed Sep  3 18:11:41 2025] 127.0.0.1:46920 Accepted
+[Wed Sep  3 18:11:41 2025] 127.0.0.1:46920 [200]: POST /api/redis/read-single
+[Wed Sep  3 18:11:41 2025] 127.0.0.1:46920 Closing
+[Wed Sep  3 18:11:42 2025] 127.0.0.1:46926 Accepted
+[Wed Sep  3 18:11:42 2025] 127.0.0.1:46926 [200]: POST /api/redis/read-single
+[Wed Sep  3 18:11:42 2025] 127.0.0.1:46926 Closing
+[Wed Sep  3 18:11:43 2025] 127.0.0.1:46928 Accepted
+[Wed Sep  3 18:11:43 2025] 127.0.0.1:46928 [200]: POST /api/redis/insert-single
+[Wed Sep  3 18:11:43 2025] 127.0.0.1:46928 Closing
+[Wed Sep  3 18:11:44 2025] 127.0.0.1:46930 Accepted
+[Wed Sep  3 18:11:44 2025] 127.0.0.1:46930 [200]: POST /api/redis/clear
+[Wed Sep  3 18:11:44 2025] 127.0.0.1:46930 Closing
+[Wed Sep  3 18:11:47 2025] 127.0.0.1:57166 Accepted
+[Wed Sep  3 18:11:47 2025] 127.0.0.1:57166 [200]: POST /api/redis/read-single
+[Wed Sep  3 18:11:47 2025] 127.0.0.1:57166 Closing
+[Wed Sep  3 18:12:10 2025] 127.0.0.1:52500 Accepted
+[Wed Sep  3 18:12:12 2025] 127.0.0.1:52500 [200]: POST /api/external
+[Wed Sep  3 18:12:12 2025] 127.0.0.1:52500 Closing
+[Wed Sep  3 18:12:29 2025] 127.0.0.1:54162 Accepted
+[Wed Sep  3 18:12:34 2025] 127.0.0.1:54162 [200]: POST /api/external
+[Wed Sep  3 18:12:34 2025] 127.0.0.1:54162 Closing
+[Wed Sep  3 18:12:37 2025] 127.0.0.1:54172 Accepted
+[Wed Sep  3 18:12:40 2025] 127.0.0.1:54172 [200]: POST /api/external
+[Wed Sep  3 18:12:40 2025] 127.0.0.1:54172 Closing
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41060 Accepted
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41060 [200]: GET /
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41060 Closing
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41068 Accepted
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41068 [200]: GET /api/php-version
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41068 Closing
+[Wed Sep  3 18:12:48 2025] 127.0.0.1:41082 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41082 [200]: POST /api/external
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41082 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41088 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41088 [200]: POST /api/db/check
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41088 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41090 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41090 [200]: POST /api/db/crud
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41090 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41096 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41096 [200]: POST /api/redis/insert-multiple
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41096 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41106 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41106 [200]: POST /api/redis/insert-single
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41106 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41110 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41110 [200]: POST /api/redis/read-single
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41110 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41118 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41118 [200]: POST /api/redis/clear
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41118 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41134 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41134 [200]: POST /api/db/check
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41134 Closing
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41136 Accepted
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41136 [200]: POST /api/redis/insert-multiple?count=3
+[Wed Sep  3 18:12:51 2025] 127.0.0.1:41136 Closing

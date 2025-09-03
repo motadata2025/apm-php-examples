@@ -1,0 +1,6 @@
+[2025-09-03 12:39:19] Error: stream_socket_client(): Unable to connect to tcp://127.0.0.1:6380 (Connection refused) in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/vendor/predis/predis/src/Connection/StreamConnection.php on line 129
+[2025-09-03 12:39:19] Exception: Failed to connect to Redis: stream_socket_client(): Unable to connect to tcp://127.0.0.1:6380 (Connection refused)
+Stack trace:
+#0 /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/src/RedisQueue.php(20): SimplePhp\RedisQueue->initializeClient()
+#1 /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php(199): SimplePhp\RedisQueue->__construct()
+#2 {main}

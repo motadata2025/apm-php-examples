@@ -1,0 +1,1 @@
+{"ok":true,"data":{"args":[],"headers":{"Host":"httpbin.org","User-Agent":"SimplePhp\/1.0","X-Amzn-Trace-Id":"Root=1-68b837c9-216fe3446a1edbfb252a1518"},"origin":"103.240.33.154","url":"https:\/\/httpbin.org\/get"}}
