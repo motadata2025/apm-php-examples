@@ -1,0 +1,49 @@
+{
+    "app": "codeigniter-app",
+    "php_version": "8.4.12",
+    "timestamp": 1756932193,
+    "total_duration": 1.7598049640655518,
+    "web_ok": true,
+    "mysql_ok": false,
+    "pg_ok": true,
+    "redis_ok": true,
+    "external_ok": true,
+    "success": false,
+    "errors": [
+        "MySQL validation failed"
+    ],
+    "details": {
+        "web": {
+            "success": true,
+            "duration": 0.00109100341796875,
+            "http_code": 200,
+            "has_codeigniter_text": true,
+            "has_php_version": true,
+            "url": "http://127.0.0.1:8082/"
+        },
+        "mysql": {
+            "success": false,
+            "duration": 0.0009219646453857422,
+            "error": "SQLSTATE[HY000] [1045] Access denied for user 'codeigniter_app_user'@'172.26.0.1' (using password: YES)"
+        },
+        "postgresql": {
+            "success": true,
+            "duration": 0.013765096664428711,
+            "table_exists": true,
+            "user_count": 4
+        },
+        "redis": {
+            "success": true,
+            "duration": 0.0026400089263916016,
+            "client": "redis_extension",
+            "test_passed": true
+        },
+        "http": {
+            "success": true,
+            "duration": 1.7402949333190918,
+            "method": "curl",
+            "http_code": 200,
+            "json_valid": true
+        }
+    }
+}

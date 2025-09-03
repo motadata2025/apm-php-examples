@@ -21,8 +21,9 @@ class ApmController
             'DB_MYSQL_HOST' => $_ENV['DB_MYSQL_HOST'] ?? '127.0.0.1',
             'DB_MYSQL_PORT' => $_ENV['DB_MYSQL_PORT'] ?? '3310',
             'DB_MYSQL_DATABASE' => $_ENV['DB_MYSQL_DATABASE'] ?? 'codeigniter_app_db',
-            'DB_MYSQL_USERNAME' => $_ENV['DB_MYSQL_USERNAME'] ?? 'codeigniter_app_user',
-            'DB_MYSQL_PASSWORD' => $_ENV['DB_MYSQL_PASSWORD'] ?? 'codeigniter_app_password',
+            // Fix MySQL credentials to match docker-compose.yml
+            'DB_MYSQL_USERNAME' => 'codeigniter-app_user',
+            'DB_MYSQL_PASSWORD' => 'codeigniter-app_password',
             'DB_PGSQL_HOST' => $_ENV['DB_PGSQL_HOST'] ?? '127.0.0.1',
             'DB_PGSQL_PORT' => $_ENV['DB_PGSQL_PORT'] ?? '5436',
             'DB_PGSQL_DATABASE' => $_ENV['DB_PGSQL_DATABASE'] ?? 'codeigniter_app_db',

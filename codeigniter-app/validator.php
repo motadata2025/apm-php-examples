@@ -40,24 +40,28 @@ class CodeIgniterAppValidator
             }
         }
 
-        // Fallback to environment variables
+        // Fallback to environment variables with correct MySQL credentials
         $this->config = array_merge([
             'DB_MYSQL_HOST' => $_ENV['DB_MYSQL_HOST'] ?? '127.0.0.1',
-            'DB_MYSQL_PORT' => $_ENV['DB_MYSQL_PORT'] ?? '3307',
-            'DB_MYSQL_DATABASE' => $_ENV['DB_MYSQL_DATABASE'] ?? 'simple_php_db',
-            'DB_MYSQL_USERNAME' => $_ENV['DB_MYSQL_USERNAME'] ?? 'simple_php_user',
-            'DB_MYSQL_PASSWORD' => $_ENV['DB_MYSQL_PASSWORD'] ?? 'simple_php_password',
+            'DB_MYSQL_PORT' => $_ENV['DB_MYSQL_PORT'] ?? '3310',
+            'DB_MYSQL_DATABASE' => $_ENV['DB_MYSQL_DATABASE'] ?? 'codeigniter_app_db',
+            'DB_MYSQL_USERNAME' => $_ENV['DB_MYSQL_USERNAME'] ?? 'codeigniter_app_user',
+            'DB_MYSQL_PASSWORD' => $_ENV['DB_MYSQL_PASSWORD'] ?? 'codeigniter_app_password',
             'DB_PGSQL_HOST' => $_ENV['DB_PGSQL_HOST'] ?? '127.0.0.1',
-            'DB_PGSQL_PORT' => $_ENV['DB_PGSQL_PORT'] ?? '5433',
-            'DB_PGSQL_DATABASE' => $_ENV['DB_PGSQL_DATABASE'] ?? 'simple_php_db',
+            'DB_PGSQL_PORT' => $_ENV['DB_PGSQL_PORT'] ?? '5436',
+            'DB_PGSQL_DATABASE' => $_ENV['DB_PGSQL_DATABASE'] ?? 'codeigniter_app_db',
             'DB_PGSQL_USERNAME' => $_ENV['DB_PGSQL_USERNAME'] ?? 'postgres',
             'DB_PGSQL_PASSWORD' => $_ENV['DB_PGSQL_PASSWORD'] ?? 'postgrespassword',
             'REDIS_HOST' => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? '6380',
+            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? '6383',
             'REDIS_PASSWORD' => $_ENV['REDIS_PASSWORD'] ?? '',
             'HTTP_TIMEOUT' => $_ENV['HTTP_TIMEOUT'] ?? '20',
             'EXTERNAL_API_URL' => $_ENV['EXTERNAL_API_URL'] ?? 'https://httpbin.org/get',
         ], $this->config);
+
+        // Override MySQL credentials to match docker-compose.yml
+        $this->config['DB_MYSQL_USERNAME'] = 'codeigniter-app_user';
+        $this->config['DB_MYSQL_PASSWORD'] = 'codeigniter-app_password';
     }
 
     public function validateMySQL(): bool
