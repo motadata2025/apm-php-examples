@@ -1,0 +1,96 @@
+{
+    "external_api": {
+        "success": true,
+        "details": {
+            "status": 200,
+            "response_size": 233,
+            "elapsed_ms": 2004.65,
+            "first_level_keys": [
+                "args",
+                "headers",
+                "origin",
+                "url"
+            ]
+        },
+        "test_type": "external_api_call"
+    },
+    "databases": {
+        "success": true,
+        "details": {
+            "mysql": {
+                "ok": true,
+                "msg": "Connected to mysql successfully"
+            },
+            "pg": {
+                "ok": true,
+                "msg": "Connected to pgsql successfully"
+            }
+        },
+        "test_type": "database_connections"
+    },
+    "database_crud": {
+        "success": true,
+        "details": {
+            "mysql": {
+                "ok": true,
+                "created_user_id": 11,
+                "created_post_id": 11,
+                "updated_rows": 1,
+                "deleted_rows": 1,
+                "final_user_count": 11,
+                "final_post_count": 3
+            },
+            "pg": {
+                "ok": true,
+                "created_user_id": 11,
+                "created_post_id": 11,
+                "updated_rows": 1,
+                "deleted_rows": 1,
+                "final_user_count": 11,
+                "final_post_count": 3
+            }
+        },
+        "test_type": "database_crud"
+    },
+    "redis_insert_bulk": {
+        "success": true,
+        "details": {
+            "ok": true,
+            "queue_name": "Laravel App_8_1_33",
+            "length_after": 3,
+            "inserted_messages": [
+                "{\"id\":\"68b89f28cc283\",\"timestamp\":\"2025-09-03T20:03:52.836243Z\",\"payload\":\"A ratione enim praesentium eum.\"}",
+                "{\"id\":\"68b89f28cc416\",\"timestamp\":\"2025-09-03T20:03:52.836641Z\",\"payload\":\"Corporis itaque doloribus dolore repudiandae.\"}",
+                "{\"id\":\"68b89f28cc494\",\"timestamp\":\"2025-09-03T20:03:52.836762Z\",\"payload\":\"Ullam sint expedita architecto aut ut ut placeat.\"}"
+            ]
+        },
+        "test_type": "redis_insert_bulk"
+    },
+    "redis_read_one": {
+        "success": true,
+        "details": {
+            "ok": true,
+            "queue_name": "Laravel App_8_1_33",
+            "length_after": 2,
+            "popped_message": "{\"id\":\"68b89f28cc283\",\"timestamp\":\"2025-09-03T20:03:52.836243Z\",\"payload\":\"A ratione enim praesentium eum.\"}"
+        },
+        "test_type": "redis_read_one"
+    },
+    "redis_clear": {
+        "success": true,
+        "details": {
+            "ok": true,
+            "queue_name": "Laravel App_8_1_33",
+            "length_after": 0,
+            "cleared_count": 2
+        },
+        "test_type": "redis_clear"
+    },
+    "summary": {
+        "total_duration": 2.4964349269866943,
+        "php_version": "8.1.33",
+        "laravel_version": "10.48.29",
+        "timestamp": "2025-09-03 20:03:52",
+        "overall_success": true
+    }
+}

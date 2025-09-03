@@ -33,6 +33,12 @@ Install PHP dependencies using Composer:
 composer install
 ```
 
+**Note for PHP 8.1 users**: If you encounter timezone database corruption errors with Composer, use the provided wrapper script:
+
+```bash
+./composer-php81.sh install
+```
+
 ### 3. Configure Environment
 
 The application uses the existing `.env` file. Ensure all required environment variables are set:
@@ -201,6 +207,11 @@ Example output:
 4. **Permission Issues**
    - Ensure `validate.sh` is executable: `chmod +x validate.sh`
    - Check write permissions for `augment/` directory
+
+5. **PHP 8.1 Timezone Database Corruption**
+   - Error: "Timezone database is corrupt" when running Composer
+   - Solution: Use the provided wrapper script: `./composer-php81.sh install`
+   - Alternative: Run with timezone settings: `TZ=UTC php -d date.timezone=UTC composer install`
 
 ### Logs
 

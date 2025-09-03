@@ -1,0 +1,7 @@
+{
+    "timestamp": "2025-09-03T19:53:07.862794Z",
+    "operation": "external-api",
+    "error": "cURL error 28: Operation timed out after 20002 milliseconds with 0 bytes received (see https:\/\/curl.haxx.se\/libcurl\/c\/libcurl-errors.html) for https:\/\/httpbin.org\/get",
+    "php_version": "8.2.29",
+    "laravel_version": "10.48.29"
+}
