@@ -93,5 +93,12 @@
     "redis_operations": "PASS - All Redis operations working correctly",
     "timeouts_respected": "PASS - No operations exceeded allowed timeouts",
     "logs_created": "PASS - All outputs saved under augment/ directories"
+  },
+  "pull_request": {
+    "url": "https://github.com/motadata2025/apm-php-examples/pull/2",
+    "title": "feature/simple-php-ui — simple-php UI + API",
+    "base_branch": "simple",
+    "status": "created",
+    "previous_pr": "https://github.com/motadata2025/apm-php-examples/pull/1 (closed - was targeting main)"
   }
 }
