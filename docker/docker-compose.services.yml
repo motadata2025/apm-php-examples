@@ -1,0 +1,370 @@
+# APM PHP Examples - Centralized Services
+# All database and cache services for validation testing
+# Port allocation per DOCKER_PORTS.md
+
+version: '3.8'
+
+services:
+
+  # MySQL Services
+  apm-mysql-simple:
+    image: mysql:8.0
+    container_name: apm_mysql_simple
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: simple_php_db
+      MYSQL_USER: simple_php_user
+      MYSQL_PASSWORD: simple_php_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - apm_mysql_simple_data:/var/lib/mysql
+      - ../simple-php/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-mysql-symfony:
+    image: mysql:8.0
+    container_name: apm_mysql_symfony
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: symfony_app_db
+      MYSQL_USER: symfony_app_user
+      MYSQL_PASSWORD: symfony_app_password
+    ports:
+      - "3308:3306"
+    volumes:
+      - apm_mysql_symfony_data:/var/lib/mysql
+      - ../symfony-app/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-mysql-slim:
+    image: mysql:8.0
+    container_name: apm_mysql_slim
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: slim_framework_db
+      MYSQL_USER: slim_framework_user
+      MYSQL_PASSWORD: slim_framework_password
+    ports:
+      - "3309:3306"
+    volumes:
+      - apm_mysql_slim_data:/var/lib/mysql
+      - ../slim-framework/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-mysql-codeigniter:
+    image: mysql:8.0
+    container_name: apm_mysql_codeigniter
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: codeigniter_app_db
+      MYSQL_USER: codeigniter_app_user
+      MYSQL_PASSWORD: codeigniter_app_password
+    ports:
+      - "3310:3306"
+    volumes:
+      - apm_mysql_codeigniter_data:/var/lib/mysql
+      - ../codeigniter-app/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-mysql-laravel:
+    image: mysql:8.0
+    container_name: apm_mysql_laravel
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: laravel_app_db
+      MYSQL_USER: laravel_app_user
+      MYSQL_PASSWORD: laravel_app_password
+    ports:
+      - "3311:3306"
+    volumes:
+      - apm_mysql_laravel_data:/var/lib/mysql
+      - ../laravel-app/docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # PostgreSQL Services
+  apm-postgres-simple:
+    image: postgres:15
+    container_name: apm_postgres_simple
+    environment:
+      POSTGRES_DB: simple_php_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5433:5432"
+    volumes:
+      - apm_postgres_simple_data:/var/lib/postgresql/data
+      - ../simple-php/docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d simple_php_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-postgres-symfony:
+    image: postgres:15
+    container_name: apm_postgres_symfony
+    environment:
+      POSTGRES_DB: symfony_app_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5434:5432"
+    volumes:
+      - apm_postgres_symfony_data:/var/lib/postgresql/data
+      - ../symfony-app/docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d symfony_app_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-postgres-slim:
+    image: postgres:15
+    container_name: apm_postgres_slim
+    environment:
+      POSTGRES_DB: slim_framework_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5435:5432"
+    volumes:
+      - apm_postgres_slim_data:/var/lib/postgresql/data
+      - ../slim-framework/docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d slim_framework_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-postgres-codeigniter:
+    image: postgres:15
+    container_name: apm_postgres_codeigniter
+    environment:
+      POSTGRES_DB: codeigniter_app_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5436:5432"
+    volumes:
+      - apm_postgres_codeigniter_data:/var/lib/postgresql/data
+      - ../codeigniter-app/docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d codeigniter_app_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  apm-postgres-laravel:
+    image: postgres:15
+    container_name: apm_postgres_laravel
+    environment:
+      POSTGRES_DB: laravel_app_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5437:5432"
+    volumes:
+      - apm_postgres_laravel_data:/var/lib/postgresql/data
+      - ../laravel-app/docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d laravel_app_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Redis Services
+  apm-redis-simple:
+    image: redis:7-alpine
+    container_name: apm_redis_simple
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"
+    volumes:
+      - apm_redis_simple_data:/data
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  apm-redis-symfony:
+    image: redis:7-alpine
+    container_name: apm_redis_symfony
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6381:6379"
+    volumes:
+      - apm_redis_symfony_data:/data
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  apm-redis-slim:
+    image: redis:7-alpine
+    container_name: apm_redis_slim
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6382:6379"
+    volumes:
+      - apm_redis_slim_data:/data
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  apm-redis-codeigniter:
+    image: redis:7-alpine
+    container_name: apm_redis_codeigniter
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6383:6379"
+    volumes:
+      - apm_redis_codeigniter_data:/data
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  apm-redis-laravel:
+    image: redis:7-alpine
+    container_name: apm_redis_laravel
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6384:6379"
+    volumes:
+      - apm_redis_laravel_data:/data
+    networks:
+      - apm-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  # MySQL volumes
+  apm_mysql_simple_data:
+    driver: local
+  apm_mysql_symfony_data:
+    driver: local
+  apm_mysql_slim_data:
+    driver: local
+  apm_mysql_codeigniter_data:
+    driver: local
+  apm_mysql_laravel_data:
+    driver: local
+  
+  # PostgreSQL volumes
+  apm_postgres_simple_data:
+    driver: local
+  apm_postgres_symfony_data:
+    driver: local
+  apm_postgres_slim_data:
+    driver: local
+  apm_postgres_codeigniter_data:
+    driver: local
+  apm_postgres_laravel_data:
+    driver: local
+  
+  # Redis volumes
+  apm_redis_simple_data:
+    driver: local
+  apm_redis_symfony_data:
+    driver: local
+  apm_redis_slim_data:
+    driver: local
+  apm_redis_codeigniter_data:
+    driver: local
+  apm_redis_laravel_data:
+    driver: local
+
+networks:
+  apm-network:
+    driver: bridge
+    name: apm_network
+    ipam:
+      config:
+        - subnet: 172.31.0.0/16
