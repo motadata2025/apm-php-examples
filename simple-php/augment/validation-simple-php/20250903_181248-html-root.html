@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple PHP - APM Example</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simple PHP - APM Example</h1>
+        </header>
+        
+        <main class="grid-container">
+            <div class="card">
+                <h2>Application Info</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Application Type:</label>
+                        <span>Simple PHP</span>
+                    </div>
+                    <div class="info-item">
+                        <label>PHP Version:</label>
+                        <span id="php-version">8.3.25</span>
+                    </div>
+                    <div class="info-item">
+                        <label>Web Server:</label>
+                        <span>php_cli</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>External API & Database</h2>
+                <div class="button-group">
+                    <button id="external-api-btn" class="btn btn-primary">External API</button>
+                    <button id="db-check-btn" class="btn btn-secondary">DB Connection Check</button>
+                    <button id="db-crud-btn" class="btn btn-secondary">DB Calls</button>
+                </div>
+                <div id="api-db-results" class="results"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Redis Queue</h2>
+                <div class="button-group">
+                    <button id="redis-insert-3-btn" class="btn btn-accent">Insert 3</button>
+                    <button id="redis-insert-1-btn" class="btn btn-accent">Insert 1</button>
+                    <button id="redis-read-1-btn" class="btn btn-accent">Read 1</button>
+                    <button id="redis-clear-btn" class="btn btn-danger">Clear Queue</button>
+                </div>
+                <div id="redis-results" class="results"></div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        window.__CONFIG__ = {
+            externalApiUrl: 'https://httpbin.org/get'
+        };
+    </script>
+    <script src="/assets/app.js"></script>
+</body>
+</html>

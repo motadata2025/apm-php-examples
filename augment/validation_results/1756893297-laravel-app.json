@@ -1,0 +1,40 @@
+Creating .env from .env.example...
+{
+    "app": "laravel-app",
+    "php_version": "8.3.25",
+    "timestamp": 1756893311,
+    "total_duration": 4.962949991226196,
+    "mysql_ok": true,
+    "pg_ok": true,
+    "redis_ok": true,
+    "http_ok": true,
+    "success": true,
+    "errors": [],
+    "details": {
+        "mysql": {
+            "success": true,
+            "duration": 0.011569023132324219,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "postgresql": {
+            "success": true,
+            "duration": 0.009002923965454102,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "redis": {
+            "success": true,
+            "duration": 0.0006551742553710938,
+            "client": "redis_extension",
+            "test_passed": true
+        },
+        "http": {
+            "success": true,
+            "duration": 4.940771102905273,
+            "method": "curl",
+            "http_code": 200,
+            "json_valid": true
+        }
+    }
+}

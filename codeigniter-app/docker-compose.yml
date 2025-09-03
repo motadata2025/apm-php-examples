@@ -6,9 +6,9 @@ version: '3.8'
 services:
 
   # MySQL Database for CodeIgniter
-  codeigniter-app-mysql:
+  apm-mysql-codeigniter:
     image: mysql:8.0
-    container_name: codeigniter-app_mysql
+    container_name: apm_mysql_codeigniter
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: codeigniter_app_db
@@ -17,10 +17,8 @@ services:
     ports:
       - "3310:3306"
     volumes:
-      - codeigniter-app_mysql_data:/var/lib/mysql
+      - apm_mysql_codeigniter_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - codeigniter-app-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -30,9 +28,9 @@ services:
       start_period: 30s
 
   # PostgreSQL Database for CodeIgniter
-  codeigniter-app-postgres:
+  apm-postgres-codeigniter:
     image: postgres:15
-    container_name: codeigniter-app_postgres
+    container_name: apm_postgres_codeigniter
     environment:
       POSTGRES_DB: codeigniter_app_db
       POSTGRES_USER: postgres
@@ -40,10 +38,8 @@ services:
     ports:
       - "5436:5432"
     volumes:
-      - codeigniter-app_postgres_data:/var/lib/postgresql/data
+      - apm_postgres_codeigniter_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - codeigniter-app-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d codeigniter_app_db"]
@@ -53,16 +49,14 @@ services:
       start_period: 30s
 
   # Redis Cache for CodeIgniter
-  codeigniter-app-redis:
+  apm-redis-codeigniter:
     image: redis:7-alpine
-    container_name: codeigniter-app_redis
+    container_name: apm_redis_codeigniter
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "6383:6379"
     volumes:
-      - codeigniter-app_redis_data:/data
-    networks:
-      - codeigniter-app-network
+      - apm_redis_codeigniter_data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -72,17 +66,9 @@ services:
       start_period: 10s
 
 volumes:
-  codeigniter-app_mysql_data:
+  apm_mysql_codeigniter_data:
     driver: local
-  codeigniter-app_postgres_data:
+  apm_postgres_codeigniter_data:
     driver: local
-  codeigniter-app_redis_data:
+  apm_redis_codeigniter_data:
     driver: local
-
-networks:
-  codeigniter-app-network:
-    driver: bridge
-    name: codeigniter-app_network
-    ipam:
-      config:
-        - subnet: 172.33.0.0/16

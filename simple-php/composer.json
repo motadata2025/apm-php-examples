@@ -1,0 +1,21 @@
+{
+    "name": "simple-php/ui-backend",
+    "description": "Simple PHP UI and Backend for APM examples",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "vlucas/phpdotenv": "^5 || ^6",
+        "predis/predis": "^2.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "SimplePhp\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

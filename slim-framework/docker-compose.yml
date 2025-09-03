@@ -6,9 +6,9 @@ version: '3.8'
 services:
 
   # MySQL Database for Slim Framework
-  slim-framework-mysql:
+  apm-mysql-slim:
     image: mysql:8.0
-    container_name: slim-framework_mysql
+    container_name: apm_mysql_slim
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: slim_framework_db
@@ -17,10 +17,8 @@ services:
     ports:
       - "3309:3306"
     volumes:
-      - slim-framework_mysql_data:/var/lib/mysql
+      - apm_mysql_slim_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - slim-framework-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -30,9 +28,9 @@ services:
       start_period: 30s
 
   # PostgreSQL Database for Slim Framework
-  slim-framework-postgres:
+  apm-postgres-slim:
     image: postgres:15
-    container_name: slim-framework_postgres
+    container_name: apm_postgres_slim
     environment:
       POSTGRES_DB: slim_framework_db
       POSTGRES_USER: postgres
@@ -40,10 +38,8 @@ services:
     ports:
       - "5435:5432"
     volumes:
-      - slim-framework_postgres_data:/var/lib/postgresql/data
+      - apm_postgres_slim_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - slim-framework-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d slim_framework_db"]
@@ -53,16 +49,14 @@ services:
       start_period: 30s
 
   # Redis Cache for Slim Framework
-  slim-framework-redis:
+  apm-redis-slim:
     image: redis:7-alpine
-    container_name: slim-framework_redis
+    container_name: apm_redis_slim
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "6382:6379"
     volumes:
-      - slim-framework_redis_data:/data
-    networks:
-      - slim-framework-network
+      - apm_redis_slim_data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -72,17 +66,9 @@ services:
       start_period: 10s
 
 volumes:
-  slim-framework_mysql_data:
+  apm_mysql_slim_data:
     driver: local
-  slim-framework_postgres_data:
+  apm_postgres_slim_data:
     driver: local
-  slim-framework_redis_data:
+  apm_redis_slim_data:
     driver: local
-
-networks:
-  slim-framework-network:
-    driver: bridge
-    name: slim-framework_network
-    ipam:
-      config:
-        - subnet: 172.31.0.0/16

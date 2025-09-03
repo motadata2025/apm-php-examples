@@ -1,0 +1,8 @@
+[2025-09-03 12:41:18] Error: file_get_contents(https://httpbin.org/get): Failed to open stream: HTTP request failed! HTTP/1.1 503 Service Temporarily Unavailable
+ in /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php on line 96
+[2025-09-03 12:41:18] Exception: file_get_contents(https://httpbin.org/get): Failed to open stream: HTTP request failed! HTTP/1.1 503 Service Temporarily Unavailable
+
+Stack trace:
+#0 [internal function]: {closure}()
+#1 /home/nikunj-katariya/projects/php/apm-php-examples/simple-php/public/index.php(96): file_get_contents()
+#2 {main}

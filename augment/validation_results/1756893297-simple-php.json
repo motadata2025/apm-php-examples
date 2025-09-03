@@ -1,0 +1,40 @@
+Creating .env from .env.example...
+{
+    "app": "simple-php",
+    "php_version": "8.3.25",
+    "timestamp": 1756893300,
+    "total_duration": 2.905482053756714,
+    "mysql_ok": true,
+    "pg_ok": true,
+    "redis_ok": true,
+    "http_ok": true,
+    "success": true,
+    "errors": [],
+    "details": {
+        "mysql": {
+            "success": true,
+            "duration": 0.012761116027832031,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "postgresql": {
+            "success": true,
+            "duration": 0.010982990264892578,
+            "table_exists": true,
+            "user_count": 3
+        },
+        "redis": {
+            "success": true,
+            "duration": 0.0008318424224853516,
+            "client": "redis_extension",
+            "test_passed": true
+        },
+        "http": {
+            "success": true,
+            "duration": 2.880013942718506,
+            "method": "curl",
+            "http_code": 200,
+            "json_valid": true
+        }
+    }
+}

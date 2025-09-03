@@ -1,0 +1,24 @@
+compat/ubuntu-22.04/php-8.4
+?? augment/inventory-simple-php.txt
+
+simple-php directory listing:
+total 48
+drwxrwxr-x  4 nikunj-katariya nikunj-katariya  4096 Sep  3 15:24 .
+drwxrwxr-x 12 nikunj-katariya nikunj-katariya  4096 Sep  3 17:36 ..
+drwxrwxr-x  4 nikunj-katariya nikunj-katariya  4096 Sep  2 22:14 docker
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya  1989 Sep  3 16:25 docker-compose.yml
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   726 Sep  3 15:24 .env
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   726 Sep  3 15:07 .env.example
+drwxrwxr-x  2 nikunj-katariya nikunj-katariya  4096 Sep  3 14:52 public
+-rwxrwxr-x  1 nikunj-katariya nikunj-katariya  1129 Sep  3 15:25 validate.sh
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya 13701 Sep  3 15:08 validator.php
+total 48
+drwxrwxr-x  4 nikunj-katariya nikunj-katariya  4096 Sep  3 15:24 .
+drwxrwxr-x 12 nikunj-katariya nikunj-katariya  4096 Sep  3 17:36 ..
+drwxrwxr-x  4 nikunj-katariya nikunj-katariya  4096 Sep  2 22:14 docker
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya  1989 Sep  3 16:25 docker-compose.yml
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   726 Sep  3 15:24 .env
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   726 Sep  3 15:07 .env.example
+drwxrwxr-x  2 nikunj-katariya nikunj-katariya  4096 Sep  3 14:52 public
+-rwxrwxr-x  1 nikunj-katariya nikunj-katariya  1129 Sep  3 15:25 validate.sh
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya 13701 Sep  3 15:08 validator.php

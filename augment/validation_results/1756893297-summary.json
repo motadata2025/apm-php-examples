@@ -1,0 +1,24 @@
+{
+  "timestamp": 1756893297,
+  "total_apps": 5,
+  "successful_apps": 5,
+  "failed_apps": 0,
+  "success_list": [
+  "simple-php",
+  "slim-framework",
+  "symfony-app",
+  "laravel-app",
+  "codeigniter-app"
+],
+  "failure_list": [
+  ""
+],
+  "results_directory": "/home/nikunj-katariya/projects/php/apm-php-examples/augment/validation_results",
+  "individual_results": [
+    "1756893297-simple-php.json",
+    "1756893297-slim-framework.json",
+    "1756893297-symfony-app.json",
+    "1756893297-laravel-app.json",
+    "1756893297-codeigniter-app.json"
+  ]
+}

@@ -1,0 +1,59 @@
+AUGMENT INVENTORY - PHPApm-Testbed Repository
+==============================================
+
+Date: 2025-09-03
+Current Branch: simple
+Last Commit SHA: dd37ed2aa8d08684e9329862e1d07dd709325cdc
+Repository Root: /home/nikunj-katariya/projects/php/apm-php-examples
+
+REPOSITORY STRUCTURE:
+--------------------
+Note: Repository uses individual app directories instead of centralized apps/ directory
+- simple-php/
+- slim-framework/
+- symfony-app/
+- laravel-app/
+- codeigniter-app/
+
+EXISTING DOCKER-COMPOSE FILES:
+-----------------------------
+- ./codeigniter-app/docker-compose.yml
+- ./slim-framework/docker-compose.yml
+- ./symfony-app/docker-compose.yml
+- ./laravel-app/docker-compose.yml
+- ./simple-php/docker-compose.yml
+
+EXISTING DATABASE INIT FILES:
+----------------------------
+MySQL Init Files:
+- ./codeigniter-app/docker/mysql/init/01-create-database.sql
+- ./slim-framework/docker/mysql/init/01-create-database.sql
+- ./symfony-app/docker/mysql/init/01-create-database.sql
+- ./laravel-app/docker/mysql/init/01-create-database.sql
+- ./simple-php/docker/mysql/init/01-create-database.sql
+
+PostgreSQL Init Files:
+- ./codeigniter-app/docker/postgres/init/01-create-database.sql
+- ./slim-framework/docker/postgres/init/01-create-database.sql
+- ./symfony-app/docker/postgres/init/01-create-database.sql
+- ./laravel-app/docker/postgres/init/01-create-database.sql
+- ./simple-php/docker/postgres/init/01-create-database.sql
+
+MISSING DIRECTORIES:
+-------------------
+- docker/ (centralized services directory)
+- apps/ (centralized apps directory - using individual app dirs instead)
+
+PRECHECK STATUS: PASSED
+- Repository is clean (no uncommitted changes)
+- All required app directories present
+- Database init files exist per app
+- Docker compose files exist per app
+
+IMPLEMENTATION PLAN:
+-------------------
+Will adapt to existing structure:
+- Use individual app directories instead of apps/ prefix
+- Create centralized docker/ directory for services
+- Add validators to each app directory
+- Create repo-level scripts and docs
