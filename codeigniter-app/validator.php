@@ -328,11 +328,77 @@ class CodeIgniterAppValidator
         }
     }
 
+    public function validateWebUI(): bool
+    {
+        $start = microtime(true);
+        try {
+            // Check if web server is running on port 8082
+            $url = 'http://127.0.0.1:8082/';
+            $timeout = 10;
+
+            // Try cURL first
+            if (function_exists('curl_init')) {
+                $ch = curl_init();
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => $timeout,
+                    CURLOPT_CONNECTTIMEOUT => 5,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_USERAGENT => 'APM-PHP-Validator/1.0',
+                ]);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $error = curl_error($ch);
+                curl_close($ch);
+
+                if ($response === false || !empty($error)) {
+                    throw new Exception("cURL error: $error");
+                }
+
+                if ($httpCode !== 200) {
+                    throw new Exception("HTTP error: $httpCode");
+                }
+
+                // Check if response contains expected content
+                $hasCodeIgniter = strpos($response, 'CodeIgniter') !== false;
+                $hasPhpVersion = strpos($response, PHP_VERSION) !== false;
+
+                $this->results['web'] = [
+                    'success' => $hasCodeIgniter && $hasPhpVersion,
+                    'duration' => microtime(true) - $start,
+                    'http_code' => $httpCode,
+                    'has_codeigniter_text' => $hasCodeIgniter,
+                    'has_php_version' => $hasPhpVersion,
+                    'url' => $url,
+                ];
+
+                return $hasCodeIgniter && $hasPhpVersion;
+            }
+
+            throw new Exception("cURL not available for web UI validation");
+
+        } catch (Exception $e) {
+            $this->results['web'] = [
+                'success' => false,
+                'duration' => microtime(true) - $start,
+                'error' => $e->getMessage(),
+                'url' => $url ?? 'unknown',
+            ];
+            return false;
+        }
+    }
+
     public function run(): int
     {
         $errors = [];
 
         // Run all validations
+        if (!$this->validateWebUI()) {
+            $errors[] = "Web UI validation failed";
+        }
+
         if (!$this->validateMySQL()) {
             $errors[] = "MySQL validation failed";
         }
@@ -356,10 +422,11 @@ class CodeIgniterAppValidator
             'php_version' => PHP_VERSION,
             'timestamp' => time(),
             'total_duration' => $totalDuration,
+            'web_ok' => $this->results['web']['success'] ?? false,
             'mysql_ok' => $this->results['mysql']['success'] ?? false,
             'pg_ok' => $this->results['postgresql']['success'] ?? false,
             'redis_ok' => $this->results['redis']['success'] ?? false,
-            'http_ok' => $this->results['http']['success'] ?? false,
+            'external_ok' => $this->results['http']['success'] ?? false,
             'success' => empty($errors),
             'errors' => $errors,
             'details' => $this->results,
