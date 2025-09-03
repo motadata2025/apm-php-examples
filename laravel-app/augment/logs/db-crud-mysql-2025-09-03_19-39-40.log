@@ -1,0 +1,7 @@
+{
+    "timestamp": "2025-09-03T19:39:40.406055Z",
+    "operation": "db-crud-mysql",
+    "error": "SQLSTATE[HY000] [1045] Access denied for user 'laravel_app_user'@'172.23.0.1' (using password: YES) (Connection: mysql_remote, SQL: select table_name as `name`, (data_length + index_length) as `size`, table_comment as `comment`, engine as `engine`, table_collation as `collation` from information_schema.tables where table_schema = 'laravel_app_db' and table_type in ('BASE TABLE', 'SYSTEM VERSIONED') order by table_name)",
+    "php_version": "8.4.12",
+    "laravel_version": "10.48.29"
+}

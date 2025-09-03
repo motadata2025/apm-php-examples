@@ -1,0 +1,7 @@
+{
+    "timestamp": "2025-09-03T19:39:40.641911Z",
+    "operation": "db-crud-pgsql",
+    "error": "SQLSTATE[42703]: Undefined column: 7 ERROR:  column \"email_verified_at\" of relation \"users\" does not exist\nLINE 1: insert into \"users\" (\"name\", \"email\", \"email_verified_at\", \"...\n                                              ^ (Connection: pgsql_remote, SQL: insert into \"users\" (\"name\", \"email\", \"email_verified_at\", \"password\", \"created_at\", \"updated_at\") values (Aliyah Walker, raoul.schneider@yahoo.com, 2025-09-03 19:39:40, $2y$12$cvuW02N7KlwngKIjM5hPfOoCkJTZd6fgDztUvAb5DS6bQabYaRxwa, 2025-09-03 19:39:40, 2025-09-03 19:39:40) returning \"id\")",
+    "php_version": "8.4.12",
+    "laravel_version": "10.48.29"
+}

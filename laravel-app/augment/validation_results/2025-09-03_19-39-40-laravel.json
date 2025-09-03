@@ -1,0 +1,86 @@
+{
+    "external_api": {
+        "success": true,
+        "details": {
+            "status": 200,
+            "response_size": 233,
+            "elapsed_ms": 15897.7,
+            "first_level_keys": [
+                "args",
+                "headers",
+                "origin",
+                "url"
+            ]
+        },
+        "test_type": "external_api_call"
+    },
+    "databases": {
+        "success": false,
+        "details": {
+            "mysql": {
+                "ok": false,
+                "msg": "Failed to connect to mysql: SQLSTATE[HY000] [1045] Access denied for user 'laravel_app_user'@'172.23.0.1' (using password: YES)"
+            },
+            "pg": {
+                "ok": true,
+                "msg": "Connected to pgsql successfully"
+            }
+        },
+        "test_type": "database_connections"
+    },
+    "database_crud": {
+        "success": false,
+        "details": {
+            "mysql": {
+                "ok": false,
+                "error": "SQLSTATE[HY000] [1045] Access denied for user 'laravel_app_user'@'172.23.0.1' (using password: YES) (Connection: mysql_remote, SQL: select table_name as `name`, (data_length + index_length) as `size`, table_comment as `comment`, engine as `engine`, table_collation as `collation` from information_schema.tables where table_schema = 'laravel_app_db' and table_type in ('BASE TABLE', 'SYSTEM VERSIONED') order by table_name)"
+            },
+            "pg": {
+                "ok": false,
+                "error": "SQLSTATE[42703]: Undefined column: 7 ERROR:  column \"email_verified_at\" of relation \"users\" does not exist\nLINE 1: insert into \"users\" (\"name\", \"email\", \"email_verified_at\", \"...\n                                              ^ (Connection: pgsql_remote, SQL: insert into \"users\" (\"name\", \"email\", \"email_verified_at\", \"password\", \"created_at\", \"updated_at\") values (Aliyah Walker, raoul.schneider@yahoo.com, 2025-09-03 19:39:40, $2y$12$cvuW02N7KlwngKIjM5hPfOoCkJTZd6fgDztUvAb5DS6bQabYaRxwa, 2025-09-03 19:39:40, 2025-09-03 19:39:40) returning \"id\")"
+            }
+        },
+        "test_type": "database_crud"
+    },
+    "redis_insert_bulk": {
+        "success": true,
+        "details": {
+            "ok": true,
+            "queue_name": "Laravel App_8_4_12",
+            "length_after": 3,
+            "inserted_messages": [
+                "{\"id\":\"68b8997c9d2c9\",\"timestamp\":\"2025-09-03T19:39:40.643803Z\",\"payload\":\"Fuga ipsum non delectus iusto adipisci ex.\"}",
+                "{\"id\":\"68b8997c9d401\",\"timestamp\":\"2025-09-03T19:39:40.644107Z\",\"payload\":\"Et aliquid et placeat quisquam tempore.\"}",
+                "{\"id\":\"68b8997c9d488\",\"timestamp\":\"2025-09-03T19:39:40.644238Z\",\"payload\":\"Officiis amet et magni dolores.\"}"
+            ]
+        },
+        "test_type": "redis_insert_bulk"
+    },
+    "redis_read_one": {
+        "success": true,
+        "details": {
+            "ok": true,
+            "queue_name": "Laravel App_8_4_12",
+            "length_after": 2,
+            "popped_message": "{\"id\":\"68b8997c9d2c9\",\"timestamp\":\"2025-09-03T19:39:40.643803Z\",\"payload\":\"Fuga ipsum non delectus iusto adipisci ex.\"}"
+        },
+        "test_type": "redis_read_one"
+    },
+    "redis_clear": {
+        "success": true,
+        "details": {
+            "ok": true,
+            "queue_name": "Laravel App_8_4_12",
+            "length_after": 0,
+            "cleared_count": 2
+        },
+        "test_type": "redis_clear"
+    },
+    "summary": {
+        "total_duration": 16.162628173828125,
+        "php_version": "8.4.12",
+        "laravel_version": "10.48.29",
+        "timestamp": "2025-09-03 19:39:40",
+        "overall_success": false
+    }
+}
