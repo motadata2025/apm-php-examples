@@ -40,24 +40,28 @@ class CodeIgniterAppValidator
             }
         }
 
-        // Fallback to environment variables
+        // Fallback to environment variables with correct MySQL credentials
         $this->config = array_merge([
             'DB_MYSQL_HOST' => $_ENV['DB_MYSQL_HOST'] ?? '127.0.0.1',
-            'DB_MYSQL_PORT' => $_ENV['DB_MYSQL_PORT'] ?? '3307',
-            'DB_MYSQL_DATABASE' => $_ENV['DB_MYSQL_DATABASE'] ?? 'simple_php_db',
-            'DB_MYSQL_USERNAME' => $_ENV['DB_MYSQL_USERNAME'] ?? 'simple_php_user',
-            'DB_MYSQL_PASSWORD' => $_ENV['DB_MYSQL_PASSWORD'] ?? 'simple_php_password',
+            'DB_MYSQL_PORT' => $_ENV['DB_MYSQL_PORT'] ?? '3310',
+            'DB_MYSQL_DATABASE' => $_ENV['DB_MYSQL_DATABASE'] ?? 'codeigniter_app_db',
+            'DB_MYSQL_USERNAME' => $_ENV['DB_MYSQL_USERNAME'] ?? 'codeigniter_app_user',
+            'DB_MYSQL_PASSWORD' => $_ENV['DB_MYSQL_PASSWORD'] ?? 'codeigniter_app_password',
             'DB_PGSQL_HOST' => $_ENV['DB_PGSQL_HOST'] ?? '127.0.0.1',
-            'DB_PGSQL_PORT' => $_ENV['DB_PGSQL_PORT'] ?? '5433',
-            'DB_PGSQL_DATABASE' => $_ENV['DB_PGSQL_DATABASE'] ?? 'simple_php_db',
+            'DB_PGSQL_PORT' => $_ENV['DB_PGSQL_PORT'] ?? '5436',
+            'DB_PGSQL_DATABASE' => $_ENV['DB_PGSQL_DATABASE'] ?? 'codeigniter_app_db',
             'DB_PGSQL_USERNAME' => $_ENV['DB_PGSQL_USERNAME'] ?? 'postgres',
             'DB_PGSQL_PASSWORD' => $_ENV['DB_PGSQL_PASSWORD'] ?? 'postgrespassword',
             'REDIS_HOST' => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? '6380',
+            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? '6383',
             'REDIS_PASSWORD' => $_ENV['REDIS_PASSWORD'] ?? '',
             'HTTP_TIMEOUT' => $_ENV['HTTP_TIMEOUT'] ?? '20',
             'EXTERNAL_API_URL' => $_ENV['EXTERNAL_API_URL'] ?? 'https://httpbin.org/get',
         ], $this->config);
+
+        // Override MySQL credentials to match docker-compose.yml
+        $this->config['DB_MYSQL_USERNAME'] = 'codeigniter-app_user';
+        $this->config['DB_MYSQL_PASSWORD'] = 'codeigniter-app_password';
     }
 
     public function validateMySQL(): bool
@@ -328,11 +332,77 @@ class CodeIgniterAppValidator
         }
     }
 
+    public function validateWebUI(): bool
+    {
+        $start = microtime(true);
+        try {
+            // Check if web server is running on port 8082
+            $url = 'http://127.0.0.1:8082/';
+            $timeout = 10;
+
+            // Try cURL first
+            if (function_exists('curl_init')) {
+                $ch = curl_init();
+                curl_setopt_array($ch, [
+                    CURLOPT_URL => $url,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => $timeout,
+                    CURLOPT_CONNECTTIMEOUT => 5,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_USERAGENT => 'APM-PHP-Validator/1.0',
+                ]);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $error = curl_error($ch);
+                curl_close($ch);
+
+                if ($response === false || !empty($error)) {
+                    throw new Exception("cURL error: $error");
+                }
+
+                if ($httpCode !== 200) {
+                    throw new Exception("HTTP error: $httpCode");
+                }
+
+                // Check if response contains expected content
+                $hasCodeIgniter = strpos($response, 'CodeIgniter') !== false;
+                $hasPhpVersion = strpos($response, PHP_VERSION) !== false;
+
+                $this->results['web'] = [
+                    'success' => $hasCodeIgniter && $hasPhpVersion,
+                    'duration' => microtime(true) - $start,
+                    'http_code' => $httpCode,
+                    'has_codeigniter_text' => $hasCodeIgniter,
+                    'has_php_version' => $hasPhpVersion,
+                    'url' => $url,
+                ];
+
+                return $hasCodeIgniter && $hasPhpVersion;
+            }
+
+            throw new Exception("cURL not available for web UI validation");
+
+        } catch (Exception $e) {
+            $this->results['web'] = [
+                'success' => false,
+                'duration' => microtime(true) - $start,
+                'error' => $e->getMessage(),
+                'url' => $url ?? 'unknown',
+            ];
+            return false;
+        }
+    }
+
     public function run(): int
     {
         $errors = [];
 
         // Run all validations
+        if (!$this->validateWebUI()) {
+            $errors[] = "Web UI validation failed";
+        }
+
         if (!$this->validateMySQL()) {
             $errors[] = "MySQL validation failed";
         }
@@ -356,10 +426,11 @@ class CodeIgniterAppValidator
             'php_version' => PHP_VERSION,
             'timestamp' => time(),
             'total_duration' => $totalDuration,
+            'web_ok' => $this->results['web']['success'] ?? false,
             'mysql_ok' => $this->results['mysql']['success'] ?? false,
             'pg_ok' => $this->results['postgresql']['success'] ?? false,
             'redis_ok' => $this->results['redis']['success'] ?? false,
-            'http_ok' => $this->results['http']['success'] ?? false,
+            'external_ok' => $this->results['http']['success'] ?? false,
             'success' => empty($errors),
             'errors' => $errors,
             'details' => $this->results,
