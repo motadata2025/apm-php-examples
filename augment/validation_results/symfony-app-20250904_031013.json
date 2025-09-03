@@ -1,0 +1,25 @@
+[critical] Uncaught Error: Cannot assign Faker\Generator to property App\Command\ApmValidateCommand::$faker of type Faker\Factory
+TypeError {#187
+  #message: "Cannot assign Faker\Generator to property App\Command\ApmValidateCommand::$faker of type Faker\Factory"
+  #code: 0
+  #file: "./src/Command/ApmValidateCommand.php"
+  #line: 27
+  trace: {
+    ./src/Command/ApmValidateCommand.php:27 {
+      App\Command\ApmValidateCommand->__construct()
+      ›     $this->loadConfig();
+      ›     $this->faker = FakerFactory::create();
+      › }
+    }
+    ./var/cache/dev/Container0gPwnsj/getApmValidateCommandService.php:24 { …}
+    ./var/cache/dev/Container0gPwnsj/App_KernelDevDebugContainer.php:167 { …}
+    ./var/cache/dev/Container0gPwnsj/getApmValidateCommand_LazyService.php:24 { …}
+    ./vendor/symfony/console/Command/LazyCommand.php:190 { …}
+    ./vendor/symfony/console/Application.php:320 { …}
+    ./vendor/symfony/framework-bundle/Console/Application.php:80 { …}
+    ./vendor/symfony/console/Application.php:175 { …}
+    ./vendor/symfony/runtime/Runner/Symfony/ConsoleApplicationRunner.php:49 { …}
+    ./vendor/autoload_runtime.php:29 { …}
+    ./bin/console:15 { …}
+  }
+}

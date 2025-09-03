@@ -1,0 +1,45 @@
+# Symfony APM Application Routes
+
+# Main UI route
+app_index:
+    path: /
+    controller: App\Controller\UiController::index
+    methods: [GET]
+
+# API routes for external API testing
+api_external:
+    path: /api/external
+    controller: App\Controller\UiController::externalApi
+    methods: [POST]
+
+# API routes for database operations
+api_db_check:
+    path: /api/db/check
+    controller: App\Controller\UiController::dbCheck
+    methods: [POST]
+
+api_db_crud:
+    path: /api/db/crud
+    controller: App\Controller\UiController::dbCrud
+    methods: [POST]
+
+# API routes for Redis operations
+api_redis_push:
+    path: /api/redis/push
+    controller: App\Controller\UiController::redisPush
+    methods: [POST]
+
+api_redis_push_one:
+    path: /api/redis/push_one
+    controller: App\Controller\UiController::redisPushOne
+    methods: [POST]
+
+api_redis_pop:
+    path: /api/redis/pop
+    controller: App\Controller\UiController::redisPop
+    methods: [POST]
+
+api_redis_clear:
+    path: /api/redis/clear
+    controller: App\Controller\UiController::redisClear
+    methods: [POST]

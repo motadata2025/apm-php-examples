@@ -1,0 +1,12 @@
+{
+    "app": "symfony-app",
+    "php_version": "8.4.12",
+    "web_server": "php_cli",
+    "mysql_ok": true,
+    "pgsql_ok": true,
+    "redis_ok": true,
+    "external_ok": true,
+    "errors": [],
+    "duration": 1.53,
+    "timestamp": 1756935815
+}
