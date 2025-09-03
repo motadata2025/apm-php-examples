@@ -6,9 +6,9 @@ version: '3.8'
 services:
 
   # MySQL Database for Simple PHP
-  simple-php-mysql:
+  apm-mysql-simple:
     image: mysql:8.0
-    container_name: simple_php_mysql
+    container_name: apm_mysql_simple
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: simple_php_db
@@ -17,10 +17,8 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - simple_php_mysql_data:/var/lib/mysql
+      - apm_mysql_simple_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - simple-php-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -30,9 +28,9 @@ services:
       start_period: 30s
 
   # PostgreSQL Database for Simple PHP
-  simple-php-postgres:
+  apm-postgres-simple:
     image: postgres:15
-    container_name: simple_php_postgres
+    container_name: apm_postgres_simple
     environment:
       POSTGRES_DB: simple_php_db
       POSTGRES_USER: postgres
@@ -40,10 +38,8 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - simple_php_postgres_data:/var/lib/postgresql/data
+      - apm_postgres_simple_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - simple-php-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d simple_php_db"]
@@ -53,16 +49,14 @@ services:
       start_period: 30s
 
   # Redis Cache for Simple PHP
-  simple-php-redis:
+  apm-redis-simple:
     image: redis:7-alpine
-    container_name: simple_php_redis
+    container_name: apm_redis_simple
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "6380:6379"
     volumes:
-      - simple_php_redis_data:/data
-    networks:
-      - simple-php-network
+      - apm_redis_simple_data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -72,17 +66,9 @@ services:
       start_period: 10s
 
 volumes:
-  simple_php_mysql_data:
+  apm_mysql_simple_data:
     driver: local
-  simple_php_postgres_data:
+  apm_postgres_simple_data:
     driver: local
-  simple_php_redis_data:
+  apm_redis_simple_data:
     driver: local
-
-networks:
-  simple-php-network:
-    driver: bridge
-    name: simple_php_network
-    ipam:
-      config:
-        - subnet: 172.30.0.0/16

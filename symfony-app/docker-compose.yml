@@ -6,9 +6,9 @@ version: '3.8'
 services:
 
   # MySQL Database for Simple PHP
-  symfony-app-mysql:
+  apm-mysql-symfony:
     image: mysql:8.0
-    container_name: symfony_app_mysql
+    container_name: apm_mysql_symfony
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: symfony_app_db
@@ -17,10 +17,8 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - symfony_app_mysql_data:/var/lib/mysql
+      - apm_mysql_symfony_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - symfony-app-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -30,20 +28,18 @@ services:
       start_period: 30s
 
   # PostgreSQL Database for Simple PHP
-  symfony-app-postgres:
+  apm-postgres-symfony:
     image: postgres:15
-    container_name: symfony_app_postgres
+    container_name: apm_postgres_symfony
     environment:
       POSTGRES_DB: symfony_app_db
-      POSTGRES_USER: symfony_app_user
-      POSTGRES_PASSWORD: symfony_app_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
     ports:
       - "5434:5432"
     volumes:
-      - symfony_app_postgres_data:/var/lib/postgresql/data
+      - apm_postgres_symfony_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - symfony-app-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d symfony_app_db"]
@@ -53,16 +49,14 @@ services:
       start_period: 30s
 
   # Redis Cache for Simple PHP
-  symfony-app-redis:
+  apm-redis-symfony:
     image: redis:7-alpine
-    container_name: symfony_app_redis
+    container_name: apm_redis_symfony
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "6381:6379"
     volumes:
-      - symfony_app_redis_data:/data
-    networks:
-      - symfony-app-network
+      - apm_redis_symfony_data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -72,17 +66,9 @@ services:
       start_period: 10s
 
 volumes:
-  symfony_app_mysql_data:
+  apm_mysql_symfony_data:
     driver: local
-  symfony_app_postgres_data:
+  apm_postgres_symfony_data:
     driver: local
-  symfony_app_redis_data:
+  apm_redis_symfony_data:
     driver: local
-
-networks:
-  symfony-app-network:
-    driver: bridge
-    name: symfony_app_network
-    ipam:
-      config:
-        - subnet: 172.32.0.0/16
