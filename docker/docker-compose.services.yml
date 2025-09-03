@@ -2,8 +2,6 @@
 # All database and cache services for validation testing
 # Port allocation per DOCKER_PORTS.md
 
-version: '3.8'
-
 services:
 
   # MySQL Services
@@ -20,8 +18,7 @@ services:
     volumes:
       - apm_mysql_simple_data:/var/lib/mysql
       - ../simple-php/docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
+
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -43,8 +40,6 @@ services:
     volumes:
       - apm_mysql_symfony_data:/var/lib/mysql
       - ../symfony-app/docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -66,8 +61,6 @@ services:
     volumes:
       - apm_mysql_slim_data:/var/lib/mysql
       - ../slim-framework/docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -89,8 +82,6 @@ services:
     volumes:
       - apm_mysql_codeigniter_data:/var/lib/mysql
       - ../codeigniter-app/docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -112,8 +103,6 @@ services:
     volumes:
       - apm_mysql_laravel_data:/var/lib/mysql
       - ../laravel-app/docker/mysql/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
@@ -135,8 +124,6 @@ services:
     volumes:
       - apm_postgres_simple_data:/var/lib/postgresql/data
       - ../simple-php/docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d simple_php_db"]
@@ -157,8 +144,6 @@ services:
     volumes:
       - apm_postgres_symfony_data:/var/lib/postgresql/data
       - ../symfony-app/docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d symfony_app_db"]
@@ -179,8 +164,6 @@ services:
     volumes:
       - apm_postgres_slim_data:/var/lib/postgresql/data
       - ../slim-framework/docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d slim_framework_db"]
@@ -201,8 +184,6 @@ services:
     volumes:
       - apm_postgres_codeigniter_data:/var/lib/postgresql/data
       - ../codeigniter-app/docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d codeigniter_app_db"]
@@ -223,8 +204,6 @@ services:
     volumes:
       - apm_postgres_laravel_data:/var/lib/postgresql/data
       - ../laravel-app/docker/postgres/init:/docker-entrypoint-initdb.d
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d laravel_app_db"]
@@ -242,8 +221,6 @@ services:
       - "6380:6379"
     volumes:
       - apm_redis_simple_data:/data
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -260,8 +237,6 @@ services:
       - "6381:6379"
     volumes:
       - apm_redis_symfony_data:/data
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -278,8 +253,6 @@ services:
       - "6382:6379"
     volumes:
       - apm_redis_slim_data:/data
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -296,8 +269,6 @@ services:
       - "6383:6379"
     volumes:
       - apm_redis_codeigniter_data:/data
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -314,8 +285,6 @@ services:
       - "6384:6379"
     volumes:
       - apm_redis_laravel_data:/data
-    networks:
-      - apm-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -360,11 +329,3 @@ volumes:
     driver: local
   apm_redis_laravel_data:
     driver: local
-
-networks:
-  apm-network:
-    driver: bridge
-    name: apm_network
-    ipam:
-      config:
-        - subnet: 172.31.0.0/16
