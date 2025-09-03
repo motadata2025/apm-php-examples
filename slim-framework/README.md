@@ -29,8 +29,16 @@ A Slim Framework-based Application Performance Monitoring (APM) dashboard that d
 
 ### 1. Install Dependencies
 ```bash
-# Install Composer dependencies
+# For standard PHP installations
 composer install --no-interaction --prefer-dist --no-scripts
+
+# For PHP 8.1 users (if encountering timezone errors)
+./composer-php81.sh install --no-interaction --prefer-dist --no-scripts
+```
+
+**Note for PHP 8.1 users**: If you encounter timezone database corruption errors with Composer, use the provided wrapper script:
+```bash
+./composer-php81.sh install
 ```
 
 ### 2. Start Services
@@ -68,7 +76,11 @@ EXTERNAL_API_URL=https://httpbin.org/get
 
 **Option 1: Using PHP Built-in Server (Recommended)**
 ```bash
+# Standard PHP
 php -S 0.0.0.0:8083 -t public
+
+# For PHP 8.1 users (if encountering timezone issues)
+./php-php81.sh -S 0.0.0.0:8083 -t public
 ```
 
 **Option 2: Using Composer Script**
@@ -191,6 +203,16 @@ slim-framework/
 2. **Database Connection**: Verify Docker services are running
 3. **Composer Dependencies**: Run `composer install` if vendor/ is missing
 4. **Permissions**: Ensure validate.sh is executable (`chmod +x validate.sh`)
+5. **PHP 8.1 Timezone Database Corruption**:
+   - Error: "Timezone database is corrupt" when running Composer or PHP scripts
+   - Solution: Use the provided wrapper scripts:
+     - For Composer: `./composer-php81.sh [arguments]`
+     - For PHP: `./php-php81.sh [arguments]`
+   - Alternative: Run with timezone settings manually:
+     ```bash
+     TZ=UTC php -d date.timezone=UTC composer install
+     TZ=UTC php -d date.timezone=UTC -S 0.0.0.0:8083 -t public
+     ```
 
 ### Logs and Debugging
 
