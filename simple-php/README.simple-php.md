@@ -22,6 +22,11 @@ The application provides a web interface with three main sections:
    composer install --no-interaction --no-scripts
    ```
 
+   **Note for PHP 8.1 users**: If you encounter timezone database corruption errors with Composer, use the provided wrapper script:
+   ```bash
+   ./composer-php81.sh install --no-interaction --no-scripts
+   ```
+
 2. Ensure your `.env` file is properly configured with database and Redis connection details.
 
 ## Starting the Server
@@ -124,6 +129,20 @@ simple-php/
 - **Database connection issues**: Verify `.env` configuration and ensure services are running
 - **Redis connection issues**: Check Redis service status and configuration
 - **Validation failures**: Check `augment/logs/validate-failure.log` for specific error details
+
+### PHP 8.1 Specific Issues
+
+- **Timezone database corruption error**:
+  - Error: "Timezone database is corrupt" when running Composer or PHP scripts
+  - Solution: Use the provided wrapper scripts:
+    - For Composer: `./composer-php81.sh [arguments]`
+    - For PHP: `./php-php81.sh [arguments]`
+    - For validation: `./validate.sh` (automatically detects PHP 8.1)
+  - Alternative: Run with timezone settings manually:
+    ```bash
+    TZ=UTC php -d date.timezone=UTC composer install
+    TZ=UTC php -d date.timezone=UTC validator.php
+    ```
 
 ## Logs
 

@@ -9,33 +9,8 @@ cd "$SCRIPT_DIR"
 # Create logs directory
 mkdir -p augment/logs
 
-# Detect PHP version and set appropriate commands
-PHP_VERSION=$(php -r "echo PHP_VERSION_ID;")
-COMPOSER_WRAPPER="$SCRIPT_DIR/composer-php81.sh"
-PHP_WRAPPER="$SCRIPT_DIR/php-php81.sh"
-
-# Use wrappers for PHP 8.1 if available, otherwise use standard commands
-if [[ $PHP_VERSION -ge 80100 && $PHP_VERSION -lt 80200 ]]; then
-    if [[ -x "$COMPOSER_WRAPPER" ]]; then
-        echo "Using Composer PHP 8.1 wrapper for timezone fix..."
-        COMPOSER_CMD="$COMPOSER_WRAPPER"
-    else
-        COMPOSER_CMD="composer"
-    fi
-
-    if [[ -x "$PHP_WRAPPER" ]]; then
-        echo "Using PHP 8.1 wrapper for timezone fix..."
-        PHP_CMD="$PHP_WRAPPER"
-    else
-        PHP_CMD="php"
-    fi
-else
-    COMPOSER_CMD="composer"
-    PHP_CMD="php"
-fi
-
 # Check if composer is available
-if ! command -v composer &> /dev/null && [[ "$COMPOSER_CMD" == "composer" ]]; then
+if ! command -v composer &> /dev/null; then
     echo "composer missing" > augment/logs/composer-missing.log
     echo "Error: Composer not found. Please install Composer first."
     exit 1
@@ -43,7 +18,7 @@ fi
 
 # Install dependencies
 echo "Installing Composer dependencies..."
-$COMPOSER_CMD install --no-interaction --no-scripts
+composer install --no-interaction --no-scripts
 
 # Check if PHP server is already running
 if [ -f augment/php-server.pid ]; then
@@ -58,7 +33,7 @@ fi
 
 # Start PHP built-in server
 echo "Starting PHP built-in server on 0.0.0.0:8080..."
-$PHP_CMD -S 0.0.0.0:8080 -t public > augment/logs/php-server.log 2>&1 &
+php -S 0.0.0.0:8080 -t public > augment/logs/php-server.log 2>&1 &
 SERVER_PID=$!
 echo $SERVER_PID > augment/php-server.pid
 
