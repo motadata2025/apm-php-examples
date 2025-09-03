@@ -71,21 +71,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # Adminer for Simple PHP Database Management
-  symfony-app-adminer:
-    image: adminer:latest
-    container_name: symfony_app_adminer
-    ports:
-      - "8082:8080"
-    networks:
-      - symfony-app-network
-    restart: unless-stopped
-    depends_on:
-      - symfony-app-mysql
-      - symfony-app-postgres
-    profiles:
-      - admin
-
 volumes:
   symfony_app_mysql_data:
     driver: local

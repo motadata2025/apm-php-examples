@@ -71,21 +71,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # Adminer for Simple PHP Database Management
-  simple-php-adminer:
-    image: adminer:latest
-    container_name: simple_php_adminer
-    ports:
-      - "8080:8080"
-    networks:
-      - simple-php-network
-    restart: unless-stopped
-    depends_on:
-      - simple-php-mysql
-      - simple-php-postgres
-    profiles:
-      - admin
-
 volumes:
   simple_php_mysql_data:
     driver: local

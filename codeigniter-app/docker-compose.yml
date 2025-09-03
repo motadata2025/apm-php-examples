@@ -71,21 +71,6 @@ services:
       retries: 5
       start_period: 10s
 
-  # Adminer for CodeIgniter Database Management
-  codeigniter-app-adminer:
-    image: adminer:latest
-    container_name: codeigniter-app_adminer
-    ports:
-      - "8083:8080"
-    networks:
-      - codeigniter-app-network
-    restart: unless-stopped
-    depends_on:
-      - codeigniter-app-mysql
-      - codeigniter-app-postgres
-    profiles:
-      - admin
-
 volumes:
   codeigniter-app_mysql_data:
     driver: local
