@@ -227,12 +227,77 @@
       "file": "augment/validation_results/slim-framework-20250904_023828.json",
       "commit_sha": "c0f5aad4c7bba5ed9ed7a9e329246e48343b4811",
       "purpose": "Smoke test validation results for all API endpoints"
+    },
+    {
+      "file": "symfony-app/composer.json",
+      "commit_sha": "pending",
+      "purpose": "Symfony dependencies and autoloading configuration"
+    },
+    {
+      "file": "symfony-app/bootstrap.sh",
+      "commit_sha": "pending",
+      "purpose": "Idempotent bootstrap script for Symfony application setup"
+    },
+    {
+      "file": "symfony-app/.gitignore",
+      "commit_sha": "pending",
+      "purpose": "Git ignore patterns for Symfony application"
+    },
+    {
+      "file": "symfony-app/config/packages/doctrine.yaml",
+      "commit_sha": "pending",
+      "purpose": "Doctrine DBAL configuration for MySQL and PostgreSQL"
+    },
+    {
+      "file": "symfony-app/config/packages/cache.yaml",
+      "commit_sha": "pending",
+      "purpose": "Redis cache configuration for Symfony"
+    },
+    {
+      "file": "symfony-app/config/routes.yaml",
+      "commit_sha": "pending",
+      "purpose": "Application routes configuration"
+    },
+    {
+      "file": "symfony-app/src/Controller/UiController.php",
+      "commit_sha": "pending",
+      "purpose": "Main UI controller with API endpoints for external API, database, and Redis operations"
+    },
+    {
+      "file": "symfony-app/templates/index.html.twig",
+      "commit_sha": "pending",
+      "purpose": "Responsive web UI with three blocks and AJAX functionality"
+    },
+    {
+      "file": "symfony-app/src/Command/ApmValidateCommand.php",
+      "commit_sha": "pending",
+      "purpose": "Symfony Console command for APM validation"
+    },
+    {
+      "file": "symfony-app/validate.sh",
+      "commit_sha": "pending",
+      "purpose": "Validation wrapper script (modified existing file)"
+    },
+    {
+      "file": "symfony-app/public/index.php",
+      "commit_sha": "pending",
+      "purpose": "Symfony front controller for built-in PHP server"
+    },
+    {
+      "file": "symfony-app/public/css/style.css",
+      "commit_sha": "pending",
+      "purpose": "Responsive CSS styling for dashboard UI"
+    },
+    {
+      "file": "augment/validation_results/symfony-app-20250904_031333.json",
+      "commit_sha": "pending",
+      "purpose": "Symfony APM validation results with all checks passing"
     }
   ],
   "summary": {
-    "total_files": 34,
-    "new_files": 34,
-    "modified_files": 0,
+    "total_files": 47,
+    "new_files": 46,
+    "modified_files": 1,
     "applications_with_validators": [
       "simple-php",
       "symfony-app", 

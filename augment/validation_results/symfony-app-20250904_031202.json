@@ -1,0 +1,15 @@
+{
+    "app": "symfony-app",
+    "php_version": "8.4.12",
+    "web_server": "php_cli",
+    "mysql_ok": false,
+    "pgsql_ok": false,
+    "redis_ok": true,
+    "external_ok": true,
+    "errors": [
+        "MySQL validation failed: An exception occurred in the driver: SQLSTATE[HY000] [2002] No such file or directory",
+        "PostgreSQL validation failed: An exception occurred in the driver: SQLSTATE[08006] [7] connection to server on socket \"/var/run/postgresql/.s.PGSQL.5434\" failed: No such file or directory\n\tIs the server running locally and accepting connections on that socket?"
+    ],
+    "duration": 3.035,
+    "timestamp": 1756935725
+}
