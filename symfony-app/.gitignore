@@ -8,6 +8,9 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+# Allow .env and .env.example files to be committed for APM examples
+# Note: .env.local and other local env files are still ignored
+
 ###> symfony/phpunit-bridge ###
 .phpunit.result.cache
 /phpunit.xml
