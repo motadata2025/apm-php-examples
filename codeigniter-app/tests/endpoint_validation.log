@@ -1,0 +1,57 @@
+=== CodeIgniter App Endpoint Validation - Wed 10 Sep 2025 10:22:24 PM IST ===
+Starting CodeIgniter App endpoint validation...
+Base URL: http://127.0.0.1:8082
+Timeout: 15s
+
+Testing: Dashboard UI
+Endpoint: GET http://127.0.0.1:8082/
+HTTP Status: 200
+\033[0;32m✅ PASSED: Dashboard contains expected content (CodeIgniter and PHP)\033[0m
+
+Testing: External API Call
+Endpoint: POST http://127.0.0.1:8082/api/external
+HTTP Status: 200
+Response Body: {"ok":true,"status":200,"body":{"args":[],"headers":{"Accept":"*/*","Host":"httpbin.org","User-Agent":"CodeIgniter-APM/1.0","X-Amzn-Trace-Id":"Root=1-68c1acca-6742a290669bb0700dfb9f15"},"origin":"42.104.238.16","url":"https://httpbin.org/get"},"url":"https://httpbin.org/get"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Database Connection Check
+Endpoint: POST http://127.0.0.1:8082/api/db/connection
+HTTP Status: 200
+Response Body: {"mysql":{"ok":true,"message":"MySQL connection successful","host":"127.0.0.1","port":"3310","database":"codeigniter_app_db"},"pg":{"ok":true,"message":"PostgreSQL connection successful","host":"127.0.0.1","port":"5436","database":"codeigniter_app_db"}}
+\033[0;32m✅ PASSED: Found expected field 'mysql'\033[0m
+
+Testing: Database CRUD Operations
+Endpoint: POST http://127.0.0.1:8082/api/db/crud
+HTTP Status: 200
+Response Body: {"mysql":{"ok":true,"inserted_ids":["14"],"total_count":14,"inserted_count":1},"pg":{"ok":true,"inserted_ids":[60,61],"total_count":29,"inserted_count":2}}
+\033[0;32m✅ PASSED: Found expected field 'mysql'\033[0m
+
+Testing: Redis Insert Batch
+Endpoint: POST http://127.0.0.1:8082/api/redis/insert-batch
+HTTP Status: 200
+Response Body: {"ok":true,"inserted":3,"messages":["batch_msg_f4757557_1757523149","batch_msg_9a21f711_1757523149","batch_msg_2fe18f50_1757523149"],"queue_length":3,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Redis Insert One
+Endpoint: POST http://127.0.0.1:8082/api/redis/insert-one
+HTTP Status: 200
+Response Body: {"ok":true,"message":"single_msg_722b4153_1757523149","queue_length":4,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Redis Pop Message
+Endpoint: POST http://127.0.0.1:8082/api/redis/pop
+HTTP Status: 200
+Response Body: {"ok":true,"message":"batch_msg_f4757557_1757523149","queue_length":3,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Redis Clear Queue
+Endpoint: POST http://127.0.0.1:8082/api/redis/clear
+HTTP Status: 200
+Response Body: {"ok":true,"queue_length":0,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+=== VALIDATION SUMMARY ===
+Total tests: 8
+Passed: 8
+Failed: 0
+\033[0;32m🎉 ALL TESTS PASSED!\033[0m

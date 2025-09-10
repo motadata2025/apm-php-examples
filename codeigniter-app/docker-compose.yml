@@ -12,8 +12,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: codeigniter_app_db
-      MYSQL_USER: codeigniter-app_user
-      MYSQL_PASSWORD: codeigniter-app_password
+      MYSQL_USER: codeigniter_app_user
+      MYSQL_PASSWORD: codeigniter_app_password
     ports:
       - "3310:3306"
     volumes:

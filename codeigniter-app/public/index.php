@@ -1,111 +1,86 @@
 <?php
 
-/**
- * CodeIgniter 4 Bootstrap for APM Demo
- * Minimal bootstrap to run the APM dashboard without full CodeIgniter installation
+use CodeIgniter\Boot;
+use Config\Paths;
+
+/*
+ *---------------------------------------------------------------
+ * TIMEZONE FIX FOR PHP 8.1+
+ *---------------------------------------------------------------
  */
 
-// Set error reporting for development
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
-
-// Define paths
-define('ROOTPATH', dirname(__DIR__) . DIRECTORY_SEPARATOR);
-define('APPPATH', ROOTPATH . 'app' . DIRECTORY_SEPARATOR);
-define('PUBLICPATH', __DIR__ . DIRECTORY_SEPARATOR);
-
-// Load environment variables
-function loadEnv($file) {
-    if (!file_exists($file)) return;
-    
-    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+// Load environment variables first
+if (file_exists(__DIR__ . '/../.env')) {
+    $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') !== false) {
-            [$key, $value] = explode('=', $line, 2);
-            $_ENV[trim($key)] = trim($value, '"\'');
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        list($name, $value) = explode('=', $line, 2);
+        $name = trim($name);
+        $value = trim($value);
+        if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+            putenv(sprintf('%s=%s', $name, $value));
+            $_ENV[$name] = $value;
+            $_SERVER[$name] = $value;
         }
     }
 }
 
-loadEnv(ROOTPATH . '.env');
+// Set timezone to prevent PHP 8.1 timezone database corruption errors
+date_default_timezone_set($_ENV['APP_TIMEZONE'] ?? 'UTC');
 
-// Simple router
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
+/*
+ *---------------------------------------------------------------
+ * CHECK PHP VERSION
+ *---------------------------------------------------------------
+ */
 
-// Remove query string and normalize
-$uri = rtrim($uri, '/');
-if (empty($uri)) $uri = '/';
+$minPhpVersion = '8.1'; // If you update this, don't forget to update `spark`.
+if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
+    $message = sprintf(
+        'Your PHP version must be %s or higher to run CodeIgniter. Current version: %s',
+        $minPhpVersion,
+        PHP_VERSION,
+    );
 
-// Include the controller
-require_once APPPATH . 'Controllers/ApmController.php';
+    header('HTTP/1.1 503 Service Unavailable.', true, 503);
+    echo $message;
 
-// Route handling
-$controller = new ApmController();
-
-try {
-    switch (true) {
-        case $uri === '/' && $method === 'GET':
-            $controller->index();
-            break;
-            
-        case $uri === '/api/external' && $method === 'POST':
-            $controller->externalApi();
-            break;
-            
-        case $uri === '/api/db/connection' && $method === 'POST':
-            $controller->dbConnectionCheck();
-            break;
-            
-        case $uri === '/api/db/crud' && $method === 'POST':
-            $controller->dbCrud();
-            break;
-            
-        case $uri === '/api/redis/insert-batch' && $method === 'POST':
-            $controller->redisInsertBatch();
-            break;
-            
-        case $uri === '/api/redis/insert-one' && $method === 'POST':
-            $controller->redisInsertOne();
-            break;
-            
-        case $uri === '/api/redis/pop' && $method === 'POST':
-            $controller->redisPop();
-            break;
-            
-        case $uri === '/api/redis/clear' && $method === 'POST':
-            $controller->redisClear();
-            break;
-            
-        default:
-            // Serve static files
-            if (preg_match('/\.(css|js|png|jpg|jpeg|gif|ico)$/', $uri)) {
-                $file = PUBLICPATH . ltrim($uri, '/');
-                if (file_exists($file)) {
-                    $mimeTypes = [
-                        'css' => 'text/css',
-                        'js' => 'application/javascript',
-                        'png' => 'image/png',
-                        'jpg' => 'image/jpeg',
-                        'jpeg' => 'image/jpeg',
-                        'gif' => 'image/gif',
-                        'ico' => 'image/x-icon'
-                    ];
-                    $ext = pathinfo($file, PATHINFO_EXTENSION);
-                    if (isset($mimeTypes[$ext])) {
-                        header('Content-Type: ' . $mimeTypes[$ext]);
-                    }
-                    readfile($file);
-                    exit;
-                }
-            }
-            
-            http_response_code(404);
-            echo json_encode(['error' => 'Not Found', 'uri' => $uri]);
-            break;
-    }
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Internal Server Error', 'message' => $e->getMessage()]);
+    exit(1);
 }
+
+/*
+ *---------------------------------------------------------------
+ * SET THE CURRENT DIRECTORY
+ *---------------------------------------------------------------
+ */
+
+// Path to the front controller (this file)
+define('FCPATH', __DIR__ . DIRECTORY_SEPARATOR);
+
+// Ensure the current directory is pointing to the front controller's directory
+if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
+    chdir(FCPATH);
+}
+
+/*
+ *---------------------------------------------------------------
+ * BOOTSTRAP THE APPLICATION
+ *---------------------------------------------------------------
+ * This process sets up the path constants, loads and registers
+ * our autoloader, along with Composer's, loads our constants
+ * and fires up an environment-specific bootstrapping.
+ */
+
+// LOAD OUR PATHS CONFIG FILE
+// This is the line that might need to be changed, depending on your folder structure.
+require FCPATH . '../app/Config/Paths.php';
+// ^^^ Change this line if you move your application folder
+
+$paths = new Paths();
+
+// LOAD THE FRAMEWORK BOOTSTRAP FILE
+require $paths->systemDirectory . '/Boot.php';
+
+exit(Boot::bootWeb($paths));

@@ -1,11 +1,85 @@
 /**
- * CodeIgniter APM Dashboard JavaScript
- * Handles AJAX calls to API endpoints with timeouts and user feedback
+ * APM Dashboard JavaScript
+ * Handles AJAX calls to backend endpoints with timeout support
  */
 
-// Utility functions
+// Global configuration
+const CONFIG = {
+    timeout: 15000, // 15 seconds
+    baseUrl: window.location.origin
+};
+
+/**
+ * Create AbortController with timeout
+ */
+function createTimeoutController(timeoutMs = CONFIG.timeout) {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), timeoutMs);
+    return controller;
+}
+
+/**
+ * Make API call with timeout
+ */
+async function apiCall(endpoint, options = {}) {
+    const controller = createTimeoutController();
+    
+    const defaultOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        signal: controller.signal
+    };
+
+    const finalOptions = { ...defaultOptions, ...options };
+    
+    try {
+        const response = await fetch(`${CONFIG.baseUrl}${endpoint}`, finalOptions);
+        const data = await response.json();
+        
+        return {
+            ok: response.ok,
+            status: response.status,
+            data: data
+        };
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('Request timed out after ' + (CONFIG.timeout / 1000) + ' seconds');
+        }
+        throw error;
+    }
+}
+
+/**
+ * Display results in a target element
+ */
+function displayResults(targetId, data, title = '') {
+    const element = document.getElementById(targetId);
+    if (!element) return;
+
+    const timestamp = new Date().toLocaleTimeString();
+    const header = title ? `=== ${title} (${timestamp}) ===\n` : `=== Results (${timestamp}) ===\n`;
+    
+    let content = header;
+    if (typeof data === 'object') {
+        content += JSON.stringify(data, null, 2);
+    } else {
+        content += data;
+    }
+    
+    element.textContent = content;
+    element.scrollTop = element.scrollHeight;
+}
+
+/**
+ * Show toast notification
+ */
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
+    if (!container) return;
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
@@ -20,162 +94,113 @@ function showToast(message, type = 'info') {
     }, 5000);
 }
 
-function setButtonLoading(button, loading) {
+/**
+ * Set loading state for button
+ */
+function setButtonLoading(button, loading = true) {
     if (loading) {
-        button.classList.add('loading');
         button.disabled = true;
+        button.dataset.originalText = button.textContent;
+        button.textContent = 'Loading...';
+        button.classList.add('loading');
     } else {
-        button.classList.remove('loading');
         button.disabled = false;
+        button.textContent = button.dataset.originalText || button.textContent;
+        button.classList.remove('loading');
     }
 }
 
-function updateResultsArea(elementId, data) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = JSON.stringify(data, null, 2);
-    }
-}
-
-// API call wrapper with timeout
-async function apiCall(url, options = {}) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-    
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            signal: controller.signal,
-            ...options
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        return await response.json();
-    } catch (error) {
-        clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-            throw new Error('Request timed out after 15 seconds');
-        }
-        throw error;
-    }
-}
-
-// External API test
-async function testExternalApi() {
+/**
+ * External API call
+ */
+async function callExternalApi() {
     const button = event.target;
     setButtonLoading(button, true);
     
     try {
         const result = await apiCall('/api/external');
         
-        if (result.ok) {
+        displayResults('global-results', result.data, 'External API Call');
+        
+        if (result.data.ok) {
             showToast('External API call successful', 'success');
-            console.log('External API Response:', result);
         } else {
-            showToast(`External API failed: ${result.error}`, 'error');
+            showToast('External API call failed: ' + result.data.error, 'error');
         }
     } catch (error) {
-        showToast(`External API error: ${error.message}`, 'error');
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('global-results', errorData, 'External API Error');
+        showToast('External API error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
-// Database connection test
-async function testDbConnection() {
+/**
+ * Database connection check
+ */
+async function checkDbConnections() {
     const button = event.target;
     setButtonLoading(button, true);
     
     try {
         const result = await apiCall('/api/db/connection');
         
-        let successCount = 0;
-        let messages = [];
+        displayResults('db-results', result.data, 'Database Connection Check');
+        displayResults('global-results', result.data, 'Database Connection Check');
         
-        if (result.mysql && result.mysql.ok) {
-            successCount++;
-            messages.push('MySQL: ✓ Connected');
-        } else {
-            messages.push(`MySQL: ✗ ${result.mysql?.message || 'Failed'}`);
-        }
+        const mysqlOk = result.data.mysql && result.data.mysql.ok;
+        const pgOk = result.data.pg && result.data.pg.ok;
         
-        if (result.pg && result.pg.ok) {
-            successCount++;
-            messages.push('PostgreSQL: ✓ Connected');
-        } else {
-            messages.push(`PostgreSQL: ✗ ${result.pg?.message || 'Failed'}`);
-        }
-        
-        updateResultsArea('db-results', result);
-        
-        if (successCount === 2) {
+        if (mysqlOk && pgOk) {
             showToast('All database connections successful', 'success');
-        } else if (successCount === 1) {
-            showToast('Partial database connectivity', 'warning');
         } else {
-            showToast('Database connections failed', 'error');
+            showToast('Some database connections failed', 'warning');
         }
-        
     } catch (error) {
-        showToast(`Database test error: ${error.message}`, 'error');
-        updateResultsArea('db-results', { error: error.message });
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('db-results', errorData, 'Database Connection Error');
+        displayResults('global-results', errorData, 'Database Connection Error');
+        showToast('Database connection error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
-// Database CRUD operations
-async function testDbCrud() {
+/**
+ * Database CRUD operations
+ */
+async function performDbCrud() {
     const button = event.target;
     setButtonLoading(button, true);
     
     try {
         const result = await apiCall('/api/db/crud');
         
-        let successCount = 0;
-        let messages = [];
+        displayResults('db-results', result.data, 'Database CRUD Operations');
+        displayResults('global-results', result.data, 'Database CRUD Operations');
         
-        if (result.mysql && result.mysql.ok) {
-            successCount++;
-            messages.push(`MySQL CRUD: ✓ Inserted ID ${result.mysql.inserted_id}, Total: ${result.mysql.total_count}`);
-        } else {
-            messages.push(`MySQL CRUD: ✗ ${result.mysql?.error || 'Failed'}`);
-        }
+        const mysqlOk = result.data.mysql && result.data.mysql.ok;
+        const pgOk = result.data.pg && result.data.pg.ok;
         
-        if (result.pg && result.pg.ok) {
-            successCount++;
-            messages.push(`PostgreSQL CRUD: ✓ Inserted ID ${result.pg.inserted_id}, Total: ${result.pg.total_count}`);
-        } else {
-            messages.push(`PostgreSQL CRUD: ✗ ${result.pg?.error || 'Failed'}`);
-        }
-        
-        updateResultsArea('db-results', result);
-        
-        if (successCount === 2) {
+        if (mysqlOk && pgOk) {
             showToast('Database CRUD operations successful', 'success');
-        } else if (successCount === 1) {
-            showToast('Partial CRUD success', 'warning');
         } else {
-            showToast('Database CRUD operations failed', 'error');
+            showToast('Some database CRUD operations failed', 'warning');
         }
-        
     } catch (error) {
-        showToast(`Database CRUD error: ${error.message}`, 'error');
-        updateResultsArea('db-results', { error: error.message });
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('db-results', errorData, 'Database CRUD Error');
+        displayResults('global-results', errorData, 'Database CRUD Error');
+        showToast('Database CRUD error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
-// Redis operations
+/**
+ * Redis insert batch
+ */
 async function redisInsertBatch() {
     const button = event.target;
     setButtonLoading(button, true);
@@ -183,22 +208,27 @@ async function redisInsertBatch() {
     try {
         const result = await apiCall('/api/redis/insert-batch');
         
-        updateResultsArea('redis-results', result);
+        displayResults('redis-results', result.data, 'Redis Insert Batch');
+        displayResults('global-results', result.data, 'Redis Insert Batch');
         
-        if (result.ok) {
-            showToast(`Inserted ${result.inserted} messages. Queue length: ${result.queue_length}`, 'success');
+        if (result.data.ok) {
+            showToast(`Inserted ${result.data.inserted} messages to queue`, 'success');
         } else {
-            showToast(`Redis batch insert failed: ${result.error}`, 'error');
+            showToast('Redis insert batch failed: ' + result.data.error, 'error');
         }
-        
     } catch (error) {
-        showToast(`Redis batch insert error: ${error.message}`, 'error');
-        updateResultsArea('redis-results', { error: error.message });
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('redis-results', errorData, 'Redis Insert Batch Error');
+        displayResults('global-results', errorData, 'Redis Insert Batch Error');
+        showToast('Redis insert batch error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
+/**
+ * Redis insert one
+ */
 async function redisInsertOne() {
     const button = event.target;
     setButtonLoading(button, true);
@@ -206,22 +236,27 @@ async function redisInsertOne() {
     try {
         const result = await apiCall('/api/redis/insert-one');
         
-        updateResultsArea('redis-results', result);
+        displayResults('redis-results', result.data, 'Redis Insert One');
+        displayResults('global-results', result.data, 'Redis Insert One');
         
-        if (result.ok) {
-            showToast(`Message inserted. Queue length: ${result.queue_length}`, 'success');
+        if (result.data.ok) {
+            showToast(`Message inserted. Queue length: ${result.data.queue_length}`, 'success');
         } else {
-            showToast(`Redis insert failed: ${result.error}`, 'error');
+            showToast('Redis insert one failed: ' + result.data.error, 'error');
         }
-        
     } catch (error) {
-        showToast(`Redis insert error: ${error.message}`, 'error');
-        updateResultsArea('redis-results', { error: error.message });
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('redis-results', errorData, 'Redis Insert One Error');
+        displayResults('global-results', errorData, 'Redis Insert One Error');
+        showToast('Redis insert one error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
+/**
+ * Redis pop message
+ */
 async function redisPop() {
     const button = event.target;
     setButtonLoading(button, true);
@@ -229,26 +264,28 @@ async function redisPop() {
     try {
         const result = await apiCall('/api/redis/pop');
         
-        updateResultsArea('redis-results', result);
+        displayResults('redis-results', result.data, 'Redis Pop Message');
+        displayResults('global-results', result.data, 'Redis Pop Message');
         
-        if (result.ok) {
-            if (result.message) {
-                showToast(`Popped message. Remaining: ${result.remaining_count}`, 'success');
-            } else {
-                showToast('Queue is empty', 'warning');
-            }
+        if (result.data.ok) {
+            const message = result.data.message || 'No message in queue';
+            showToast(`Popped: ${message}. Queue length: ${result.data.queue_length}`, 'success');
         } else {
-            showToast(`Redis pop failed: ${result.error}`, 'error');
+            showToast('Redis pop failed: ' + result.data.error, 'error');
         }
-        
     } catch (error) {
-        showToast(`Redis pop error: ${error.message}`, 'error');
-        updateResultsArea('redis-results', { error: error.message });
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('redis-results', errorData, 'Redis Pop Error');
+        displayResults('global-results', errorData, 'Redis Pop Error');
+        showToast('Redis pop error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
+/**
+ * Redis clear queue
+ */
 async function redisClear() {
     const button = event.target;
     setButtonLoading(button, true);
@@ -256,34 +293,26 @@ async function redisClear() {
     try {
         const result = await apiCall('/api/redis/clear');
         
-        updateResultsArea('redis-results', result);
+        displayResults('redis-results', result.data, 'Redis Clear Queue');
+        displayResults('global-results', result.data, 'Redis Clear Queue');
         
-        if (result.ok) {
+        if (result.data.ok) {
             showToast('Queue cleared successfully', 'success');
         } else {
-            showToast(`Redis clear failed: ${result.error}`, 'error');
+            showToast('Redis clear failed: ' + result.data.error, 'error');
         }
-        
     } catch (error) {
-        showToast(`Redis clear error: ${error.message}`, 'error');
-        updateResultsArea('redis-results', { error: error.message });
+        const errorData = { error: error.message, timestamp: new Date().toISOString() };
+        displayResults('redis-results', errorData, 'Redis Clear Error');
+        displayResults('global-results', errorData, 'Redis Clear Error');
+        showToast('Redis clear error: ' + error.message, 'error');
     } finally {
         setButtonLoading(button, false);
     }
 }
 
-// Initialize dashboard
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    showToast('CodeIgniter APM Dashboard loaded', 'success');
-    
-    // Add click handlers for any buttons that might not have onclick attributes
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        if (!button.onclick) {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Button-specific logic can be added here if needed
-            });
-        }
-    });
+    console.log('APM Dashboard initialized');
+    showToast('APM Dashboard loaded successfully', 'success');
 });
