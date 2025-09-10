@@ -1,0 +1,50 @@
+Git Branch: simple
+Git Commit SHA: da968b93836e2ba74212c7604e2cd2a072552c30
+
+CodeIgniter App Directory Listing (recursive):
+
+codeigniter-app:
+total 92
+drwxrwxr-x  7 nikunj-katariya nikunj-katariya  4096 Sep  4 02:25 .
+drwxrwxr-x 13 nikunj-katariya nikunj-katariya  4096 Sep  4 01:58 ..
+drwxrwxr-x  6 nikunj-katariya nikunj-katariya  4096 Sep  4 02:03 app
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   523 Sep  4 02:25 composer.json
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya  2800 Sep  4 02:21 composer.lock
+-rwxrwxr-x  1 nikunj-katariya nikunj-katariya   525 Sep  4 02:25 composer-php81.sh
+drwxrwxr-x  4 nikunj-katariya nikunj-katariya  4096 Sep  2 22:14 docker
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya  2078 Sep  4 00:37 docker-compose.yml
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   748 Sep  3 15:25 .env
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya   748 Sep  4 00:37 .env.example
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya  1110 Sep  4 02:25 fix-timezone.php
+-rwxrwxr-x  1 nikunj-katariya nikunj-katariya   458 Sep  4 02:25 php-php81.sh
+drwxrwxr-x  3 nikunj-katariya nikunj-katariya  4096 Sep  4 02:03 public
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya  5798 Sep  4 02:25 README.md
+drwxrwxr-x  2 nikunj-katariya nikunj-katariya  4096 Sep  4 02:08 tests
+-rwxrwxr-x  1 nikunj-katariya nikunj-katariya  2201 Sep  4 02:25 validate.sh
+-rw-rw-r--  1 nikunj-katariya nikunj-katariya 16391 Sep  4 02:13 validator.php
+drwxrwxr-x  4 nikunj-katariya nikunj-katariya  4096 Sep  4 02:21 vendor
+
+Key directories found:
+- app/ (CodeIgniter application structure)
+- app/Config/ (empty)
+- app/Controllers/ (contains ApmController.php)
+- app/Models/ (empty)
+- app/Views/ (contains apm_dashboard.php)
+- public/ (web root with index.php)
+- vendor/ (contains predis only, no CodeIgniter framework)
+- docker/ (MySQL and PostgreSQL init scripts)
+
+Key files found:
+- composer.json (523 bytes)
+- composer.lock (2800 bytes)
+- public/index.php (3536 bytes)
+- app/Controllers/ApmController.php (12790 bytes)
+- app/Views/apm_dashboard.php (2862 bytes)
+- validator.php (16391 bytes)
+- validate.sh (2201 bytes)
+
+Notable observations:
+- vendor/ directory only contains predis/predis package
+- No CodeIgniter framework found in vendor/
+- App structure follows CodeIgniter 4 conventions
+- composer.json and composer.lock present

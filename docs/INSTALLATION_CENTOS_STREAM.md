@@ -78,7 +78,7 @@ sudo dnf module reset php -y
 sudo dnf module enable php:remi-8.4 -y
 
 # Install PHP 8.4 and required extensions
-sudo dnf install -y php php-cli php-common php-mysqlnd php-pgsql php-redis php-curl php-json php-mbstring php-xml php-zip
+sudo dnf install -y php84-php php84-php-cli php84-php-common php84-php-mysqlnd php84-php-pgsql php84-php-redis php84-php-curl php84-php-json php84-php-mbstring php84-php-xml php84-php-zip
 
 # Verify installation
 php --version
@@ -93,7 +93,7 @@ sudo dnf module reset php -y
 sudo dnf module enable php:remi-8.3 -y
 
 # Install PHP 8.3 and required extensions
-sudo dnf install -y php php-cli php-common php-mysqlnd php-pgsql php-redis php-curl php-json php-mbstring php-xml php-zip
+sudo dnf install -y php83-php php83-php-cli php83-php-common php83-php-mysqlnd php83-php-pgsql php83-php-redis php83-php-curl php83-php-json php83-php-mbstring php83-php-xml php83-php-zip
 
 # Verify installation
 php --version
@@ -108,7 +108,7 @@ sudo dnf module reset php -y
 sudo dnf module enable php:remi-8.2 -y
 
 # Install PHP 8.2 and required extensions
-sudo dnf install -y php php-cli php-common php-mysqlnd php-pgsql php-redis php-curl php-json php-mbstring php-xml php-zip
+sudo dnf install -y php82-php php82-php-cli php82-php-common php82-php-mysqlnd php82-php-pgsql php82-php-redis php82-php-curl php82-php-json php82-php-mbstring php82-php-xml php82-php-zip
 
 # Verify installation
 php --version
@@ -123,7 +123,7 @@ sudo dnf module reset php -y
 sudo dnf module enable php:remi-8.1 -y
 
 # Install PHP 8.1 and required extensions
-sudo dnf install -y php php-cli php-common php-mysqlnd php-pgsql php-redis php-curl php-json php-mbstring php-xml php-zip
+sudo dnf install -y php81-php php81-php-cli php81-php-common php81-php-mysqlnd php81-php-pgsql php81-php-redis php81-php-curl php81-php-json php81-php-mbstring php81-php-xml php81-php-zip
 
 # Verify installation
 php --version
