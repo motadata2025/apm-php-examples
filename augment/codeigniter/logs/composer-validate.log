@@ -1,0 +1,8 @@
+PHP Fatal error:  Uncaught Error: Timezone database is corrupt. Please file a bug report as this should never happen in phar:///usr/local/bin/composer/src/Composer/Util/Silencer.php:67
+Stack trace:
+#0 phar:///usr/local/bin/composer/src/Composer/Util/Silencer.php(67): date_default_timezone_get()
+#1 phar:///usr/local/bin/composer/src/Composer/Console/Application.php(103): Composer\Util\Silencer::call()
+#2 phar:///usr/local/bin/composer/bin/composer(97): Composer\Console\Application->__construct()
+#3 /usr/local/bin/composer(29): require('...')
+#4 {main}
+  thrown in phar:///usr/local/bin/composer/src/Composer/Util/Silencer.php on line 67
