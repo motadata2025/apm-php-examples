@@ -1,65 +1,98 @@
 <?php
 
+declare(strict_types=1);
+
+namespace App\Controllers;
+
+use CodeIgniter\Controller;
+use CodeIgniter\HTTP\CLIRequest;
+use CodeIgniter\HTTP\IncomingRequest;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
+use PDO;
+use PDOException;
+use Redis;
+use Predis\Client as PredisClient;
+use Exception;
+
 /**
  * APM Controller for CodeIgniter Application
- * Handles dashboard view and API endpoints for database, Redis, and external API operations
+ * 
+ * Provides endpoints for:
+ * - Dashboard UI
+ * - External API calls
+ * - Database connectivity and CRUD operations
+ * - Redis queue operations
  */
-
-class ApmController
+class ApmController extends Controller
 {
-    private array $config = [];
+    /**
+     * Instance of the main Request object.
+     *
+     * @var CLIRequest|IncomingRequest
+     */
+    protected $request;
 
-    public function __construct()
+    /**
+     * An array of helpers to be loaded automatically upon
+     * class instantiation. These helpers will be available
+     * to all other controllers that extend BaseController.
+     *
+     * @var list<string>
+     */
+    protected $helpers = [];
+
+    private string $appName;
+    private string $phpVersion;
+    private string $queueName;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger): void
     {
-        $this->loadConfig();
+        // Do Not Edit This Line
+        parent::initController($request, $response, $logger);
+
+        // Preload any models, libraries, etc, here.
+        $this->appName = $_ENV['APP_NAME'] ?? 'codeigniter-app';
+        $this->phpVersion = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+        $this->queueName = $this->appName . '_' . $this->phpVersion;
     }
 
-    private function loadConfig(): void
+    /**
+     * Dashboard index page
+     */
+    public function index(): string
     {
-        $this->config = [
-            'APP_NAME' => $_ENV['APP_NAME'] ?? 'CodeIgniter App',
-            'DB_MYSQL_HOST' => $_ENV['DB_MYSQL_HOST'] ?? '127.0.0.1',
-            'DB_MYSQL_PORT' => $_ENV['DB_MYSQL_PORT'] ?? '3310',
-            'DB_MYSQL_DATABASE' => $_ENV['DB_MYSQL_DATABASE'] ?? 'codeigniter_app_db',
-            // Fix MySQL credentials to match docker-compose.yml
-            'DB_MYSQL_USERNAME' => 'codeigniter-app_user',
-            'DB_MYSQL_PASSWORD' => 'codeigniter-app_password',
-            'DB_PGSQL_HOST' => $_ENV['DB_PGSQL_HOST'] ?? '127.0.0.1',
-            'DB_PGSQL_PORT' => $_ENV['DB_PGSQL_PORT'] ?? '5436',
-            'DB_PGSQL_DATABASE' => $_ENV['DB_PGSQL_DATABASE'] ?? 'codeigniter_app_db',
-            'DB_PGSQL_USERNAME' => $_ENV['DB_PGSQL_USERNAME'] ?? 'postgres',
-            'DB_PGSQL_PASSWORD' => $_ENV['DB_PGSQL_PASSWORD'] ?? 'postgrespassword',
-            'REDIS_HOST' => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? '6383',
-            'REDIS_PASSWORD' => $_ENV['REDIS_PASSWORD'] ?? '',
-            'EXTERNAL_API_URL' => $_ENV['EXTERNAL_API_URL'] ?? 'https://httpbin.org/get',
-            'HTTP_TIMEOUT' => $_ENV['HTTP_TIMEOUT'] ?? '20',
+        $data = [
+            'app_type' => 'CodeIgniter',
+            'php_version' => PHP_VERSION,
+            'web_server' => 'php_cli',
+            'queue_name' => $this->queueName
         ];
+
+        return view('apm_dashboard', $data);
     }
 
-    public function index(): void
+    /**
+     * External API call endpoint
+     */
+    public function externalApi(): ResponseInterface
     {
-        require_once APPPATH . 'Views/apm_dashboard.php';
-    }
-
-    public function externalApi(): void
-    {
-        header('Content-Type: application/json');
-        
         try {
-            $url = $this->config['EXTERNAL_API_URL'];
-            $timeout = (int)$this->config['HTTP_TIMEOUT'];
+            $apiUrl = $_ENV['EXTERNAL_API_URL'] ?? 'https://httpbin.org/get';
+            $timeout = (int)($_ENV['HTTP_TIMEOUT'] ?? 10); // Reduced timeout for faster response
 
+            // Try cURL first for better error handling
             if (function_exists('curl_init')) {
                 $ch = curl_init();
                 curl_setopt_array($ch, [
-                    CURLOPT_URL => $url,
+                    CURLOPT_URL => $apiUrl,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT => $timeout,
-                    CURLOPT_CONNECTTIMEOUT => 10,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_CONNECTTIMEOUT => 5,
                     CURLOPT_USERAGENT => 'CodeIgniter-APM/1.0',
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_SSL_VERIFYPEER => false,
                 ]);
 
                 $response = curl_exec($ch);
@@ -71,105 +104,279 @@ class ApmController
                     throw new Exception("cURL error: $error");
                 }
 
-                $body = json_decode($response, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
-                    $body = substr($response, 0, 200) . '...';
+                // Accept any HTTP response as long as we get data
+                if (empty($response)) {
+                    throw new Exception("Empty response from external API");
                 }
-
-                echo json_encode([
-                    'ok' => true,
-                    'status' => $httpCode,
-                    'body' => $body
-                ]);
             } else {
-                throw new Exception('cURL not available');
+                // Fallback to file_get_contents
+                $context = stream_context_create([
+                    'http' => [
+                        'timeout' => $timeout,
+                        'method' => 'GET',
+                        'header' => 'User-Agent: CodeIgniter-APM/1.0'
+                    ]
+                ]);
+
+                $response = file_get_contents($apiUrl, false, $context);
             }
+            
+            if ($response === false) {
+                throw new Exception('Failed to fetch external API');
+            }
+
+            // Try to decode as JSON, but don't fail if it's not JSON
+            $decodedResponse = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // If not JSON, return the raw response (truncated for safety)
+                $decodedResponse = [
+                    'raw_response' => substr($response, 0, 500),
+                    'content_type' => 'non-json',
+                    'note' => 'External API returned non-JSON response'
+                ];
+            }
+
+            return $this->response->setJSON([
+                'ok' => true,
+                'status' => 200,
+                'body' => $decodedResponse,
+                'url' => $apiUrl
+            ]);
+
         } catch (Exception $e) {
-            echo json_encode([
+            // Return 200 with error details for graceful error handling
+            return $this->response->setJSON([
+                'ok' => false,
+                'error' => $e->getMessage(),
+                'url' => $apiUrl ?? 'unknown'
+            ]);
+        }
+    }
+
+    /**
+     * Database connection check endpoint
+     */
+    public function dbConnectionCheck(): ResponseInterface
+    {
+        $results = [
+            'mysql' => $this->checkMysqlConnection(),
+            'pg' => $this->checkPostgresConnection()
+        ];
+
+        return $this->response->setJSON($results);
+    }
+
+    /**
+     * Database CRUD operations endpoint
+     */
+    public function dbCrud(): ResponseInterface
+    {
+        $results = [
+            'mysql' => $this->performMysqlCrud(),
+            'pg' => $this->performPostgresCrud()
+        ];
+
+        return $this->response->setJSON($results);
+    }
+
+    /**
+     * Redis insert batch endpoint
+     */
+    public function redisInsertBatch(): ResponseInterface
+    {
+        try {
+            $redis = $this->getRedisConnection();
+            
+            $messages = [];
+            for ($i = 0; $i < 3; $i++) {
+                $messages[] = 'batch_msg_' . bin2hex(random_bytes(4)) . '_' . time();
+            }
+
+            foreach ($messages as $message) {
+                $redis->rPush($this->queueName, $message);
+            }
+
+            $count = $redis->lLen($this->queueName);
+
+            return $this->response->setJSON([
+                'ok' => true,
+                'inserted' => count($messages),
+                'messages' => $messages,
+                'queue_length' => $count,
+                'queue_name' => $this->queueName
+            ]);
+
+        } catch (Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
                 'ok' => false,
                 'error' => $e->getMessage()
             ]);
         }
     }
 
-    public function dbConnectionCheck(): void
-    {
-        header('Content-Type: application/json');
-        
-        $result = [
-            'mysql' => $this->testMysqlConnection(),
-            'pg' => $this->testPostgresConnection()
-        ];
-        
-        echo json_encode($result);
-    }
-
-    private function testMysqlConnection(): array
+    /**
+     * Redis insert one endpoint
+     */
+    public function redisInsertOne(): ResponseInterface
     {
         try {
-            $dsn = sprintf(
-                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-                $this->config['DB_MYSQL_HOST'],
-                $this->config['DB_MYSQL_PORT'],
-                $this->config['DB_MYSQL_DATABASE']
-            );
+            $redis = $this->getRedisConnection();
+            
+            $message = 'single_msg_' . bin2hex(random_bytes(4)) . '_' . time();
+            $redis->rPush($this->queueName, $message);
+            
+            $count = $redis->lLen($this->queueName);
 
-            $pdo = new PDO($dsn, $this->config['DB_MYSQL_USERNAME'], $this->config['DB_MYSQL_PASSWORD'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_TIMEOUT => 10,
+            return $this->response->setJSON([
+                'ok' => true,
+                'message' => $message,
+                'queue_length' => $count,
+                'queue_name' => $this->queueName
             ]);
 
-            return ['ok' => true, 'message' => 'MySQL connection successful'];
         } catch (Exception $e) {
-            return ['ok' => false, 'message' => 'MySQL connection failed: ' . $e->getMessage()];
+            return $this->response->setStatusCode(500)->setJSON([
+                'ok' => false,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
-    private function testPostgresConnection(): array
+    /**
+     * Redis pop message endpoint
+     */
+    public function redisPop(): ResponseInterface
     {
         try {
-            $dsn = sprintf(
-                'pgsql:host=%s;port=%s;dbname=%s',
-                $this->config['DB_PGSQL_HOST'],
-                $this->config['DB_PGSQL_PORT'],
-                $this->config['DB_PGSQL_DATABASE']
-            );
+            $redis = $this->getRedisConnection();
+            
+            $message = $redis->lPop($this->queueName);
+            $count = $redis->lLen($this->queueName);
 
-            $pdo = new PDO($dsn, $this->config['DB_PGSQL_USERNAME'], $this->config['DB_PGSQL_PASSWORD'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_TIMEOUT => 10,
+            return $this->response->setJSON([
+                'ok' => true,
+                'message' => $message,
+                'queue_length' => $count,
+                'queue_name' => $this->queueName
             ]);
 
-            return ['ok' => true, 'message' => 'PostgreSQL connection successful'];
         } catch (Exception $e) {
-            return ['ok' => false, 'message' => 'PostgreSQL connection failed: ' . $e->getMessage()];
+            return $this->response->setStatusCode(500)->setJSON([
+                'ok' => false,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
-    public function dbCrud(): void
+    /**
+     * Redis clear queue endpoint
+     */
+    public function redisClear(): ResponseInterface
     {
-        header('Content-Type: application/json');
-        
-        $result = [
-            'mysql' => $this->performMysqlCrud(),
-            'pg' => $this->performPostgresCrud()
-        ];
-        
-        echo json_encode($result);
+        try {
+            $redis = $this->getRedisConnection();
+            
+            $redis->del($this->queueName);
+            $count = $redis->lLen($this->queueName);
+
+            return $this->response->setJSON([
+                'ok' => true,
+                'queue_length' => $count,
+                'queue_name' => $this->queueName
+            ]);
+
+        } catch (Exception $e) {
+            return $this->response->setStatusCode(500)->setJSON([
+                'ok' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
+    /**
+     * Check MySQL connection
+     */
+    private function checkMysqlConnection(): array
+    {
+        try {
+            $host = $_ENV['DB_MYSQL_HOST'] ?? '127.0.0.1';
+            $port = $_ENV['DB_MYSQL_PORT'] ?? '3310';
+            $database = $_ENV['DB_MYSQL_DATABASE'] ?? 'codeigniter_app_db';
+            $username = $_ENV['DB_MYSQL_USERNAME'] ?? 'codeigniter_app_user';
+            $password = $_ENV['DB_MYSQL_PASSWORD'] ?? 'codeigniter_app_password';
+
+            $dsn = "mysql:host={$host};port={$port};dbname={$database}";
+            $pdo = new PDO($dsn, $username, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_TIMEOUT => 10
+            ]);
+
+            return [
+                'ok' => true,
+                'message' => 'MySQL connection successful',
+                'host' => $host,
+                'port' => $port,
+                'database' => $database
+            ];
+
+        } catch (PDOException $e) {
+            return [
+                'ok' => false,
+                'message' => 'MySQL connection failed: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Check PostgreSQL connection
+     */
+    private function checkPostgresConnection(): array
+    {
+        try {
+            $host = $_ENV['DB_PGSQL_HOST'] ?? '127.0.0.1';
+            $port = $_ENV['DB_PGSQL_PORT'] ?? '5436';
+            $database = $_ENV['DB_PGSQL_DATABASE'] ?? 'codeigniter_app_db';
+            $username = $_ENV['DB_PGSQL_USERNAME'] ?? 'postgres';
+            $password = $_ENV['DB_PGSQL_PASSWORD'] ?? 'postgrespassword';
+
+            $dsn = "pgsql:host={$host};port={$port};dbname={$database}";
+            $pdo = new PDO($dsn, $username, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_TIMEOUT => 10
+            ]);
+
+            return [
+                'ok' => true,
+                'message' => 'PostgreSQL connection successful',
+                'host' => $host,
+                'port' => $port,
+                'database' => $database
+            ];
+
+        } catch (PDOException $e) {
+            return [
+                'ok' => false,
+                'message' => 'PostgreSQL connection failed: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Perform MySQL CRUD operations
+     */
     private function performMysqlCrud(): array
     {
         try {
-            $dsn = sprintf(
-                'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-                $this->config['DB_MYSQL_HOST'],
-                $this->config['DB_MYSQL_PORT'],
-                $this->config['DB_MYSQL_DATABASE']
-            );
+            $host = $_ENV['DB_MYSQL_HOST'] ?? '127.0.0.1';
+            $port = $_ENV['DB_MYSQL_PORT'] ?? '3310';
+            $database = $_ENV['DB_MYSQL_DATABASE'] ?? 'codeigniter_app_db';
+            $username = $_ENV['DB_MYSQL_USERNAME'] ?? 'codeigniter_app_user';
+            $password = $_ENV['DB_MYSQL_PASSWORD'] ?? 'codeigniter_app_password';
 
-            $pdo = new PDO($dsn, $this->config['DB_MYSQL_USERNAME'], $this->config['DB_MYSQL_PASSWORD'], [
+            $dsn = "mysql:host={$host};port={$port};dbname={$database}";
+            $pdo = new PDO($dsn, $username, $password, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_TIMEOUT => 10
             ]);
 
             // Create table if not exists
@@ -177,19 +384,24 @@ class ApmController
                 CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
-                    email VARCHAR(255) UNIQUE NOT NULL,
+                    email VARCHAR(255) NOT NULL UNIQUE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ");
 
             // Insert randomized data
-            $random = bin2hex(random_bytes(4));
-            $name = "ci_user_{$random}";
-            $email = "{$random}@" . time() . ".example.test";
+            $insertedIds = [];
+            $insertCount = rand(1, 3);
 
-            $stmt = $pdo->prepare("INSERT INTO users (name, email) VALUES (?, ?)");
-            $stmt->execute([$name, $email]);
-            $insertId = $pdo->lastInsertId();
+            for ($i = 0; $i < $insertCount; $i++) {
+                $randomHex = bin2hex(random_bytes(4));
+                $name = "ci_user_{$randomHex}";
+                $email = "{$randomHex}@" . time() . ".example.test";
+
+                $stmt = $pdo->prepare("INSERT INTO users (name, email) VALUES (?, ?)");
+                $stmt->execute([$name, $email]);
+                $insertedIds[] = $pdo->lastInsertId();
+            }
 
             // Get count
             $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
@@ -197,28 +409,35 @@ class ApmController
 
             return [
                 'ok' => true,
-                'operation' => 'CRUD completed',
-                'inserted_id' => $insertId,
-                'total_count' => $count,
-                'inserted_data' => ['name' => $name, 'email' => $email]
+                'inserted_ids' => $insertedIds,
+                'total_count' => (int)$count,
+                'inserted_count' => $insertCount
             ];
-        } catch (Exception $e) {
-            return ['ok' => false, 'error' => $e->getMessage()];
+
+        } catch (PDOException $e) {
+            return [
+                'ok' => false,
+                'error' => 'MySQL CRUD failed: ' . $e->getMessage()
+            ];
         }
     }
 
+    /**
+     * Perform PostgreSQL CRUD operations
+     */
     private function performPostgresCrud(): array
     {
         try {
-            $dsn = sprintf(
-                'pgsql:host=%s;port=%s;dbname=%s',
-                $this->config['DB_PGSQL_HOST'],
-                $this->config['DB_PGSQL_PORT'],
-                $this->config['DB_PGSQL_DATABASE']
-            );
+            $host = $_ENV['DB_PGSQL_HOST'] ?? '127.0.0.1';
+            $port = $_ENV['DB_PGSQL_PORT'] ?? '5436';
+            $database = $_ENV['DB_PGSQL_DATABASE'] ?? 'codeigniter_app_db';
+            $username = $_ENV['DB_PGSQL_USERNAME'] ?? 'postgres';
+            $password = $_ENV['DB_PGSQL_PASSWORD'] ?? 'postgrespassword';
 
-            $pdo = new PDO($dsn, $this->config['DB_PGSQL_USERNAME'], $this->config['DB_PGSQL_PASSWORD'], [
+            $dsn = "pgsql:host={$host};port={$port};dbname={$database}";
+            $pdo = new PDO($dsn, $username, $password, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_TIMEOUT => 10
             ]);
 
             // Create table if not exists
@@ -226,19 +445,24 @@ class ApmController
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(255) NOT NULL,
-                    email VARCHAR(255) UNIQUE NOT NULL,
+                    email VARCHAR(255) NOT NULL UNIQUE,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             ");
 
             // Insert randomized data
-            $random = bin2hex(random_bytes(4));
-            $name = "ci_user_{$random}";
-            $email = "{$random}@" . time() . ".example.test";
+            $insertedIds = [];
+            $insertCount = rand(1, 3);
 
-            $stmt = $pdo->prepare("INSERT INTO users (name, email) VALUES (?, ?) RETURNING id");
-            $stmt->execute([$name, $email]);
-            $insertId = $stmt->fetch(PDO::FETCH_ASSOC)['id'];
+            for ($i = 0; $i < $insertCount; $i++) {
+                $randomHex = bin2hex(random_bytes(4));
+                $name = "ci_user_{$randomHex}";
+                $email = "{$randomHex}@" . time() . ".example.test";
+
+                $stmt = $pdo->prepare("INSERT INTO users (name, email) VALUES (?, ?) RETURNING id");
+                $stmt->execute([$name, $email]);
+                $insertedIds[] = $stmt->fetch(PDO::FETCH_ASSOC)['id'];
+            }
 
             // Get count
             $stmt = $pdo->query("SELECT COUNT(*) as count FROM users");
@@ -246,133 +470,52 @@ class ApmController
 
             return [
                 'ok' => true,
-                'operation' => 'CRUD completed',
-                'inserted_id' => $insertId,
-                'total_count' => $count,
-                'inserted_data' => ['name' => $name, 'email' => $email]
+                'inserted_ids' => $insertedIds,
+                'total_count' => (int)$count,
+                'inserted_count' => $insertCount
             ];
-        } catch (Exception $e) {
-            return ['ok' => false, 'error' => $e->getMessage()];
+
+        } catch (PDOException $e) {
+            return [
+                'ok' => false,
+                'error' => 'PostgreSQL CRUD failed: ' . $e->getMessage()
+            ];
         }
     }
 
-    private function getRedisQueueName(): string
+    /**
+     * Get Redis connection (phpredis or Predis)
+     */
+    private function getRedisConnection()
     {
-        $appName = str_replace(' ', '_', strtolower($this->config['APP_NAME']));
-        $phpVersion = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
-        return "{$appName}_{$phpVersion}";
-    }
+        $host = $_ENV['REDIS_HOST'] ?? '127.0.0.1';
+        $port = (int)($_ENV['REDIS_PORT'] ?? 6383);
+        $password = $_ENV['REDIS_PASSWORD'] ?? '';
 
-    private function getRedisClient()
-    {
+        // Try phpredis first
         if (extension_loaded('redis')) {
             $redis = new Redis();
-            $redis->connect($this->config['REDIS_HOST'], (int)$this->config['REDIS_PORT'], 10);
-            
-            if (!empty($this->config['REDIS_PASSWORD'])) {
-                $redis->auth($this->config['REDIS_PASSWORD']);
+            $redis->connect($host, $port, 3);
+            if ($password) {
+                $redis->auth($password);
             }
-            
             return $redis;
         }
-        
-        throw new Exception('redis-client-not-installed');
-    }
 
-    public function redisInsertBatch(): void
-    {
-        header('Content-Type: application/json');
-        
-        try {
-            $redis = $this->getRedisClient();
-            $queue = $this->getRedisQueueName();
-            
-            $messages = [];
-            for ($i = 0; $i < 3; $i++) {
-                $messages[] = 'batch_msg_' . bin2hex(random_bytes(4)) . '_' . time();
+        // Fallback to Predis
+        if (class_exists('Predis\Client')) {
+            $config = [
+                'scheme' => 'tcp',
+                'host' => $host,
+                'port' => $port,
+                'timeout' => 3
+            ];
+            if ($password) {
+                $config['password'] = $password;
             }
-            
-            foreach ($messages as $message) {
-                $redis->rPush($queue, $message);
-            }
-            
-            $count = $redis->lLen($queue);
-            
-            echo json_encode([
-                'ok' => true,
-                'operation' => 'batch_insert',
-                'inserted' => count($messages),
-                'queue_length' => $count,
-                'messages' => $messages
-            ]);
-        } catch (Exception $e) {
-            echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+            return new PredisClient($config);
         }
-    }
 
-    public function redisInsertOne(): void
-    {
-        header('Content-Type: application/json');
-        
-        try {
-            $redis = $this->getRedisClient();
-            $queue = $this->getRedisQueueName();
-            
-            $message = 'single_msg_' . bin2hex(random_bytes(4)) . '_' . time();
-            $redis->rPush($queue, $message);
-            
-            $count = $redis->lLen($queue);
-            
-            echo json_encode([
-                'ok' => true,
-                'operation' => 'single_insert',
-                'message' => $message,
-                'queue_length' => $count
-            ]);
-        } catch (Exception $e) {
-            echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    public function redisPop(): void
-    {
-        header('Content-Type: application/json');
-        
-        try {
-            $redis = $this->getRedisClient();
-            $queue = $this->getRedisQueueName();
-            
-            $message = $redis->lPop($queue);
-            $count = $redis->lLen($queue);
-            
-            echo json_encode([
-                'ok' => true,
-                'operation' => 'pop',
-                'message' => $message,
-                'remaining_count' => $count
-            ]);
-        } catch (Exception $e) {
-            echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
-        }
-    }
-
-    public function redisClear(): void
-    {
-        header('Content-Type: application/json');
-        
-        try {
-            $redis = $this->getRedisClient();
-            $queue = $this->getRedisQueueName();
-            
-            $redis->del($queue);
-            
-            echo json_encode([
-                'ok' => true,
-                'operation' => 'clear',
-                'queue_length' => 0
-            ]);
-        } catch (Exception $e) {
-            echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
-        }
+        throw new Exception('No Redis client available. Install phpredis extension or predis/predis package.');
     }
 }

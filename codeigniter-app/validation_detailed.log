@@ -1,0 +1,56 @@
+Starting CodeIgniter App endpoint validation...
+Base URL: http://127.0.0.1:8082
+Timeout: 15s
+
+Testing: Dashboard UI
+Endpoint: GET http://127.0.0.1:8082/
+HTTP Status: 200
+\033[0;32m✅ PASSED: Dashboard contains expected content (CodeIgniter and PHP)\033[0m
+
+Testing: External API Call
+Endpoint: POST http://127.0.0.1:8082/api/external
+HTTP Status: 500
+Response Body: {"ok":false,"error":"file_get_contents(https://httpbin.org/get): Failed to open stream: HTTP request failed! HTTP/1.1 503 Service Temporarily Unavailable\r\n","url":"https://httpbin.org/get"}
+\033[0;31m❌ FAILED: HTTP status 500 (expected 200)\033[0m
+
+Testing: Database Connection Check
+Endpoint: POST http://127.0.0.1:8082/api/db/connection
+HTTP Status: 200
+Response Body: {"mysql":{"ok":false,"message":"MySQL connection failed: SQLSTATE[HY000] [1045] Access denied for user 'codeigniter_app_user'@'172.26.0.1' (using password: YES)"},"pg":{"ok":true,"message":"PostgreSQL connection successful","host":"127.0.0.1","port":"5436","database":"codeigniter_app_db"}}
+\033[0;32m✅ PASSED: Found expected field 'mysql'\033[0m
+
+Testing: Database CRUD Operations
+Endpoint: POST http://127.0.0.1:8082/api/db/crud
+HTTP Status: 200
+Response Body: {"mysql":{"ok":false,"error":"MySQL CRUD failed: SQLSTATE[HY000] [1045] Access denied for user 'codeigniter_app_user'@'172.26.0.1' (using password: YES)"},"pg":{"ok":true,"inserted_ids":[17],"total_count":17,"inserted_count":1}}
+\033[0;32m✅ PASSED: Found expected field 'mysql'\033[0m
+
+Testing: Redis Insert Batch
+Endpoint: POST http://127.0.0.1:8082/api/redis/insert-batch
+HTTP Status: 200
+Response Body: {"ok":true,"inserted":3,"messages":["batch_msg_7aa8d60e_1757522436","batch_msg_bdcce1fc_1757522436","batch_msg_6a28e10e_1757522436"],"queue_length":3,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Redis Insert One
+Endpoint: POST http://127.0.0.1:8082/api/redis/insert-one
+HTTP Status: 200
+Response Body: {"ok":true,"message":"single_msg_40b36f61_1757522436","queue_length":4,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Redis Pop Message
+Endpoint: POST http://127.0.0.1:8082/api/redis/pop
+HTTP Status: 200
+Response Body: {"ok":true,"message":"batch_msg_7aa8d60e_1757522436","queue_length":3,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+Testing: Redis Clear Queue
+Endpoint: POST http://127.0.0.1:8082/api/redis/clear
+HTTP Status: 200
+Response Body: {"ok":true,"queue_length":0,"queue_name":"\"CodeIgniter App\"_8.4"}
+\033[0;32m✅ PASSED: Found expected field 'ok'\033[0m
+
+=== VALIDATION SUMMARY ===
+Total tests: 8
+Passed: 7
+Failed: 1
+\033[0;31m❌ 1 TEST(S) FAILED\033[0m

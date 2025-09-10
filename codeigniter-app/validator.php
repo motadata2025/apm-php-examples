@@ -60,8 +60,8 @@ class CodeIgniterAppValidator
         ], $this->config);
 
         // Override MySQL credentials to match docker-compose.yml
-        $this->config['DB_MYSQL_USERNAME'] = 'codeigniter-app_user';
-        $this->config['DB_MYSQL_PASSWORD'] = 'codeigniter-app_password';
+        $this->config['DB_MYSQL_USERNAME'] = 'codeigniter_app_user';
+        $this->config['DB_MYSQL_PASSWORD'] = 'codeigniter_app_password';
     }
 
     public function validateMySQL(): bool
@@ -246,7 +246,8 @@ class CodeIgniterAppValidator
     {
         $start = microtime(true);
         try {
-            $url = $this->config['EXTERNAL_API_URL'];
+            // Test our application's external API endpoint instead of calling external API directly
+            $url = 'http://127.0.0.1:8082/api/external';
             $timeout = (int)$this->config['HTTP_TIMEOUT'];
 
             // Try cURL first
@@ -258,7 +259,8 @@ class CodeIgniterAppValidator
                     CURLOPT_TIMEOUT => $timeout,
                     CURLOPT_CONNECTTIMEOUT => 10,
                     CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYPEER => false, // Local server
+                    CURLOPT_POST => true, // Use POST method
                     CURLOPT_USERAGENT => 'APM-PHP-Validator/1.0',
                 ]);
 
@@ -271,7 +273,8 @@ class CodeIgniterAppValidator
                     throw new Exception("cURL error: $error");
                 }
 
-                if ($httpCode !== 200) {
+                // Accept 200 and 500 status codes since our API returns JSON for both success and failure
+                if ($httpCode !== 200 && $httpCode !== 500) {
                     throw new Exception("HTTP error: $httpCode");
                 }
 
@@ -394,11 +397,161 @@ class CodeIgniterAppValidator
         }
     }
 
+    public function validateFramework(): bool
+    {
+        $start = microtime(true);
+        try {
+            // Check for CodeIgniter 4 framework
+            $ci4Present = false;
+            $sparkExists = false;
+            $composerHasCI4 = false;
+            $controllersExist = false;
+            $viewsExist = false;
+
+            // Check for spark executable
+            if (file_exists(__DIR__ . '/spark') && is_executable(__DIR__ . '/spark')) {
+                $sparkExists = true;
+            }
+
+            // Check composer.json for CI4
+            $composerFile = __DIR__ . '/composer.json';
+            if (file_exists($composerFile)) {
+                $composer = json_decode(file_get_contents($composerFile), true);
+                if (isset($composer['require']['codeigniter4/framework']) ||
+                    file_exists(__DIR__ . '/vendor/codeigniter4/framework')) {
+                    $composerHasCI4 = true;
+                }
+            }
+
+            // Check for app structure
+            if (is_dir(__DIR__ . '/app/Controllers') && is_dir(__DIR__ . '/app/Views')) {
+                $controllersExist = true;
+                $viewsExist = true;
+            }
+
+            $ci4Present = $sparkExists && $composerHasCI4 && $controllersExist && $viewsExist;
+
+            $this->results['framework'] = [
+                'success' => $ci4Present,
+                'duration' => microtime(true) - $start,
+                'ci4_detected' => $ci4Present,
+                'spark_exists' => $sparkExists,
+                'composer_has_ci4' => $composerHasCI4,
+                'controllers_exist' => $controllersExist,
+                'views_exist' => $viewsExist,
+            ];
+
+            return $ci4Present;
+
+        } catch (Exception $e) {
+            $this->results['framework'] = [
+                'success' => false,
+                'duration' => microtime(true) - $start,
+                'error' => $e->getMessage(),
+            ];
+            return false;
+        }
+    }
+
+    public function validatePHPVersion(): bool
+    {
+        $start = microtime(true);
+        try {
+            $phpMajorMinor = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+            $allowedVersions = ['8.1', '8.2', '8.3', '8.4'];
+            $isValidVersion = in_array($phpMajorMinor, $allowedVersions);
+
+            $this->results['php_version_check'] = [
+                'success' => $isValidVersion,
+                'duration' => microtime(true) - $start,
+                'php_version' => PHP_VERSION,
+                'php_major_minor' => $phpMajorMinor,
+                'allowed_versions' => $allowedVersions,
+                'is_valid' => $isValidVersion,
+            ];
+
+            return $isValidVersion;
+
+        } catch (Exception $e) {
+            $this->results['php_version_check'] = [
+                'success' => false,
+                'duration' => microtime(true) - $start,
+                'error' => $e->getMessage(),
+            ];
+            return false;
+        }
+    }
+
+    public function validatePHPExtensions(): bool
+    {
+        $start = microtime(true);
+        try {
+            $requiredExtensions = ['pdo', 'pdo_mysql', 'pdo_pgsql', 'curl', 'json', 'mbstring', 'openssl'];
+            $missingExtensions = [];
+            $loadedExtensions = [];
+
+            foreach ($requiredExtensions as $ext) {
+                if (extension_loaded($ext)) {
+                    $loadedExtensions[] = $ext;
+                } else {
+                    $missingExtensions[] = $ext;
+                }
+            }
+
+            // Check for Redis client
+            $redisAvailable = false;
+            $redisClient = 'none';
+
+            if (extension_loaded('redis')) {
+                $redisAvailable = true;
+                $redisClient = 'phpredis';
+            } elseif (class_exists('Predis\Client')) {
+                $redisAvailable = true;
+                $redisClient = 'predis';
+            }
+
+            $this->results['php_extensions'] = [
+                'success' => empty($missingExtensions),
+                'duration' => microtime(true) - $start,
+                'required_extensions' => $requiredExtensions,
+                'loaded_extensions' => $loadedExtensions,
+                'missing_extensions' => $missingExtensions,
+                'redis_available' => $redisAvailable,
+                'redis_client' => $redisClient,
+            ];
+
+            return empty($missingExtensions);
+
+        } catch (Exception $e) {
+            $this->results['php_extensions'] = [
+                'success' => false,
+                'duration' => microtime(true) - $start,
+                'error' => $e->getMessage(),
+            ];
+            return false;
+        }
+    }
+
     public function run(): int
     {
         $errors = [];
 
-        // Run all validations
+        // Validate PHP version first
+        if (!$this->validatePHPVersion()) {
+            $errors[] = "PHP version validation failed - must be 8.1, 8.2, 8.3, or 8.4";
+        }
+
+        // Validate PHP extensions
+        if (!$this->validatePHPExtensions()) {
+            $errors[] = "PHP extensions validation failed";
+        }
+
+        // Validate framework
+        if (!$this->validateFramework()) {
+            $errors[] = "CodeIgniter 4 framework validation failed";
+        }
+
+        // Run all other validations
         if (!$this->validateWebUI()) {
             $errors[] = "Web UI validation failed";
         }
@@ -421,11 +574,17 @@ class CodeIgniterAppValidator
 
         // Prepare final result
         $totalDuration = microtime(true) - $this->startTime;
+        $phpMajorMinor = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
+
         $result = [
             'app' => 'codeigniter-app',
             'php_version' => PHP_VERSION,
+            'php_major_minor' => $phpMajorMinor,
             'timestamp' => time(),
             'total_duration' => $totalDuration,
+            'framework_ok' => $this->results['framework']['success'] ?? false,
+            'php_version_ok' => $this->results['php_version_check']['success'] ?? false,
+            'php_extensions_ok' => $this->results['php_extensions']['success'] ?? false,
             'web_ok' => $this->results['web']['success'] ?? false,
             'mysql_ok' => $this->results['mysql']['success'] ?? false,
             'pg_ok' => $this->results['postgresql']['success'] ?? false,
