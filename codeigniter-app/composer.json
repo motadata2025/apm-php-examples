@@ -3,7 +3,15 @@
     "description": "CodeIgniter APM Application with PHP 8.1 timezone fix support",
     "type": "project",
     "require": {
-        "php": ">=8.0"
+        "php": ">=8.0",
+        "codeigniter4/framework": "^4",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-pdo_pgsql": "*",
+        "predis/predis": "^2.0"
     },
     "require-dev": {
         "predis/predis": "^2.0"
