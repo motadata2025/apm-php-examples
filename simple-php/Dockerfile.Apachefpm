@@ -1,0 +1,17 @@
+# Dockerfile.Apachefpm
+FROM httpd:2.4
+
+# Copy your Apache virtual host configuration (with FPM proxy)
+COPY apache/default.conf /usr/local/apache2/conf/httpd.conf
+
+# Create docroot directory (to mount later)
+RUN mkdir -p /var/www/html 
+
+# Copy application source
+COPY . /var/www/html/
+
+
+WORKDIR /var/www/html
+
+# Expose port 80
+EXPOSE 80

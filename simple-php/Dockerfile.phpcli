@@ -1,0 +1,42 @@
+# syntax=docker/dockerfile:1
+FROM php:8.3-cli-alpine
+
+LABEL maintainer="mdnikunjkatariya" \
+      description="PHP CLI for Simple PHP app" \
+      version="1.0"
+
+# Install persistent runtime dependencies (not removed)
+RUN set -eux; \
+    apk add --no-cache \
+        icu-libs \
+        libzip \
+        libpq \
+        oniguruma \
+        bash git unzip curl;
+
+# Install build dependencies, compile extensions, then remove build deps
+RUN set -eux; \
+    apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        postgresql-dev \
+        icu-dev \
+        libzip-dev \
+        oniguruma-dev; \
+    pecl install redis-5.3.7; \
+    docker-php-ext-enable redis; \
+    docker-php-ext-install pdo pdo_mysql pdo_pgsql intl mbstring bcmath zip; \
+    apk del .build-deps; \
+    rm -rf /tmp/* /var/cache/apk/*
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+COPY . /var/www/html
+
+# Install composer dependencies if composer.json exists
+RUN if [ -f composer.json ]; then composer install --no-dev --optimize-autoloader; fi
+
+EXPOSE 8081
+
+CMD ["php", "-S", "0.0.0.0:8081", "-t", "public"]

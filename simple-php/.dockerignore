@@ -1,0 +1,16 @@
+# Ignore git files
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+composer.lock
+
+# Ignore folders
+vendor/
+node_modules/
+
+# Ignore logs / temp
+*.log
+*.backup
+*.tmp
+*.cache

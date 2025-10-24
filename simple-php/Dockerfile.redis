@@ -1,0 +1,15 @@
+# Multi-arch Redis image for Simple PHP
+FROM redis:7-alpine
+
+LABEL maintainer="mdnikunjkatariya" \
+      description="Redis 7 Alpine for Simple PHP app with persistence enabled" \
+      version="1.0"
+
+# Enable persistence and basic config
+CMD ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+
+# No exposed ports
+# EXPOSE intentionally omitted
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=5 CMD redis-cli ping || exit 1

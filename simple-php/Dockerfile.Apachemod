@@ -1,0 +1,70 @@
+# syntax=docker/dockerfile:1
+FROM php:8.3-apache
+
+LABEL maintainer="mdnikunjkatariya" \
+      description="PHP 8.3 + Apache image with MySQL, Postgres, Redis, and common extensions" \
+      version="1.1"
+
+# Install system dependencies and PHP extensions
+RUN set -eux; \
+    apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        curl \
+        libicu-dev \
+        libpq-dev \
+        libonig-dev \
+        libzip-dev; \
+    \
+    pecl install redis-5.3.7 && docker-php-ext-enable redis; \
+    \
+    docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_mysql \
+        pdo_pgsql \
+        mysqli \
+        intl \
+        mbstring \
+        bcmath \
+        zip; \
+    \
+    # Enable essential Apache modules
+    a2enmod rewrite headers; \
+    \
+    # Cleanup
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copy Composer from official image
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application source
+COPY . .
+
+# Install PHP dependencies if composer.json exists
+RUN if [ -f composer.json ]; then \
+        composer install --no-dev --optimize-autoloader; \
+    fi
+
+# Set correct ownership
+RUN chown -R www-data:www-data /var/www/html
+
+# Apache configuration tweaks (optional best practices)
+# Enable .htaccess overrides
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf && \
+    echo '<Directory /var/www/html/public>\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>' > /etc/apache2/conf-available/app.conf && \
+    a2enconf app
+
+# Expose Apache port
+EXPOSE 80
+
+# Healthcheck to verify Apache + PHP are alive
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD curl -f http://localhost/ || exit 1
+
+# Default command
+CMD ["apache2-foreground"]
