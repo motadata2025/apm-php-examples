@@ -5,6 +5,9 @@ LABEL maintainer="mdnikunjkatariya" \
       description="PHP 8.3 + Apache image with MySQL, Postgres, Redis, and common extensions" \
       version="1.1"
 
+# Choose which environment config you want active
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 # Install system dependencies and PHP extensions
 RUN set -eux; \
     apt-get update && apt-get install -y --no-install-recommends \

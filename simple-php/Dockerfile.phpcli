@@ -1,32 +1,38 @@
 # syntax=docker/dockerfile:1
-FROM php:8.3-cli-alpine
+FROM php:8.3-cli
 
 LABEL maintainer="mdnikunjkatariya" \
       description="PHP CLI for Simple PHP app" \
       version="1.0"
 
+# Choose which environment config you want active
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 # Install persistent runtime dependencies (not removed)
 RUN set -eux; \
-    apk add --no-cache \
-        icu-libs \
-        libzip \
-        libpq \
-        oniguruma \
-        bash git unzip curl;
-
-# Install build dependencies, compile extensions, then remove build deps
-RUN set -eux; \
-    apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS \
-        postgresql-dev \
-        icu-dev \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        curl \
+        libicu-dev \
         libzip-dev \
-        oniguruma-dev; \
+        libpq-dev \
+        libonig-dev; \
+    rm -rf /var/lib/apt/lists/*
+
+# Install build dependencies, compile PHP extensions, then remove build deps
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends $PHPIZE_DEPS; \
+    \
     pecl install redis-5.3.7; \
     docker-php-ext-enable redis; \
-    docker-php-ext-install pdo pdo_mysql pdo_pgsql intl mbstring bcmath zip; \
-    apk del .build-deps; \
-    rm -rf /tmp/* /var/cache/apk/*
+    docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql intl mbstring bcmath zip; \
+    \
+    apt-get purge -y --auto-remove $PHPIZE_DEPS; \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

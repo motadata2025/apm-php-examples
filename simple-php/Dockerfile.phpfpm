@@ -5,11 +5,13 @@ LABEL maintainer="mdnikunjkatariya" \
       description="PHP-FPM runtime for Simple PHP app" \
       version="1.0"
 
+# Choose which environment config you want active
+RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 # Install system dependencies & PHP extensions
 RUN set -eux; \
     # Update base packages
     apt-get update && apt-get install -y --no-install-recommends \
-        bash \
         git \
         unzip \
         curl \
